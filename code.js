@@ -190,6 +190,7 @@ async function documentSelected() {
         const baseFill      = new Item('FFFFFF');
         const baseToken     = new Visual(baseFill, null, null ,null);
         const baseFrame     = new Frame('VERTICAL', 16, 24, 5, baseToken);
+        const innerFrame    = new Frame('VERTICAL', 8, 0, 0, null);
         const propFill      = new Item('F5F5F6');
         const propToken     = new Visual(propFill, null, null, null);
         const propFrame     = new Frame('VERTICAL', 0, [4,8], 4, propToken);
@@ -268,7 +269,11 @@ async function documentSelected() {
                     // Get all children and get their properties
                     selectedItem.findAll(i => {
 
-                        // if (i.type === 'COMPONENT') { console.log(selectedItem.variantGroupProperties) }
+                        if (i.type === 'component') {
+
+
+
+                        }
     
                         // Ignore a child if it is an instance as we do not document instances
                         if (i.type === 'INSTANCE' || i.parent.type === 'INSTANCE') {
@@ -278,14 +283,12 @@ async function documentSelected() {
                         }
                         // Otherwise get a child's properties
                         else {
-
-                            console.log(i);
-    
+                            
                             const currentProps      = getAllProperties(i);      // Get the required props for this item
                             const currentHierarchy  = defineHierarchy(i, 0);    // Define the hierarchy of this node
     
                             // Create property and push to nodeArray
-                            const selectedProperty = new Child(cleanName(i.name), i.id, currentHierarchy, currentProps, i.parent.id, i.type)
+                            const selectedProperty = new Child(cleanName(i.name, i.type), i.id, currentHierarchy, currentProps, i.parent.id, i.type);
                             
                             componentChildren.push(selectedProperty);
     
@@ -302,6 +305,24 @@ async function documentSelected() {
             });
 
             console.log(toDocument);
+
+            toDocument.forEach(i => {
+
+                i.properties.forEach(p => {
+
+                    if (i.children) {
+
+                        i.children.forEach(c => {
+
+                            if (p.name === c.name) { console.log('MATCH: ', p.name, c.name) };
+
+                        })
+
+                    }
+
+                })
+
+            });
 
             // Check if there is anything to document
             // if (toDocument && toDocument.length > 0) {
@@ -365,7 +386,8 @@ async function documentSelected() {
             //             sortArray(i.properties, 'type');
 
             //             // Create component props frame
-            //             const propsCont = createSection('properties', baseFrame, sectHead);
+            //             const propsCont         = createSection('properties', baseFrame, sectHead);
+            //             const propsInnerCont    = createFrame(innerFrame, 'properties');
 
             //             // Loop thru component props
             //             i.properties.forEach(p => {
@@ -409,12 +431,14 @@ async function documentSelected() {
 
             //                 propCont.appendChild(typeCont);
             //                 propLabel.layoutSizingHorizontal = 'FILL';
-            //                 propsCont.appendChild(propCont);
+            //                 propsInnerCont.appendChild(propCont);
             //                 propCont.layoutSizingHorizontal = 'FILL';
 
             //             });
 
+            //             propsCont.appendChild(propsInnerCont);
             //             componentCont.appendChild(propsCont);
+            //             propsInnerCont.layoutSizingHorizontal = 'FILL';
             //             propsCont.layoutSizingHorizontal = 'FILL';
 
             //         }
@@ -597,12 +621,24 @@ function setSides(type, frame, size) {
 }
 
 // Clean name
-function cleanName(string) {
+function cleanName(string, type) {
 
     let name = string.trim();                                               // Remove trailing spaces
+
+    if (type === 'COMPONENT') {
+
+        name = name.replace(/\,/g, '')                                      // Remove commas
+        name = name.replace(/ /g, '/')                                      // Replace space with slash
+
+    }
+
+    else {
+
         name = name.replace(/\//g, '.');                                    // Replace slashes with dots
         name = name.replace(/ /g, '-');                                     // Replace spaces with dashes
         name = name.toLowerCase();                                          // Convert to lowercase
+
+    }
 
     return name;
 
