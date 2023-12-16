@@ -82,13 +82,14 @@ class Property {
 
 class Child {
 
-    constructor(name, id, level, properties, parent) {
+    constructor(name, id, level, properties, parent, type) {
 
         this.name           = name; 
         this.id             = id;
         this.level          = level;
         this.properties     = properties;
         this.parent         = parent;
+        this.type           = type;
 
     }
 
@@ -138,13 +139,13 @@ class Layout {
 
 }
 
-class Style {
+class Visual {
 
-    constructor(fill, stroke, textStyle, layout) {
+    constructor(fill, stroke, style, layout) {
 
         this.fill       = fill;
         this.stroke     = stroke;
-        this.textStyle  = textStyle;
+        this.style      = style;
         this.layout     = layout;
 
     }
@@ -186,14 +187,14 @@ async function documentSelected() {
 
         // Create default styles
         const baseStroke    = new Stroke('INSIDE', 1, {token: null, value: '9747FF'}, [10,5]);
-        const baseFill      = new Property(null, 'FFFFFF');
-        const baseToken     = new Style(baseFill, null, null);
+        const baseFill      = new Item('FFFFFF');
+        const baseToken     = new Visual(baseFill, null, null ,null);
         const baseFrame     = new Frame('VERTICAL', 16, 24, 5, baseToken);
-        const propFill      = new Property(null, 'F5F5F6');
-        const propToken     = new Style(propFill, null, null);
+        const propFill      = new Item('F5F5F6');
+        const propToken     = new Visual(propFill, null, null, null);
         const propFrame     = new Frame('VERTICAL', 0, [4,8], 4, propToken);
-        const valueFill     = new Property(null, 'FAF4F2');
-        const valueToken    = new Style(valueFill, null, null);
+        const valueFill     = new Item('FAF4F2');
+        const valueToken    = new Visual(valueFill, null, null, null);
         const valueFrame    = new Frame('VERTICAL', 0, [4,8], 4, valueToken);
         const compHead      = new Text('LOWER', 'NONE', fontBold, 16, null, null);
         const sectHead      = new Text('LOWER', 'UNDERLINE', fontBold, 14, null, null);
@@ -266,6 +267,8 @@ async function documentSelected() {
 
                     // Get all children and get their properties
                     selectedItem.findAll(i => {
+
+                        // if (i.type === 'COMPONENT') { console.log(selectedItem.variantGroupProperties) }
     
                         // Ignore a child if it is an instance as we do not document instances
                         if (i.type === 'INSTANCE' || i.parent.type === 'INSTANCE') {
@@ -275,12 +278,14 @@ async function documentSelected() {
                         }
                         // Otherwise get a child's properties
                         else {
+
+                            console.log(i);
     
                             const currentProps      = getAllProperties(i);      // Get the required props for this item
                             const currentHierarchy  = defineHierarchy(i, 0);    // Define the hierarchy of this node
     
                             // Create property and push to nodeArray
-                            const selectedProperty = new Child(cleanName(i.name), i.id, currentHierarchy, currentProps, i.parent.id)
+                            const selectedProperty = new Child(cleanName(i.name), i.id, currentHierarchy, currentProps, i.parent.id, i.type)
                             
                             componentChildren.push(selectedProperty);
     
@@ -296,159 +301,159 @@ async function documentSelected() {
 
             });
 
-            // console.log(toDocument);
+            console.log(toDocument);
 
             // Check if there is anything to document
-            if (toDocument && toDocument.length > 0) {
+            // if (toDocument && toDocument.length > 0) {
 
 
-                // Create main frame (lol)
-                const docContStroke             = baseStroke;
-                // const docContToken              = new Token(null, docContStroke, null);
-                const docContProps              = new Frame('HORIZONTAL', 24, 24, 5, null);
-                const docCont                   = createFrame(docContProps, 'documentation');
+            //     // Create main frame (lol)
+            //     const docContStroke             = baseStroke;
+            //     const docContToken              = new Visual(null, docContStroke, null, null);
+            //     const docContProps              = new Frame('HORIZONTAL', 24, 24, 5, docContToken);
+            //     const docCont                   = createFrame(docContProps, 'documentation');
 
-                // Document all selected items and their children (if any)
+            //     // Document all selected items and their children (if any)
 
-                toDocument.forEach(i => {
+            //     toDocument.forEach(i => {
 
-                    console.log(i);
+            //         // Configure padding
+            //         // let padding;
 
-                    // Configure padding
-                    // let padding;
+            //         // i.level > 0 ? padding = [16, 16, 16, 16 * i.level] : padding = 16;
 
-                    // i.level > 0 ? padding = [16, 16, 16, 16 * i.level] : padding = 16;
+            //         // Create frame for component
+            //         const componentCont = createFrame(new Frame('VERTICAL', 16, 0, 0),`component: ${i.name}`);
 
-                    // Create frame for component
-                    const componentCont = createFrame(new Frame('VERTICAL', 16, 0, 0),`component: ${i.name}`)
-
-                    // Create label
-                    const componentHeading = createText(`component: ${i.name}`, compHead, 'component-heading');
+            //         // Create label
+            //         const componentHeading = createText(`component: ${i.name}`, compHead, 'component-heading');
                     
-                    componentCont.appendChild(componentHeading);
+            //         componentCont.appendChild(componentHeading);
 
-                    // Display information & links
+            //         // Display information & links
 
-                    // Display information if available
-                    if (i.docs !== '') {
+            //         // Display information if available
+            //         if (i.docs !== '') {
 
-                        // Create information frame
-                        const infoCont = createSection('information', baseFrame, sectHead);
+            //             // Create information frame
+            //             const infoCont = createSection('information', baseFrame, sectHead);
 
-                        // Insert information
-                        const infoText = createText(i.docs, regCopy, 'documentation-content');
+            //             // Insert information
+            //             const infoText = createText(i.docs, regCopy, 'documentation-content');
 
-                        infoCont.appendChild(infoText);
+            //             infoCont.appendChild(infoText);
 
-                        // Check if there are any links
-                        if (i.link && i.link.length > 0) {
+            //             // Check if there are any links
+            //             if (i.link && i.link.length > 0) {
 
-                            // Insert link
-                            const infoLinkText  = createText(i.link[0].uri, propText, 'documentation-link');
+            //                 // Insert link
+            //                 const infoLinkText  = createText(i.link[0].uri, propText, 'documentation-link');
 
-                            infoLinkText.hyperlink = {type: 'URL', value: i.link[0].uri};
-                            infoCont.appendChild(infoLinkText);
+            //                 infoLinkText.hyperlink = {type: 'URL', value: i.link[0].uri};
+            //                 infoCont.appendChild(infoLinkText);
 
-                        }
+            //             }
 
-                        componentCont.appendChild(infoCont);
-                        infoCont.layoutSizingHorizontal = 'FILL';
+            //             componentCont.appendChild(infoCont);
+            //             infoCont.layoutSizingHorizontal = 'FILL';
 
-                    }
+            //         }
 
-                    // Display component properties
-                    if (i.props && i.props.length > 0) {
+            //         // Display component properties
+            //         if (i.properties && i.properties.length > 0) {
 
-                        // Create component props frame
-                        const propsCont = createSection('properties', baseFrame, sectHead);
+            //             sortArray(i.properties, 'type');
 
-                        // Loop thru component props
-                        i.props.forEach(p => {
+            //             // Create component props frame
+            //             const propsCont = createSection('properties', baseFrame, sectHead);
 
-                            // Create property frame
-                            const propCont = createFrame(new Frame('HORIZONTAL', 16, 0, 0, null, {p:'MIN', s:'CENTER'}, null), `property: ${cleanName(p.name)}`);
+            //             // Loop thru component props
+            //             i.properties.forEach(p => {
 
-                            // Create type frame
-                            const typeCont = createFrame(propFrame, 'type');
+            //                 // Create property frame
+            //                 const propCont = createFrame(new Frame('HORIZONTAL', 16, 0, 0, null, {p:'MIN', s:'CENTER'}, null), `property: ${cleanName(p.name)}`);
+
+            //                 // Create type frame
+            //                 const typeCont = createFrame(propFrame, 'type');
                             
-                            // Create property label & type
-                            const propLabel = createText(cleanName(p.name), propText, 'label');
-                            const propType  = createText(p.type, propValue, 'label');
+            //                 // Create property label & type
+            //                 const propLabel = createText(cleanName(p.name), propText, 'label');
+            //                 const propType  = createText(p.type, propValue, 'label');
 
-                            typeCont.appendChild(propType);
-                            propCont.appendChild(propLabel);
+            //                 typeCont.appendChild(propType);
+            //                 propCont.appendChild(propLabel);
 
-                            // Create and list variants if available
-                            if (p.options && p.options.length > 0) {
+            //                 // Create and list variants if available
+            //                 if (p.options && p.options.length > 0) {
 
-                                // Create options frame
-                                const optionsCont = createFrame(new Frame('HORIZONTAL', 8, 0, 0), 'variant');
+            //                     // Create options frame
+            //                     const optionsCont = createFrame(new Frame('HORIZONTAL', 8, 0, 0), 'variant');
 
-                                // Loop thru variants
-                                p.options.forEach(o => {
+            //                     // Loop thru variants
+            //                     p.options.forEach(o => {
 
-                                    // Create option frame
-                                    const valueCont = createFrame(valueFrame, 'variant');
+            //                         // Create option frame
+            //                         const valueCont = createFrame(valueFrame, 'variant');
 
-                                    // Create option label
-                                    const valueLabel = createText(o, propValue, 'label');
+            //                         // Create option label
+            //                         const valueLabel = createText(o, propValue, 'label');
 
-                                    // Append
-                                    valueCont.appendChild(valueLabel);
-                                    optionsCont.appendChild(valueCont);
-                                    propCont.appendChild(optionsCont);
+            //                         // Append
+            //                         valueCont.appendChild(valueLabel);
+            //                         optionsCont.appendChild(valueCont);
+            //                         propCont.appendChild(optionsCont);
 
-                                })
+            //                     })
 
-                            }
+            //                 }
 
-                            propCont.appendChild(typeCont);
-                            propLabel.layoutSizingHorizontal = 'FILL';
-                            propsCont.appendChild(propCont);
-                            propCont.layoutSizingHorizontal = 'FILL';
+            //                 propCont.appendChild(typeCont);
+            //                 propLabel.layoutSizingHorizontal = 'FILL';
+            //                 propsCont.appendChild(propCont);
+            //                 propCont.layoutSizingHorizontal = 'FILL';
 
-                        });
+            //             });
 
-                        componentCont.appendChild(propsCont);
-                        propsCont.layoutSizingHorizontal = 'FILL';
+            //             componentCont.appendChild(propsCont);
+            //             propsCont.layoutSizingHorizontal = 'FILL';
 
-                    }
+            //         }
 
-                    // Display component variants if applicable
-
-
-                    // Display component children, styles and tokens
-
-                //     let label;
-
-                //     !i.parent ? label = createText(i.name, labelProps) : label = createText(`↳ ${i.name}`, labelProps);
-
-                //     // Create property
-
-                //     // Check fills
-                //     if (i.props.fill) {
-
-                //         // console.log(i.props.fill);
-
-                //     }
+            //         // Display component variants if applicable
 
 
-                //     let propertyLabel   = new Text('LOWER', 'NONE', fontReg, 12, null, null);
-                //         propertyLabel   = createText(i.name, propertyLabel);
+            //         // Display component children, styles and tokens
 
-                //     // console.log(i.props);
+            //     //     let label;
+
+            //     //     !i.parent ? label = createText(i.name, labelProps) : label = createText(`↳ ${i.name}`, labelProps);
+
+            //     //     // Create property
+
+            //     //     // Check fills
+            //     //     if (i.props.fill) {
+
+            //     //         // console.log(i.props.fill);
+
+            //     //     }
+
+
+            //     //     let propertyLabel   = new Text('LOWER', 'NONE', fontReg, 12, null, null);
+            //     //         propertyLabel   = createText(i.name, propertyLabel);
+
+            //     //     // console.log(i.props);
                     
                     
                     
-                //     iCont.appendChild(propertyLabel);
-                    docCont.appendChild(componentCont);
+            //     //     iCont.appendChild(propertyLabel);
+            //         docCont.appendChild(componentCont);
 
-                })
+            //     })
 
-                // Go to documentation
-                figma.viewport.scrollAndZoomIntoView([docCont]);
+            //     // Go to documentation
+            //     figma.viewport.scrollAndZoomIntoView([docCont]);
 
-            }
+            // }
 
         }
 
@@ -601,6 +606,21 @@ function cleanName(string) {
 
     return name;
 
+}
+
+// Sort array
+function sortArray(array, key) {
+
+    array.sort((a, b) => {
+
+        // Handle the case when the key is a string or an array
+        const valueA = Array.isArray(a[key]) ? a[key][0] : a[key];
+        const valueB = Array.isArray(b[key]) ? b[key][0] : b[key];
+
+        // Compare the values
+        return valueA.localeCompare(valueB);
+
+    });
 }
 
 // Create Figma text
