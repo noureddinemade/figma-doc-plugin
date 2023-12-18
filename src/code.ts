@@ -1,5 +1,5 @@
 // Import classes
-import { Item, Stroke, DropShadow, Size, Box, Property, Child, Component, Text, Layout, Visual, Frame } from "./sys/classes";
+import { Item, Stroke, DropShadow, Size, Box, Property, Child, Component, Text, Layout, Visual, Frame, Variant } from "./sys/classes";
 import { convertColour, checkSides, setSides, cleanName, sortArray } from "./sys/functions/general";
 import { createText, createFrame, createSection } from "./sys/functions/create";
 import { defineHierarchy, getToken, getValue, hasText, checkName, getValueType, anyDiff, checkProperty, getProperties, getAllProperties } from "./sys/functions/document";
@@ -103,62 +103,66 @@ if (cs && cs.length > 0) {
 
                 }
 
-                toDocument.push(new Component(cleanName(e.name, null), e.id, compProps, compChildren, e.description, e.documentationLinks))
-
                 // Loop thru props and create an instance for each variant, then add the values, the children and their values
-                // if (forInstances && forInstances.length > 0) {
+                if (forInstances && forInstances.length > 0) {
 
-                //     forInstances.forEach(i => {
+                    forInstances.forEach(i => {
 
-                //         // Loop thru each option in a variant
-                //         if (i.options && i.options.length > 0) {
+                        const variantOptions: any[] = [];
 
-                //             i.options.forEach(o => {
+                        // Loop thru each option in a variant
+                        if (i.options && i.options.length > 0) {
 
-                //                 let instChildren: any[] | null = [];
+                            i.options.forEach(o => {
 
-                //                 const instance = e.children[0].createInstance();
+                                let instChildren: any[] | null = [];
 
-                //                 instance.name = `${i.name}=${o}`;
+                                const instance = e.children[0].createInstance();
 
-                //                 instance.setProperties({[i.name]: o});
+                                instance.name = `${i.name}=${o}`;
 
-                //                 // Get properties and values for this instance
-                //                 const instanceProps = getAllProperties(instance);
+                                instance.setProperties({[i.name]: o});
 
-                //                 // Get children and their properties if available
-                //                 if (instance.children && instance.children.length > 0) {
+                                // Get properties and values for this instance
+                                const instanceProps = getAllProperties(instance);
 
-                //                     instance.findAll(c => {
+                                // Get children and their properties if available
+                                if (instance.children && instance.children.length > 0) {
 
-                //                         if (c.type !== 'COMPONENT' || c.type !== 'INSTANCE' || c.parent.type !== 'INSTANCE') {
+                                    instance.findAll(c => {
 
-                //                             const cProps    = getAllProperties(c);
-                //                             const cHeirachy = defineHierarchy(c, 0);
+                                        if (c.type !== 'COMPONENT' || c.type !== 'INSTANCE' || c.parent.type !== 'INSTANCE') {
 
-                //                             // Create child
-                //                             const child = new Child(cleanName(c.name, null), c.id, cHeirachy, cProps, c.parent.id, c.type);
+                                            const cProps    = getAllProperties(c);
+                                            const cHeirachy = defineHierarchy(c, 0);
 
-                //                             instChildren.push(child);
+                                            // Create child
+                                            const child = new Child(cleanName(c.name, null), c.id, cHeirachy, cProps, c.parent.id, c.type);
 
-                //                         }
+                                            instChildren.push(child);
 
-                //                     });
+                                        }
 
-                //                 }
+                                    });
 
-                //                 const compInstance = new Component(i.name, i.id, instanceProps, instChildren, )
+                                }
 
-                //                 // Remove the instance from the page after we get what we need
-                //                 // instance.remove();
+                                variantOptions.push(new Component(null, null, instanceProps, instChildren, null, null));
 
-                //             })
+                                // Remove the instance from the page after we get what we need
+                                // instance.remove();
 
-                //         }
+                            })
+
+                        }
+
+                        compVariants.push(new Variant(cleanName(i.name, null), variantOptions));
     
-                //     })
+                    })
 
-                // }
+                }
+
+                toDocument.push(new Component(cleanName(e.name, null), e.id, compProps, compVariants, e.description, e.documentationLinks));
 
                 // console.log(compProps);
                 // console.log(forInstances);

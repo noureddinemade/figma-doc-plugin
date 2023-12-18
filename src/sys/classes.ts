@@ -91,6 +91,17 @@ export class Child {
 
 }
 
+export class Variant {
+
+    constructor (
+
+        public name: any,
+        public options: any
+
+    ) {}
+
+}
+
 export class Component {
 
     constructor (
@@ -98,7 +109,7 @@ export class Component {
         public name: any,
         public id: any,
         public properties: any,
-        public children: any,
+        public variants: any,
         public docs: any,
         public link: any
 
