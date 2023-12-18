@@ -2,12 +2,13 @@
 import { Item, Stroke, DropShadow, Size, Box, Property, Child, Component, Text, Layout, Visual, Frame } from "./sys/classes";
 import { convertColour, checkSides, setSides, cleanName, sortArray } from "./sys/functions/general";
 import { createText, createFrame, createSection } from "./sys/functions/create";
-import { defineHierarchy, getToken, getValue, hasText, checkName, getValueType, checkProperty, getProperties, getAllProperties } from "./sys/functions/document";
+import { defineHierarchy, getToken, getValue, hasText, checkName, getValueType, anyDiff, checkProperty, getProperties, getAllProperties } from "./sys/functions/document";
+import { baseStroke, baseFill, baseToken, baseFrame, innerFrame, propFill, propToken, propFrame, valueFill, valueToken, valueFrame, compHead, sectHead, regCopy, propText, propValue } from "./sys/styles";
 
 // Set base constructs
-const cs            = figma.currentPage.selection;
-const toDocument    = [];
-const doNotDocument = [];
+const cs                            = figma.currentPage.selection;
+const toDocument:       any[]       = [];
+const doNotDocument:    any[]       = [];
 
 // Check if a user has selected anything
 if (cs && cs.length > 0) {
@@ -18,47 +19,170 @@ if (cs && cs.length > 0) {
         await figma.loadFontAsync({ family: "IBM Plex Mono", style: "Regular" });
         await figma.loadFontAsync({ family: "IBM Plex Mono", style: "Bold" });
 
-        // Setup weights
-        const fontReg   = { family: "IBM Plex Mono", style: "Regular" };
-        const fontBold  = { family: "IBM Plex Mono", style: "Bold" };
-
-        // Create default styles
-        const baseStroke    = new Stroke('INSIDE', 1, {token: null, value: '9747FF'}, [10,5]);
-        const baseFill      = new Item('FFFFFF', null, null);
-        const baseToken     = new Visual(baseFill, null, null, null);
-        const baseFrame     = new Frame('VERTICAL', 16, 24, 5, baseToken, null, null);
-        const innerFrame    = new Frame('VERTICAL', 8, 0, 0, null, null, null);
-        const propFill      = new Item('F5F5F6', null, null);
-        const propToken     = new Visual(propFill, null, null, null);
-        const propFrame     = new Frame('VERTICAL', 0, [4,8], 4, propToken, null, null);
-        const valueFill     = new Item('FAF4F2', null, null);
-        const valueToken    = new Visual(valueFill, null, null, null);
-        const valueFrame    = new Frame('VERTICAL', 0, [4,8], 4, valueToken, null, null);
-        const compHead      = new Text('LOWER', 'NONE', fontBold, 16, null, null);
-        const sectHead      = new Text('LOWER', 'UNDERLINE', fontBold, 14, null, null);
-        const regCopy       = new Text('ORIGINAL', 'NONE', fontReg, 12, null, null);
-        const propText      = new Text('LOWER', 'NONE', fontReg, 12, null, null);
-        const propValue     = new Text('UPPER', 'NONE', fontReg, 12, null, null);
-
-        // Create the main frame (lol)
-        const mainFrameStroke   = baseStroke;
-        const mainFrameVisual   = new Visual(null, mainFrameStroke, null, null);
-        const mainFrameProps    = new Frame('HORIZONTAL', 24, 24, 5, mainFrameVisual, null, null);
-        const mainFrame         = createFrame(mainFrameProps, 'documentation');
-
-        figma.viewport.scrollAndZoomIntoView([mainFrame]);
-
         // Loop thru selected items
         cs.forEach(e => {
 
             // Check if the selected item is a component
             if (e.type === 'COMPONENT_SET' || e.type === 'COMPONENT') {
 
+                // Set up component props
+                const props = e.componentPropertyDefinitions;
+
+                let compProps:          any[] | null    = [];
+                let compVariants:       any[] | null    = [];
+                let compChildren:       any[] | null    = []; 
+                let forInstances:       any[] | null    = [];
+
+                let component;
+                let compBase;
+
+                // Get properties for component
+                for (let key in props) {
+
+                    const p = props[key];
+
+                    let property = null;
+
+                    // Loop thru each property and get its values
+                    if (props.hasOwnProperty(key)) {
+
+                        let name:       any | null      = key.split('#');
+                        let type:       any | null      = p.type;
+                        let value:      any | null      = p.defaultValue;
+                        let options:    any[] | null    = [];
+
+                        // Check if there are options available for this property
+                        if (p.variantOptions && p.variantOptions.length > 0) {
+
+                            p.variantOptions.forEach(v => {
+
+                                if (v === 'true' || v === 'false') {
+
+                                    type    = 'BOOLEAN';
+                                    options = null;
+
+                                }
+
+                                else {
+
+                                    options.push(v);
+
+                                }
+
+                            })
+
+                        }
+                        
+                        else { options = null }
+
+                        property = new Property(cleanName(name[0], null), type, options);
+                        compProps.push(property);
+
+                        if (p.type === 'VARIANT') { forInstances.push(property) };
+
+                    }
+
+                    sortArray(compProps, 'type'); // Sort component properties by type
+
+                }
+
+                // Loop through all children and get base values
+                if (e.children && e.children.length > 0) {
+
+                    e.findAll(c => {
+
+                        const props     = getAllProperties(c);
+                        const heirachy  = defineHierarchy(c, 0);
+                        const parent    = c.parent ? c.parent.id : null;
+
+                        const child = new Child(cleanName(c.name, null), c.id, heirachy, props, parent, c.type);
+
+                        compChildren.push(child);
+
+                    });
+
+                }
+
+                toDocument.push(new Component(cleanName(e.name, null), e.id, compProps, compChildren, e.description, e.documentationLinks))
+
+                // Loop thru props and create an instance for each variant, then add the values, the children and their values
+                // if (forInstances && forInstances.length > 0) {
+
+                //     forInstances.forEach(i => {
+
+                //         // Loop thru each option in a variant
+                //         if (i.options && i.options.length > 0) {
+
+                //             i.options.forEach(o => {
+
+                //                 let instChildren: any[] | null = [];
+
+                //                 const instance = e.children[0].createInstance();
+
+                //                 instance.name = `${i.name}=${o}`;
+
+                //                 instance.setProperties({[i.name]: o});
+
+                //                 // Get properties and values for this instance
+                //                 const instanceProps = getAllProperties(instance);
+
+                //                 // Get children and their properties if available
+                //                 if (instance.children && instance.children.length > 0) {
+
+                //                     instance.findAll(c => {
+
+                //                         if (c.type !== 'COMPONENT' || c.type !== 'INSTANCE' || c.parent.type !== 'INSTANCE') {
+
+                //                             const cProps    = getAllProperties(c);
+                //                             const cHeirachy = defineHierarchy(c, 0);
+
+                //                             // Create child
+                //                             const child = new Child(cleanName(c.name, null), c.id, cHeirachy, cProps, c.parent.id, c.type);
+
+                //                             instChildren.push(child);
+
+                //                         }
+
+                //                     });
+
+                //                 }
+
+                //                 const compInstance = new Component(i.name, i.id, instanceProps, instChildren, )
+
+                //                 // Remove the instance from the page after we get what we need
+                //                 // instance.remove();
+
+                //             })
+
+                //         }
+    
+                //     })
+
+                // }
+
+                // console.log(compProps);
+                // console.log(forInstances);
+
             }
 
-            else { console.log(e.name, ' is not a component') }
+            else { console.log(e.name, ' is not a component') } // Skip if not any type of component
 
         });
+
+        console.log(toDocument);
+        
+        // Loop thru components to document if any
+        // if (toDocument && toDocument.length > 0) {
+
+        //     // Create the main frame (lol)
+        //     const mainFrameStroke   = baseStroke;
+        //     const mainFrameVisual   = new Visual(null, mainFrameStroke, null, null);
+        //     const mainFrameProps    = new Frame('HORIZONTAL', 24, 24, 5, mainFrameVisual, null, null);
+        //     const mainFrame         = createFrame(mainFrameProps, 'documentation');
+
+        //     figma.viewport.scrollAndZoomIntoView([mainFrame]);
+
+        // }
 
     }
 
@@ -76,4 +200,4 @@ if (cs && cs.length > 0) {
 
 }
 
-else { figma.closePlugin('"If nothing has been selected, how can anything be documented?" — An ancient design system proverb') }
+else { figma.closePlugin('"If nothing is selected, how can anything be documented?" — An ancient design system proverb') }

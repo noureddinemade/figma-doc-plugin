@@ -1,5 +1,5 @@
 // Imports
-import { DropShadow } from "../classes";
+import { DropShadow, Item } from "../classes";
 import { cleanName, convertColour } from "./general";
 
 // Define hierarchy
@@ -97,6 +97,29 @@ export function checkName(p: any, i: any) {
 
 }
 
+// Check for differences
+export function anyDiff(array: any[] | null, i: any, key: any) {
+
+    let response = false;
+
+    if (array && array.length > 0) {
+
+        array.forEach(prop => {
+
+            if (prop[key] === i[key]) {
+
+                response = true
+
+            }
+
+        });
+
+    }
+
+    return response;
+
+}
+
 // Is it a fill or stroke?
 export function getValueType(p: any, i: any) {
 
@@ -159,7 +182,7 @@ export function checkProperty(p: any, i: any, t: any) {
 // Get fill values
 export function getProperties(array: any, i: any) {
 
-    let response = [];
+    let response: any [] | null = [];
 
     // Loop thru layout properties
     array.forEach(p => {
@@ -192,12 +215,42 @@ export function getProperties(array: any, i: any) {
 
 }
 
-// Check properties of an item
+// Clean and sort properties
+export function cleanAndSortProps(base: any[], array: any[]) {
+
+    const uniqueProps: any[] = [];
+
+    //
+
+    if (base && base.length > 0) {
+
+        base.forEach(prop => {
+
+            if (array && array.length > 0) {
+
+
+                array.forEach(i => {
+
+                    if (prop !== i) {
+
+                        uniqueProps.push(i)
+
+                    }
+
+                });
+
+            };
+
+        });
+
+    };
+
+    return uniqueProps;
+
+}
+
+// Get properties of an item
 export function getAllProperties(i: any) {
-
-    const test = figma.getStyleById(i.effectStyleId);
-
-    if (test) { console.log(test.name) }
 
     // Define arrays
     const layoutArray   = ['width', 'minWidth', 'maxWidth', 'height', 'minHeight', 'maxHeight', 'itemSpacing', 'topRightRadius'];
@@ -205,13 +258,13 @@ export function getAllProperties(i: any) {
     const strokeArray   = ['strokes'];
     const styleArray    = ['effects'];
 
-    // Get property sets
+    // Get base property sets
     const layout    = getProperties(layoutArray, i);
     const fill      = getProperties(fillArray, i);
     const stroke    = getProperties(strokeArray, i);
     const style     = getProperties(styleArray, i);
 
-    const response = {layout: layout, fill: fill, stroke: stroke, style: style};
+    const response = {name: i.name, layout: layout, fill: fill, stroke: stroke, style: style};
 
     return response;
 
