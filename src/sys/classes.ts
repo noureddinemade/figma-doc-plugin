@@ -1,3 +1,57 @@
+export class Component {
+
+    constructor (
+
+        public name:            string,
+        public id:              any,
+        public documentation:   any | null,
+        public properties:      any | null
+        
+    ) {}
+
+}
+
+export class Property {
+
+    constructor (
+
+        public name:            string,
+        public type:            string,
+        public styles:          any | null,
+        public options:         any | null,
+        public children:        any | null
+
+    ) {}
+
+}
+
+export class Child {
+
+    constructor (
+
+        public name:            string,
+        public id:              string,
+        public parentID:        string,
+        public level:           number,
+        public style:           any | null
+
+    ) {}
+
+}
+
+export class Style {
+
+    constructor (
+
+        public layout:          any,
+        public fills:           any,
+        public strokes:         any,
+        public effects:         any            
+
+    ) {}
+
+}
+
 export class Item {
 
     constructor (
@@ -35,85 +89,6 @@ export class DropShadow {
 
     ) {}
 
-}
-
-export class Size {
-
-    constructor (
-
-        public width: any,
-        public minWidth: any,
-        public maxWidth: any,
-        public height: any,
-        public minHeight: any,
-        public maxHeight: any
-
-    ) {}
-}
-
-export class Box {
-
-    constructor (
-        
-        public top: any,
-        public right: any,
-        public bottom: any,
-        public left: any
-
-    ) {}
-
-}
-
-export class Property {
-
-    constructor (
-        
-        public name: any,
-        public type: any,
-        public options: any
-        
-    ) {}
-
-}
-
-export class Child {
-
-    constructor (
-
-        public name: any,
-        public id: any,
-        public level: any,
-        public properties: any,
-        public parent: any,
-        public type: any
-
-    ) {}
-
-}
-
-export class Variant {
-
-    constructor (
-
-        public name: any,
-        public options: any
-
-    ) {}
-
-}
-
-export class Component {
-
-    constructor (
-
-        public name: any,
-        public id: any,
-        public properties: any,
-        public variants: any,
-        public docs: any,
-        public link: any
-
-    ) {}
 }
 
 // Classes to create documentation

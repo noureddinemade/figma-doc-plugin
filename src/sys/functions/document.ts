@@ -1,5 +1,5 @@
 // Imports
-import { DropShadow, Item } from "../classes";
+import { Child, DropShadow, Item, Style } from "../classes";
 import { cleanName, convertColour } from "./general";
 
 // Define hierarchy
@@ -182,7 +182,7 @@ export function checkProperty(p: any, i: any, t: any) {
 // Get fill values
 export function getProperties(array: any, i: any) {
 
-    let response: any [] | null = [];
+    let response: any = [];
 
     // Loop thru layout properties
     array.forEach(p => {
@@ -252,19 +252,66 @@ export function cleanAndSortProps(base: any[], array: any[]) {
 // Get properties of an item
 export function getAllProperties(i: any) {
 
-    // Define arrays
-    const layoutArray   = ['width', 'minWidth', 'maxWidth', 'height', 'minHeight', 'maxHeight', 'itemSpacing', 'topRightRadius'];
-    const fillArray     = ['fills'];
-    const strokeArray   = ['strokes'];
-    const styleArray    = ['effects'];
+    let response: any | null;
 
-    // Get base property sets
-    const layout    = getProperties(layoutArray, i);
-    const fill      = getProperties(fillArray, i);
-    const stroke    = getProperties(strokeArray, i);
-    const style     = getProperties(styleArray, i);
+    if (i) {
 
-    const response = {name: i.name, layout: layout, fill: fill, stroke: stroke, style: style};
+        // Define arrays
+        const layoutArray   = ['width', 'minWidth', 'maxWidth', 'height', 'minHeight', 'maxHeight', 'itemSpacing', 'topRightRadius'];
+        const fillsArray    = ['fills'];
+        const strokesArray  = ['strokes'];
+        const effectsArray  = ['effects'];
+
+        // Get base property sets
+        const layout    = getProperties(layoutArray, i);
+        const fills     = getProperties(fillsArray, i);
+        const strokes   = getProperties(strokesArray, i);
+        const effects   = getProperties(effectsArray, i);
+
+        response = new Style(layout, fills, strokes, effects);
+
+    }
+
+    else { response = null }
+
+    return response;
+
+}
+
+// Get the children of an item
+export function getAllChildren(i: any, name: any) {
+
+    let response: any[] | null = [];
+
+    // Check if there are any children
+    if (i.children && i.children.length > 0) {
+
+        const array = name ? i.findAll(x => x.name === name) : i.findAll();
+
+        if (array && array.length > 0) {
+
+            array.forEach(c => {
+
+                // Get child properties
+                const name      = cleanName(c.name, null);
+                const id        = c.id;
+                const parentID  = c.parent.id;
+                const level     = defineHierarchy(c, 0);
+                const styles    = getAllProperties(c);
+    
+                const child = new Child(name, id, parentID, level, styles);
+    
+                response?.push(child);
+    
+            })
+
+        }
+
+        else { response = null }
+
+    }
+
+    else { response = null }
 
     return response;
 
