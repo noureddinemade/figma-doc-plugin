@@ -1,5 +1,5 @@
 // Import classes
-import { Component, Property } from "./sys/classes";
+import { Component, Property, Visual, Frame } from "./sys/classes";
 import { cleanName, sortArray } from "./sys/functions/general";
 import { createText, createFrame, createSection } from "./sys/functions/create";
 import { getAllProperties, getAllChildren } from "./sys/functions/document";
@@ -34,7 +34,7 @@ if (cs && cs.length > 0) {
                 const compDocs      = [{ description: compDesc, link: compURL }];
                 const baseComp      = e.children.find((a) => a.type === 'COMPONENT');
 
-                let compProps:          any[] | null    = [];
+                let compProps: any[] | null = [];
 
                 // Get properties for component
                 for (let key in props) {
@@ -51,13 +51,14 @@ if (cs && cs.length > 0) {
                         let type:           any | null      = p.type;
                         let value:          any | null      = p.defaultValue;
                         let styles:         any | null      = [];
-                        let options:        any | null      = [];
+                        let options:        any | null      = null;
                         let children:       any | null      = [];
 
                         // Create an instance based on this property and then get it's styles
                         const instance = baseComp ? baseComp.createInstance() : null;
 
-                        let getFromInstance: any | null = instance;
+                        let getFromInstance = instance.findAll(x => x.name === name);
+                            getFromInstance = getFromInstance && getFromInstance.length > 0 ? getFromInstance[0] : null;
                         
                         instance.name = `${name}=${value}`;
                         instance.setProperties({[key]: value});
@@ -70,10 +71,7 @@ if (cs && cs.length > 0) {
                                 
                                 instance.name = `${name}=true`;
                                 
-                                instance.setProperties({[key]: true}); 
-
-                                getFromInstance = instance.findAll(x => x.name === name);
-                                getFromInstance = getFromInstance && getFromInstance.length > 0 ? getFromInstance[0] : null;
+                                instance.setProperties({[key]: true});
                             
                             }
 
@@ -85,6 +83,8 @@ if (cs && cs.length > 0) {
 
                                 // Check if there are options available for this property
                                 if (p.variantOptions && p.variantOptions.length > 0) {
+
+                                    options = [];
     
                                     p.variantOptions.forEach(v => {
     
@@ -117,6 +117,7 @@ if (cs && cs.length > 0) {
 
                             styles      = getAllProperties(getFromInstance);
                             children    = getAllChildren(instance, name);
+                            children    = children && children.length > 1 ? children : null;
 
                             // Get rid instance once it has outlived its usefulness
                             instance.remove();
@@ -137,87 +138,6 @@ if (cs && cs.length > 0) {
                 
                 toDocument.push(component);
 
-                // Loop through all children and get base values
-                // if (e.children && e.children.length > 0) {
-
-                //     e.findAll(c => {
-
-                //         const props     = getAllProperties(c);
-                //         const heirachy  = defineHierarchy(c, 0);
-                //         const parent    = c.parent ? c.parent.id : null;
-
-                //         const child = new CompChild(cleanName(c.name, null), c.id, heirachy, props, parent, c.type);
-
-                //         compChildren.push(child);
-
-                //     });
-
-                // }
-
-                // Loop thru props and create an instance for each variant, then add the values, the children and their values
-                // if (forInstances && forInstances.length > 0) {
-
-                //     forInstances.forEach(i => {
-
-                //         const variantOptions: any[] = [];
-
-                //         // Loop thru each option in a variant
-                //         if (i.options && i.options.length > 0) {
-
-                //             i.options.forEach(o => {
-
-                //                 let instChildren: any[] | null = [];
-
-                //                 const instance = e.children[0].createInstance();
-
-                //                 instance.name = `${i.name}=${o}`;
-
-                //                 instance.setProperties({[i.name]: o});
-
-                //                 // Get properties and values for this instance
-                //                 const instanceProps = getAllProperties(instance);
-
-                //                 // Get children and their properties if available
-                //                 if (instance.children && instance.children.length > 0) {
-
-                //                     instance.findAll(c => {
-
-                //                         if (c.type !== 'COMPONENT' || c.type !== 'INSTANCE' || c.parent.type !== 'INSTANCE') {
-
-                //                             const cProps    = getAllProperties(c);
-                //                             const cHeirachy = defineHierarchy(c, 0);
-
-                //                             // Create child
-                //                             const child = new CompChild(cleanName(c.name, null), c.id, cHeirachy, cProps, c.parent.id, c.type);
-
-                //                             instChildren.push(child);
-
-                //                         }
-
-                //                     });
-
-                //                 }
-
-                //                 variantOptions.push(new Component(null, null, instanceProps, null, instChildren, null, null));
-
-                //                 // Remove the instance from the page after we get what we need
-                //                 // instance.remove();
-
-                //             })
-
-                //         }
-
-                //         compVariants.push(new CompProp(cleanName(i.name, null), null, variantOptions));
-    
-                //     })
-
-                // }
-
-                // toDocument.push(new Component(cleanName(e.name, null), e.id, compProps, compVariants, null, e.description, e.documentationLinks));
-
-                // console.log(compProps);
-                // console.log(forInstances);
-
             }
 
             else { console.log(e.name, ' is not a component') } // Skip if not any type of component
@@ -227,17 +147,17 @@ if (cs && cs.length > 0) {
         console.log(toDocument);
         
         // Loop thru components to document if any
-        // if (toDocument && toDocument.length > 0) {
+        if (toDocument && toDocument.length > 0) {
 
-        //     // Create the main frame (lol)
-        //     const mainFrameStroke   = baseStroke;
-        //     const mainFrameVisual   = new Visual(null, mainFrameStroke, null, null);
-        //     const mainFrameProps    = new Frame('HORIZONTAL', 24, 24, 5, mainFrameVisual, null, null);
-        //     const mainFrame         = createFrame(mainFrameProps, 'documentation');
+            // Create the main frame (lol)
+            const mainFrameStroke   = baseStroke;
+            const mainFrameVisual   = new Visual(null, mainFrameStroke, null, null);
+            const mainFrameProps    = new Frame('HORIZONTAL', 24, 24, 5, mainFrameVisual, null, null);
+            const mainFrame         = createFrame(mainFrameProps, 'documentation');
 
-        //     figma.viewport.scrollAndZoomIntoView([mainFrame]);
+            figma.viewport.scrollAndZoomIntoView([mainFrame]);
 
-        // }
+        }
 
     }
 

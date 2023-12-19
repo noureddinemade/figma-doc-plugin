@@ -261,14 +261,16 @@ export function getAllProperties(i: any) {
         const fillsArray    = ['fills'];
         const strokesArray  = ['strokes'];
         const effectsArray  = ['effects'];
+        const textArray     = ['fontName', 'fontSize', 'fontWeight', 'textAlignHorizontal', 'textAlignVertical', 'textAutoResize', 'textCase', 'textDecoration', 'textTruncation', 'lineHeight', 'letterSpacing']
 
         // Get base property sets
         const layout    = getProperties(layoutArray, i);
         const fills     = getProperties(fillsArray, i);
         const strokes   = getProperties(strokesArray, i);
         const effects   = getProperties(effectsArray, i);
+        const text      = getProperties(textArray, i);
 
-        response = new Style(layout, fills, strokes, effects);
+        response = new Style(layout, fills, strokes, effects, text);
 
     }
 

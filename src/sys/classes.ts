@@ -46,7 +46,8 @@ export class Style {
         public layout:          any,
         public fills:           any,
         public strokes:         any,
-        public effects:         any            
+        public effects:         any,
+        public text:            any
 
     ) {}
 
