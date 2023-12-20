@@ -98,25 +98,22 @@ export function checkName(p: any, i: any) {
 }
 
 // Check for differences
-export function anyDiff(array: any[] | null, i: any, key: any) {
+export function getUniques(array: any, set: any) {
+    
+    let response: any | null = [];
 
-    let response = false;
+    for (const key in array) {
 
-    if (array && array.length > 0) {
+        if (Object.hasOwnProperty.call(array, key)) {
 
-        array.forEach(prop => {
+            const value = array[key];
+            set.add(value);
 
-            if (prop[key] === i[key]) {
-
-                response = true
-
-            }
-
-        });
+        }
 
     }
 
-    return response;
+    return set;
 
 }
 
@@ -215,44 +212,10 @@ export function getProperties(array: any, i: any) {
 
 }
 
-// Clean and sort properties
-export function cleanAndSortProps(base: any[], array: any[]) {
-
-    const uniqueProps: any[] = [];
-
-    //
-
-    if (base && base.length > 0) {
-
-        base.forEach(prop => {
-
-            if (array && array.length > 0) {
-
-
-                array.forEach(i => {
-
-                    if (prop !== i) {
-
-                        uniqueProps.push(i)
-
-                    }
-
-                });
-
-            };
-
-        });
-
-    };
-
-    return uniqueProps;
-
-}
-
 // Get properties of an item
 export function getAllProperties(i: any) {
 
-    let response: any | null;
+    let response: any | null = null;
 
     if (i) {
 
@@ -274,25 +237,29 @@ export function getAllProperties(i: any) {
 
     }
 
-    else { response = null }
-
     return response;
 
 }
 
 // Get the children of an item
-export function getAllChildren(i: any, name: any) {
+export function getAllChildren(i: any) {
 
-    let response: any[] | null = [];
+    let response: any[] | null = null;
 
     // Check if there are any children
     if (i.children && i.children.length > 0) {
 
-        const array = name ? i.findAll(x => x.name === name) : i.findAll();
+        // Set the response to be an array
+        response = [];
+
+        // Get all children
+        const array = i.findAll();
 
         if (array && array.length > 0) {
 
             array.forEach(c => {
+
+                let child;
 
                 // Get child properties
                 const name      = cleanName(c.name, null);
@@ -301,19 +268,13 @@ export function getAllChildren(i: any, name: any) {
                 const level     = defineHierarchy(c, 0);
                 const styles    = getAllProperties(c);
     
-                const child = new Child(name, id, parentID, level, styles);
-    
-                response?.push(child);
+                response?.push(new Child(name, id, parentID, level, styles));
     
             })
 
         }
 
-        else { response = null }
-
     }
-
-    else { response = null }
 
     return response;
 

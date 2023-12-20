@@ -5,7 +5,8 @@ export class Component {
         public name:            string,
         public id:              any,
         public documentation:   any | null,
-        public properties:      any | null
+        public properties:      any | null,
+        public styles:          any | null
         
     ) {}
 

@@ -2,8 +2,8 @@
 import { Component, Property, Visual, Frame } from "./sys/classes";
 import { cleanName, sortArray } from "./sys/functions/general";
 import { createText, createFrame, createSection } from "./sys/functions/create";
-import { getAllProperties, getAllChildren } from "./sys/functions/document";
-import { baseStroke, baseFill, baseToken, baseFrame, innerFrame, propFill, propToken, propFrame, valueFill, valueToken, valueFrame, compHead, sectHead, regCopy, propText, propValue } from "./sys/styles";
+import { getAllProperties, getAllChildren, getUniques } from "./sys/functions/document";
+import { baseStroke, baseFill, baseToken, baseFrame, innerFrame, propFill, propToken, propFrame, valueFill, valueToken, valueFrame, compHead, sectHead, regCopy, propText, propValue, compFrame, itemFrame, innerFrameAlt } from "./sys/styles";
 
 // Set base constructs
 const cs                            = figma.currentPage.selection;
@@ -17,7 +17,7 @@ if (cs && cs.length > 0) {
         
         // Load fonts
         await figma.loadFontAsync({ family: "IBM Plex Mono", style: "Regular" });
-        await figma.loadFontAsync({ family: "IBM Plex Mono", style: "Bold" });
+        await figma.loadFontAsync({ family: "IBM Plex Mono", style: "Medium" });
 
         // Loop thru selected items
         cs.forEach(e => {
@@ -31,8 +31,12 @@ if (cs && cs.length > 0) {
                 const compID        = e.id;
                 const compURL       = e.documentationLinks && e.documentationLinks.length > 0 ? e.documentationLinks[0].uri : null;
                 const compDesc      = e.description ? e.description : null;
-                const compDocs      = [{ description: compDesc, link: compURL }];
+                const compDocs      = { description: compDesc, link: compURL };
+                const compStyles    = null;
+
+                // Set up base
                 const baseComp      = e.children.find((a) => a.type === 'COMPONENT');
+                const baseInstance  = baseComp ? baseComp.createInstance() : null;
 
                 let compProps: any[] | null = [];
 
@@ -50,15 +54,14 @@ if (cs && cs.length > 0) {
                             name                            = name && name.length > 0 ? cleanName(name[0], null) : null;
                         let type:           any | null      = p.type;
                         let value:          any | null      = p.defaultValue;
-                        let styles:         any | null      = [];
+                        let styles:         any | null      = null;
+                        let baseStyles:     any | null      = null;
                         let options:        any | null      = null;
-                        let children:       any | null      = [];
+                        let children:       any | null      = null;
+                        let baseChildren:   any | null      = null;
 
                         // Create an instance based on this property and then get it's styles
                         const instance = baseComp ? baseComp.createInstance() : null;
-
-                        let getFromInstance = instance.findAll(x => x.name === name);
-                            getFromInstance = getFromInstance && getFromInstance.length > 0 ? getFromInstance[0] : null;
                         
                         instance.name = `${name}=${value}`;
                         instance.setProperties({[key]: value});
@@ -99,7 +102,7 @@ if (cs && cs.length > 0) {
 
                                         // Get styles and children
                                         const variantStyles     = getAllProperties(clone);
-                                        const variantChildren   = getAllChildren(clone, null)
+                                        const variantChildren   = getAllChildren(clone)
 
                                         //
                                         options.push(new Property(v, 'OPTION', variantStyles, null, variantChildren))
@@ -110,14 +113,60 @@ if (cs && cs.length > 0) {
                                     })
     
                                 }
-                                
-                                else { options = null }
     
                             }
+                            
+                            // Set styles and children
+                            styles          = getAllProperties(instance);
+                            baseStyles      = getAllProperties(baseInstance);
+                            children        = getAllChildren(instance);
+                            baseChildren    = getAllChildren(baseInstance);
 
-                            styles      = getAllProperties(getFromInstance);
-                            children    = getAllChildren(instance, name);
-                            children    = children && children.length > 1 ? children : null;
+                            // Compare top level styles
+                            // if (styles && baseStyles) {
+
+                            //     // Compare layout
+                            //     if (styles.layout && styles.layout.length > 0) {
+
+                            //         // Loop thru layout items
+                            //         styles.layout.forEach(i => {
+
+                            //             baseStyles.layout.forEach(b => {
+
+                            //                 // Check if the same property is being compared
+                            //                 if (i.name === b.name) {
+                                                
+                            //                     // Compare
+                            //                     const value = anyDiff(i, b, 'value');
+                            //                     const token = anyDiff(i, b, 'token');
+
+                            //                     if (value && token) {
+
+                            //                         console.log(name, i.name, ': is a shared property', i.value, b.value, '/', i.token, b.token);
+
+                            //                     }
+
+                            //                     else {
+
+                            //                         console.log(name, i.name, ': is a unique property', i.value, b.value, '/', i.token, b.token);
+
+                            //                     }
+
+                            //                 }
+
+                            //             })
+
+                            //         })
+
+                            //     }
+
+                            // }
+
+                            // Compare children styles
+
+
+                            // Set children for property
+                            children = children && children.length > 1 ? children : null;
 
                             // Get rid instance once it has outlived its usefulness
                             instance.remove();
@@ -133,8 +182,11 @@ if (cs && cs.length > 0) {
 
                 }
 
+                // Remove base instance once it's done it's job
+                if (baseInstance) { baseInstance.remove() }
+
                 // Create component object
-                const component = new Component(compName, compID, compDocs, compProps);
+                const component = new Component(compName, compID, compDocs, compProps, compStyles);
                 
                 toDocument.push(component);
 
@@ -143,19 +195,174 @@ if (cs && cs.length > 0) {
             else { console.log(e.name, ' is not a component') } // Skip if not any type of component
 
         });
-
-        console.log(toDocument);
         
-        // Loop thru components to document if any
+        // Check if there is anything to document
         if (toDocument && toDocument.length > 0) {
 
             // Create the main frame (lol)
-            const mainFrameStroke   = baseStroke;
-            const mainFrameVisual   = new Visual(null, mainFrameStroke, null, null);
-            const mainFrameProps    = new Frame('HORIZONTAL', 24, 24, 5, mainFrameVisual, null, null);
-            const mainFrame         = createFrame(mainFrameProps, 'documentation');
+            // const mainFrameStroke   = baseStroke;
+            // const mainFrameVisual   = new Visual(null, mainFrameStroke, null, null);
+            // const mainFrameProps    = new Frame('HORIZONTAL', 24, 24, 5, mainFrameVisual, null, {minWidth: 980, maxWidth: 980, minHeight: 100, maxHeight: null});
+            // const mainFrame         = createFrame(mainFrameProps, 'documentation');
 
-            figma.viewport.scrollAndZoomIntoView([mainFrame]);
+            // Loop thru components to document
+            toDocument.forEach(i => {
+
+                const props     = i.properties;
+                const styles    = i.styles;
+                const docs      = i.documentation;
+                const name      = i.name;
+                const seen      = new Set();
+
+                let items: any | null = null;
+
+                // Clean up styles
+                if (props && props.length > 0) {
+
+                    items = [];
+
+                    props.forEach(p => {
+
+                        const style = p.styles
+
+                        // Check if styles exist
+                        if (style) {
+
+                            //
+                            const layout    = style.layout;
+                            const fills     = style.fills;
+                            const strokes   = style.strokes;
+                            const effects   = style.effects;
+                            const text      = style.text;
+
+                            // Layout
+                            if (layout && layout.length > 0) {
+
+                                layout.forEach(l => {
+
+                                    const uLayout = getUniques(layout, seen);
+                                
+                                    console.log(uLayout);
+
+                                    items.push(uLayout);
+
+                                })
+
+                            }
+
+                        }
+                        
+                    });
+
+                }
+
+                // // Create frame & heading for each component
+                // const componentDocs = createFrame(compFrame, `component: ${cleanName(i.name, null)}`);
+                // const componentHead = createText(`component: ${cleanName(i.name, null)}`, compHead, 'component-heading');
+
+                // componentDocs.appendChild(componentHead);
+
+                // // Check if there is information available
+                // if (docs && docs.description) {
+
+                //     let link: any | null = null;
+
+                //     // Create information frame
+                //     const frame = createSection('information', baseFrame, sectHead);
+
+                //     // Add to information frame
+                //     const info = createText(docs.description, regCopy, 'information-text');
+
+                //     // Add link if available
+                //     if (docs.link) {
+
+                //         link = createText(`🔗 ${docs.link}`, regCopy, 'information-link');
+                //         link.hyperlink = {type: 'URL', value: docs.link};
+                        
+                //     }
+
+                //     // Append everything
+                //     frame.appendChild(info);
+                //     if (link) { frame.appendChild(link) }
+                //     componentDocs.appendChild(frame);
+
+                //     info.layoutSizingHorizontal = 'FILL';
+                //     if (link) { link.layoutSizingHorizontal = 'FILL' }
+                //     frame.layoutSizingHorizontal = 'FILL';
+
+                // }
+
+                // // Check if there are properties available
+                // if (props) {
+
+                //     // Create properties frame
+                //     const frame = createSection('properties', baseFrame, sectHead);
+                //     const inner = createFrame(innerFrame, 'content');
+
+                //     props.forEach(p => {
+
+                //         // Create property and type frames and labels
+                //         const property      = createFrame(itemFrame, 'property');
+                //         const label         = createText(p.name, regCopy, 'property-label');
+                //         const type          = createFrame(propFrame, 'type');
+                //         const typeLabel     = createText(p.type, propValue, 'type-label');
+
+                //         let options: any | null = null;
+
+                //         // // Check if there are any options
+                //         if (p.options && p.options.length > 0) {
+
+                //             // Create options frame
+                //             options = createFrame(innerFrameAlt, 'options');
+
+                //             p.options.forEach(o => {
+
+                //                 // Create option frame & label
+                //                 const option        = createFrame(valueFrame, 'option');
+                //                 const optionLabel   = createText(o.name, propValue, 'option-label');
+
+                //                 option.appendChild(optionLabel);
+                //                 options.appendChild(option);
+
+                //             })
+
+                //         }
+
+                //         // Append to inner
+                //         type.appendChild(typeLabel);
+                //         property.appendChild(label);
+
+                //         if (options) { property.appendChild(options) } // Append options if available
+
+                //         property.appendChild(type);
+                //         inner.appendChild(property);
+                        
+                //         property.layoutSizingHorizontal     = 'FILL';
+                //         label.layoutSizingHorizontal        = 'FILL';
+
+                //     })
+
+                //     // Append everything
+                //     frame.appendChild(inner);
+                //     componentDocs.appendChild(frame);
+
+                //     inner.layoutSizingHorizontal = 'FILL';
+                //     frame.layoutSizingHorizontal = 'FILL';
+
+                // }
+
+                // // Document the layout
+                // console.log(i);
+
+                // // Add to main frame (lol)
+                // mainFrame.appendChild(componentDocs);
+
+                // componentDocs.layoutSizingHorizontal = 'FILL';
+
+            })
+            
+            // Go to documentation created
+            // figma.viewport.scrollAndZoomIntoView([mainFrame]);
 
         }
 
@@ -169,10 +376,11 @@ if (cs && cs.length > 0) {
 
     finally {
 
+        // console.clear();
         figma.closePlugin(`Wow, look at all that we've documented, we make a good team!`);
 
     }
 
 }
 
-else { figma.closePlugin('"If nothing is selected, how can anything be documented?" — An ancient design system proverb') }
+else { console.clear(); figma.closePlugin('"If nothing is selected, how can anything be documented?" — An ancient design system proverb') }
