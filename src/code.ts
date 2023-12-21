@@ -55,8 +55,7 @@ if (cs && cs.length > 0) {
                         let type:           any | null      = p.type;
                         let value:          any | null      = p.defaultValue;
                         let options:        any | null      = [];
-                        let instance:       any | null      = null
-                        let instanceValue:  any | null      = null;
+                        let styles:         any | null      = [];          
 
                         // Fix the type and options if it's a variant boolean
                         if ((value === 'true' || value === 'false') || (value === true || value === false)) {
@@ -67,30 +66,38 @@ if (cs && cs.length > 0) {
 
                         }
 
+                        // Set conditions
+                        const c1 = (p.variantOptions && p.variantOptions.length > 0);
+                        const c2 = (options && options.length > 0);
+
                         // Loop thru variants options if available and create instances for them
-                        if ((p.variantOptions && p.variantOptions.length > 0) || (options && options.length > 0)) {
+                        if (c1 || c2) {
                             
                             let array;
 
-                            if (p.variantOptions) { array = p.variantOptions };
-                            if (options) { array = options };
-
-                            console.log(name)
+                            if (c1) { array = p.variantOptions };
+                            if (c2) { array = options };
                             
                             array.forEach(o => {
 
                                 // Create an instance for this property
-                                instance = baseComp.createInstance();
+                                const instance = baseComp.createInstance();
 
                                 // Name this instance
                                 instance.name = `${name}=${o}`;
 
                                 // Set the property for this instance
-                                instance.setProperties({[defaultName]: o})
+                                instance.setProperties({[defaultName]: o});
 
+                                console.log(name, o);
+                                console.log(getAllProperties(instance));
+                                console.log(getChildren(instance, name));
 
-                                // Add tto options array
+                                // Add to options array
                                 options.push(o);
+
+                                // Remove instance once it has outlived its purpose
+                                instance.remove();
                             
                             }); 
                         
@@ -102,10 +109,17 @@ if (cs && cs.length > 0) {
                             options = null;
 
                             // Create an instance for this property
-                            instance = baseComp.createInstance();
+                            const instance = baseComp.createInstance();
 
                             // Name this instance
                             instance.name = `${name}`;
+
+                            console.log(name);
+                            console.log(getAllProperties(instance));
+                            console.log(getChildren(instance, name));
+
+                            // Remove instance once it has outlived its purpose
+                            instance.remove();
 
                         }
 
@@ -116,9 +130,6 @@ if (cs && cs.length > 0) {
                         // Add property and style objects to the component
                         compProps.push(property);
                         compStyles.push(style);
-
-                        // Remove instance once it has outlived its purpose
-                        // instance.remove();
 
                     })
 

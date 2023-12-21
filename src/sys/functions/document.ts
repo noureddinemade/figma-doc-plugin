@@ -204,16 +204,40 @@ export function getAllProperties(i: any) {
         const fillsArray    = ['fills'];
         const strokesArray  = ['strokes'];
         const effectsArray  = ['effects'];
-        const textArray     = ['fontName', 'fontSize', 'fontWeight', 'textAlignHorizontal', 'textAlignVertical', 'textAutoResize', 'textCase', 'textDecoration', 'textTruncation', 'lineHeight', 'letterSpacing']
+        const textArray     = ['fontName', 'fontSize', 'fontWeight', 'textAlignHorizontal', 'textAlignVertical', 'textAutoResize', 'textCase', 'textDecoration', 'textTruncation', 'lineHeight', 'letterSpacing'];
 
-        // Get base property sets
-        const layout    = getProperties(layoutArray, i);
-        const fills     = getProperties(fillsArray, i);
-        const strokes   = getProperties(strokesArray, i);
-        const effects   = getProperties(effectsArray, i);
-        const text      = getProperties(textArray, i);
+        // Check if it is an array or not
+        if (i.length > 0) {
 
-        response = new Style(layout, fills, strokes, effects, text);
+            response = []
+
+            i.forEach(p => {
+
+                // Get base property sets
+                const layout    = getProperties(layoutArray, p);
+                const fills     = getProperties(fillsArray, p);
+                const strokes   = getProperties(strokesArray, p);
+                const effects   = getProperties(effectsArray, p);
+                const text      = getProperties(textArray, p);
+
+                response.push(new Style(p.name, layout, fills, strokes, effects, text));
+
+            })
+
+        }
+
+        else {
+
+            // Get base property sets
+            const layout    = getProperties(layoutArray, i);
+            const fills     = getProperties(fillsArray, i);
+            const strokes   = getProperties(strokesArray, i);
+            const effects   = getProperties(effectsArray, i);
+            const text      = getProperties(textArray, i);
+
+            response = new Style(i.name, layout, fills, strokes, effects, text);
+
+        }
 
     }
 
@@ -235,24 +259,7 @@ export function getChildren(i: any, name: any) {
         // Get all children
         const array = name ? i.findAll(n => n.name === name) : i.findAll();
 
-        if (array && array.length > 0) {
-
-            array.forEach(c => {
-
-                let child;
-
-                // Get child properties
-                const name      = cleanName(c.name, null);
-                const id        = c.id;
-                const parentID  = c.parent.id;
-                const level     = defineHierarchy(c, 0);
-                const styles    = getAllProperties(c);
-    
-                response?.push(new Child(name, id, parentID, level, styles));
-    
-            })
-
-        }
+        if (array && array.length > 0) { array.forEach(c => response?.push(c) )}
 
     }
 
