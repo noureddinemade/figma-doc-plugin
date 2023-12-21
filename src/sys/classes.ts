@@ -18,9 +18,8 @@ export class Property {
 
         public name:            string,
         public type:            string,
-        public styles:          any | null,
+        public defaultValue:    string,
         public options:         any | null,
-        public children:        any | null
 
     ) {}
 
@@ -44,6 +43,7 @@ export class Style {
 
     constructor (
 
+        public name:            any,
         public layout:          any,
         public fills:           any,
         public strokes:         any,

@@ -97,26 +97,6 @@ export function checkName(p: any, i: any) {
 
 }
 
-// Check for differences
-export function getUniques(array: any, set: any) {
-    
-    let response: any | null = [];
-
-    for (const key in array) {
-
-        if (Object.hasOwnProperty.call(array, key)) {
-
-            const value = array[key];
-            set.add(value);
-
-        }
-
-    }
-
-    return set;
-
-}
-
 // Is it a fill or stroke?
 export function getValueType(p: any, i: any) {
 
@@ -242,7 +222,7 @@ export function getAllProperties(i: any) {
 }
 
 // Get the children of an item
-export function getAllChildren(i: any) {
+export function getChildren(i: any, name: any) {
 
     let response: any[] | null = null;
 
@@ -253,7 +233,7 @@ export function getAllChildren(i: any) {
         response = [];
 
         // Get all children
-        const array = i.findAll();
+        const array = name ? i.findAll(n => n.name === name) : i.findAll();
 
         if (array && array.length > 0) {
 
@@ -277,5 +257,19 @@ export function getAllChildren(i: any) {
     }
 
     return response;
+
+}
+
+// Clean coomponent
+export function cleanComponent(i: any, base: any) {
+
+    // console.log(i);
+    // console.log(base);
+
+    let response: any | null = null;
+
+    // Compare Styles
+
+
 
 }
