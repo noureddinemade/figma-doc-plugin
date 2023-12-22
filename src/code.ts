@@ -2,7 +2,7 @@
 import { Component, Property, Visual, Frame } from "./sys/classes";
 import { cleanName, sortArray } from "./sys/functions/general";
 import { createText, createFrame, createSection } from "./sys/functions/create";
-import { getAllStyles, sharedAndUnique, getChildren } from "./sys/functions/document";
+import { getAllStyles, getAllSharedAndUnique, getChildren } from "./sys/functions/document";
 import { baseStroke, baseFill, baseToken, baseFrame, innerFrame, propFill, propToken, propFrame, valueFill, valueToken, valueFrame, compHead, sectHead, regCopy, propText, propValue, compFrame, itemFrame, innerFrameAlt } from "./sys/styles";
 
 // Set base constructs
@@ -144,7 +144,10 @@ if (cs && cs.length > 0) {
 
                     styles.forEach(s => {
 
-                        sharedAndUnique(s, styles, 'top');
+                        const j1 = getAllSharedAndUnique(s, styles, 'top');
+                        const j2 = getAllSharedAndUnique(s, styles, 'all');
+
+                        console.log(j2);
 
                     })
 

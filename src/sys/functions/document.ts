@@ -267,70 +267,190 @@ export function getChildren(i: any, name: any) {
 
 }
 
+// Find out if a single item is shared or unique
+export function sharedOrUnique(a: any, b: any) {
+
+    let response: string = '';
+
+    if (a.name === b.name) {
+
+        // Set up conditions
+        const c1 = a.value === b.value;
+        const c2 = a.token === b.token;
+
+        if (c1 || c2) { response = 'shared'}
+        else { response = 'unique' }
+
+    }
+
+    return response;
+
+}
+
+// Get all shared or unique for a style
+export function getSharedAndUnique(a: any, b: any, key: string) {
+
+    let response = { shared: [], unique: [] };
+
+    if (a[key] && b[key]) {
+
+        a.layout.forEach(x => {
+
+            b.layout.forEach(y => {
+
+                const result = sharedOrUnique(x, y);
+
+                if (result === 'shared') { response.shared.push(x) }
+                if (result === 'unique') { response.unique.push(x) }
+                
+            });
+            
+        });
+
+    }
+
+    return response;
+    
+}
+
 // Clean coomponent
-export function sharedAndUnique(item: any, array: any, key: any) {
+export function getAllSharedAndUnique(item: any, array: any, key: any) {
 
-    // Prep response
-    let response: any | null = { shared: [], unique: [] };
+    let response: any;
 
-    // Start cleaning
-    if (item && array && array.length > 0) {
+    // Start getting shared and unique
+    if (item.length > 0) {
 
-        console.log('<-------')
-        console.log(item.name);
-        console.log('-')
+        response = [];
+
+        item.forEach(p => {
+
+            // Prep response
+            let r: any = {
+
+                name: item.name,
+                
+                shared: {
+
+                    layout:     [],
+                    fills:      [],
+                    strokes:    [],
+                    effects:    [],
+                    text:       []
+
+                }, 
+                
+                unique: {
+
+                    layout:     [],
+                    fills:      [],
+                    strokes:    [],
+                    effects:    [],
+                    text:       []
+
+                } 
+            
+            };
+
+            //
+
+            array.forEach((base: any) => {
+
+                const i = p[key];
+                const b = base[key];
+    
+                if (i && b) {
+    
+                    if (i.name !== b.name) {
+    
+                        const layout    = getSharedAndUnique(i, b, 'layout');
+                        const fills     = getSharedAndUnique(i, b, 'fills');
+                        const strokes   = getSharedAndUnique(i, b, 'strokes');
+                        const effects   = getSharedAndUnique(i, b, 'fills');
+                        const text      = getSharedAndUnique(i, b, 'fills');
+    
+                        r.shared.layout.push(layout.shared);
+                        r.shared.fills.push(fills.shared);
+                        r.shared.strokes.push(strokes.shared);
+                        r.shared.effects.push(effects.shared);
+                        r.shared.text.push(text.shared);
+    
+                        r.unique.layout.push(layout.unique);
+                        r.unique.fills.push(fills.unique);
+                        r.unique.strokes.push(strokes.unique);
+                        r.unique.effects.push(effects.unique);
+                        r.unique.text.push(text.unique);
+                    
+                    }
+    
+                }
+    
+            });
+
+            response.push(r);
+
+
+        })
+
+    }
+
+    else {
+
+        // Prep response
+        response = {
+
+            name: item.name,
+            
+            shared: {
+
+                layout:     [],
+                fills:      [],
+                strokes:    [],
+                effects:    [],
+                text:       []
+
+            }, 
+            
+            unique: {
+
+                layout:     [],
+                fills:      [],
+                strokes:    [],
+                effects:    [],
+                text:       []
+
+            } 
+        
+        };
+
+        //
 
         array.forEach((base: any) => {
 
             const i = item[key];
             const b = base[key];
 
-            console.log(i)
-
             if (i && b) {
 
                 if (i.name !== b.name) {
 
-                    // Prep arrays & objects
-                    let { layout, fills, strokes, effects, text } : any | null = { shared: [], unique: [] };
+                    const layout    = getSharedAndUnique(i, b, 'layout');
+                    const fills     = getSharedAndUnique(i, b, 'fills');
+                    const strokes   = getSharedAndUnique(i, b, 'strokes');
+                    const effects   = getSharedAndUnique(i, b, 'fills');
+                    const text      = getSharedAndUnique(i, b, 'fills');
 
-                    // Layout
-                    console.log('* LAYOUT');
+                    response.shared.layout.push(layout.shared);
+                    response.shared.fills.push(fills.shared);
+                    response.shared.strokes.push(strokes.shared);
+                    response.shared.effects.push(effects.shared);
+                    response.shared.text.push(text.shared);
 
-                    if (i.layout && b.layout) {
-
-                        i.layout.forEach(i2 => {
-
-                            b.layout.forEach(b2 => {
-
-                                if (i2.name === b2.name) {
-
-                                    // Set up conditions
-                                    const c1 = i2.value === b2.value;
-                                    const c2 = i2.token === b2.token;
-
-                                    if (c1 || c2) {
-
-                                        console.log(i2.name, 'is a shared value');
-
-                                    }
-
-                                    else {
-
-                                        console.log(i2.name, 'is a unique value');
-
-                                    }
-
-                                }
-                                
-                            });
-                            
-                        });
-
-                        // Set up conditions
-                        const c1 = i.layout
-
-                    }
+                    response.unique.layout.push(layout.unique);
+                    response.unique.fills.push(fills.unique);
+                    response.unique.strokes.push(strokes.unique);
+                    response.unique.effects.push(effects.unique);
+                    response.unique.text.push(text.unique);
                 
                 }
 
@@ -339,8 +459,6 @@ export function sharedAndUnique(item: any, array: any, key: any) {
         })
 
     }
-
-    console.log('------->')
 
     return response;
 
