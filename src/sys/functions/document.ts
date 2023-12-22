@@ -157,7 +157,7 @@ export function checkProperty(p: any, i: any, t: any) {
 }
 
 // Get fill values
-export function getProperties(array: any, i: any) {
+export function getStyles(array: any, i: any) {
 
     let response: any = [];
 
@@ -193,7 +193,7 @@ export function getProperties(array: any, i: any) {
 }
 
 // Get properties of an item
-export function getAllProperties(i: any) {
+export function getAllStyles(i: any) {
 
     let response: any | null = null;
 
@@ -214,11 +214,11 @@ export function getAllProperties(i: any) {
             i.forEach(p => {
 
                 // Get base property sets
-                const layout    = getProperties(layoutArray, p);
-                const fills     = getProperties(fillsArray, p);
-                const strokes   = getProperties(strokesArray, p);
-                const effects   = getProperties(effectsArray, p);
-                const text      = getProperties(textArray, p);
+                const layout    = getStyles(layoutArray, p);
+                const fills     = getStyles(fillsArray, p);
+                const strokes   = getStyles(strokesArray, p);
+                const effects   = getStyles(effectsArray, p);
+                const text      = getStyles(textArray, p);
 
                 response.push(new Style(p.name, layout, fills, strokes, effects, text));
 
@@ -229,11 +229,11 @@ export function getAllProperties(i: any) {
         else {
 
             // Get base property sets
-            const layout    = getProperties(layoutArray, i);
-            const fills     = getProperties(fillsArray, i);
-            const strokes   = getProperties(strokesArray, i);
-            const effects   = getProperties(effectsArray, i);
-            const text      = getProperties(textArray, i);
+            const layout    = getStyles(layoutArray, i);
+            const fills     = getStyles(fillsArray, i);
+            const strokes   = getStyles(strokesArray, i);
+            const effects   = getStyles(effectsArray, i);
+            const text      = getStyles(textArray, i);
 
             response = new Style(i.name, layout, fills, strokes, effects, text);
 
@@ -268,15 +268,80 @@ export function getChildren(i: any, name: any) {
 }
 
 // Clean coomponent
-export function cleanComponent(i: any, base: any) {
+export function sharedAndUnique(item: any, array: any, key: any) {
 
-    // console.log(i);
-    // console.log(base);
+    // Prep response
+    let response: any | null = { shared: [], unique: [] };
 
-    let response: any | null = null;
+    // Start cleaning
+    if (item && array && array.length > 0) {
 
-    // Compare Styles
+        console.log('<-------')
+        console.log(item.name);
+        console.log('-')
 
+        array.forEach((base: any) => {
 
+            const i = item[key];
+            const b = base[key];
+
+            console.log(i)
+
+            if (i && b) {
+
+                if (i.name !== b.name) {
+
+                    // Prep arrays & objects
+                    let { layout, fills, strokes, effects, text } : any | null = { shared: [], unique: [] };
+
+                    // Layout
+                    console.log('* LAYOUT');
+
+                    if (i.layout && b.layout) {
+
+                        i.layout.forEach(i2 => {
+
+                            b.layout.forEach(b2 => {
+
+                                if (i2.name === b2.name) {
+
+                                    // Set up conditions
+                                    const c1 = i2.value === b2.value;
+                                    const c2 = i2.token === b2.token;
+
+                                    if (c1 || c2) {
+
+                                        console.log(i2.name, 'is a shared value');
+
+                                    }
+
+                                    else {
+
+                                        console.log(i2.name, 'is a unique value');
+
+                                    }
+
+                                }
+                                
+                            });
+                            
+                        });
+
+                        // Set up conditions
+                        const c1 = i.layout
+
+                    }
+                
+                }
+
+            }
+
+        })
+
+    }
+
+    console.log('------->')
+
+    return response;
 
 }

@@ -2,7 +2,7 @@
 import { Component, Property, Visual, Frame } from "./sys/classes";
 import { cleanName, sortArray } from "./sys/functions/general";
 import { createText, createFrame, createSection } from "./sys/functions/create";
-import { getAllProperties, cleanComponent, getChildren } from "./sys/functions/document";
+import { getAllStyles, sharedAndUnique, getChildren } from "./sys/functions/document";
 import { baseStroke, baseFill, baseToken, baseFrame, innerFrame, propFill, propToken, propFrame, valueFill, valueToken, valueFrame, compHead, sectHead, regCopy, propText, propValue, compFrame, itemFrame, innerFrameAlt } from "./sys/styles";
 
 // Set base constructs
@@ -32,17 +32,19 @@ if (cs && cs.length > 0) {
                 const compDesc              = e.description ? e.description : null;
                 const compDocs              = { description: compDesc, link: compURL };
                 const compProps:    any     = [];
-                const compStyles:   any     = [];
+                const compStyles:   any     = { shared: null, individual: null };
+                const compChildren          = e.children ? getChildren(e, null) : null;
 
                 // Set up base
-                const baseComp      = e.children.find((a) => a.type === 'COMPONENT');
-                const baseInstance  = baseComp ? baseComp.createInstance() : null;
+                const baseComp              = e.children.find((a) => a.type === 'COMPONENT');
+                const baseInstance          = baseComp ? baseComp.createInstance() : null;
+                const styles:       any     = [];
 
                 // Get properties and styles for component
                 if (e.componentPropertyDefinitions && baseComp) {
 
-                    let props: any  = e.componentPropertyDefinitions;
-                        props       = Object.entries(props).map(([key, value]) => ({ key, ...value }));
+                    let props:      any             = e.componentPropertyDefinitions;
+                        props                       = Object.entries(props).map(([key, value]) => ({ key, ...value }));
 
                     // Loop thru properties
                     props.forEach(p => {
@@ -55,7 +57,6 @@ if (cs && cs.length > 0) {
                         let type:           any | null      = p.type;
                         let value:          any | null      = p.defaultValue;
                         let options:        any | null      = [];
-                        let styles:         any | null      = [];          
 
                         // Fix the type and options if it's a variant boolean
                         if ((value === 'true' || value === 'false') || (value === true || value === false)) {
@@ -67,230 +68,96 @@ if (cs && cs.length > 0) {
                         }
 
                         // Set conditions
-                        const c1 = (p.variantOptions && p.variantOptions.length > 0);
-                        const c2 = (options && options.length > 0);
+                        const c1 = p.variantOptions && p.variantOptions.length > 0;
+                        const c2 = options && options.length > 0;
 
-                        // Loop thru variants options if available and create instances for them
-                        if (c1 || c2) {
+                        // Loop thru variants options if available and add them to properties
+                        if (c1 || c2) { if (c1) { p.variantOptions.forEach(o => options.push(o) ) } } 
+                        else { options = null }
+
+                        // Get styles from variants
+                        if (options && options.length > 0) {
                             
-                            let array;
+                            // Loop thru variant options
+                            options.forEach(o => {
 
-                            if (c1) { array = p.variantOptions };
-                            if (c2) { array = options };
-                            
-                            array.forEach(o => {
+                                // Create instance for each size
+                                const instance = baseInstance.clone();
 
-                                // Create an instance for this property
-                                const instance = baseComp.createInstance();
-
-                                // Name this instance
+                                // Customise each instance
+                                instance.setProperties({[defaultName]: o});
                                 instance.name = `${name}=${o}`;
 
-                                // Set the property for this instance
-                                instance.setProperties({[defaultName]: o});
+                                // Get styles from each size
+                                const topStyles = getAllStyles(instance);
+                                const allStyles = getAllStyles(getChildren(instance, null));
 
-                                console.log(name, o);
-                                console.log(getAllProperties(instance));
-                                console.log(getChildren(instance, name));
+                                // Add to array to clean and sort
+                                styles.push({name: `${name}=${o}`, top: topStyles, all: allStyles});
 
-                                // Add to options array
-                                options.push(o);
-
-                                // Remove instance once it has outlived its purpose
+                                // Remove instance once it has outlived it's purpose
                                 instance.remove();
-                            
-                            }); 
-                        
-                        }
 
+                            })
+
+                        } 
+                        
                         else {
 
-                            // Remove options array
-                            options = null;
+                            // Create instance for each size
+                            const instance = baseInstance.clone();
 
-                            // Create an instance for this property
-                            const instance = baseComp.createInstance();
-
-                            // Name this instance
+                            // Customise each instance
                             instance.name = `${name}`;
 
-                            console.log(name);
-                            console.log(getAllProperties(instance));
-                            console.log(getChildren(instance, name));
+                            // Get styles from each size
+                            const topStyles = getAllStyles(instance);
+                            const allStyles = getAllStyles(getChildren(instance, null));
 
-                            // Remove instance once it has outlived its purpose
+                            // Add to array to clean and sort
+                            styles.push({name: name, top: topStyles, all: allStyles});
+
+                            // Remove instance once it has outlived it's purpose
                             instance.remove();
 
                         }
 
                         // Create property and style objects
                         const property  = new Property(name, type, value, options);
-                        const style     = {name};
+                        const style     = {shared: null, individual: []};
 
                         // Add property and style objects to the component
                         compProps.push(property);
-                        compStyles.push(style);
+
+                        compStyles.individual   = style.individual;
+                        compStyles.shared       = style.shared;
 
                     })
 
 
                 }
 
+                // Get unique and shared styles
+
+                // Clean and sort styles
+                if (styles && styles.length > 0) {
+
+                    styles.forEach(s => {
+
+                        sharedAndUnique(s, styles, 'top');
+
+                    })
+
+                }
+
                 // Sort component properties by type
                 sortArray(compProps, 'type');
-
-                // for (let key in props) {
-
-                //     const p = props[key];
-
-                //     let property = null;
-
-                //     // Loop thru each property and get its values
-                //     console.log(props);
-
-                //     // if (props.hasOwnProperty(key)) {
-
-                //     //     let name:           any | null      = key.split('#');
-                //     //         name                            = name && name.length > 0 ? cleanName(name[0], null) : null;
-                //     //     let type:           any | null      = p.type;
-                //     //     let value:          any | null      = p.defaultValue;
-                //     //     let styles:         any | null      = null;
-                //     //     let baseStyles:     any | null      = null;
-                //     //     let options:        any | null      = null;
-                //     //     let children:       any | null      = null;
-                //     //     let baseChildren:   any | null      = null;
-
-                //     //     // Create an instance based on this property and then get it's styles
-                //     //     const instance = baseComp ? baseComp.createInstance() : null;
-                        
-                //     //     instance.name = `${name}=${value}`;
-                //     //     instance.setProperties({[key]: value});
-
-                //     //     // Check if instance exists
-                //     //     if (instance) {
-
-                //     //         // If it's a boolean
-                //     //         if (type === 'BOOLEAN') { 
-                                
-                //     //             instance.name = `${name}=true`;
-                                
-                //     //             instance.setProperties({[key]: true});
-                            
-                //     //         }
-
-                //     //         // If it's an instance swap
-                //     //         if ( type === 'INSTANCE_SWAP' ) {}
-
-                //     //         // If it's a variant
-                //     //         if ( type === 'VARIANT' ) {
-
-                //     //             // Check if there are options available for this property
-                //     //             if (p.variantOptions && p.variantOptions.length > 0) {
-
-                //     //                 options = [];
-    
-                //     //                 p.variantOptions.forEach(v => {
-    
-                //     //                     const clone = instance.clone();
-                                
-                //     //                     clone.name = `${name}=${v}`;
-    
-                //     //                     // Check if this is a "fake" boolean
-                //     //                     if (v === 'true' || v === 'false') { type = 'BOOLEAN'; clone.setProperties({[key]: 'true'}); }
-    
-                //     //                     else { clone.setProperties({[key]: v}) }
-
-                //     //                     // Get styles and children
-                //     //                     const variantStyles     = getAllProperties(clone);
-                //     //                     const variantChildren   = getChildren(clone, `${name}=${v}`);
-
-                //     //                     //
-                //     //                     options.push(new Property(v, 'OPTION', variantStyles, null, variantChildren))
-    
-                //     //                     // Get rid instance once it has outlived its usefulness
-                //     //                     clone.remove();
-    
-                //     //                 })
-    
-                //     //             }
-    
-                //     //         }
-                            
-                //     //         // Set styles and children
-                //     //         styles          = getAllProperties(instance);
-                //     //         baseStyles      = getAllProperties(baseInstance);
-                //     //         children        = getChildren(instance, name);
-                //     //         baseChildren    = getChildren(baseInstance, null);
-
-                //     //         // Compare top level styles
-                //     //         // if (styles && baseStyles) {
-
-                //     //         //     // Compare layout
-                //     //         //     if (styles.layout && styles.layout.length > 0) {
-
-                //     //         //         // Loop thru layout items
-                //     //         //         styles.layout.forEach(i => {
-
-                //     //         //             baseStyles.layout.forEach(b => {
-
-                //     //         //                 // Check if the same property is being compared
-                //     //         //                 if (i.name === b.name) {
-                                                
-                //     //         //                     // Compare
-                //     //         //                     const value = anyDiff(i, b, 'value');
-                //     //         //                     const token = anyDiff(i, b, 'token');
-
-                //     //         //                     if (value && token) {
-
-                //     //         //                         console.log(name, i.name, ': is a shared property', i.value, b.value, '/', i.token, b.token);
-
-                //     //         //                     }
-
-                //     //         //                     else {
-
-                //     //         //                         console.log(name, i.name, ': is a unique property', i.value, b.value, '/', i.token, b.token);
-
-                //     //         //                     }
-
-                //     //         //                 }
-
-                //     //         //             })
-
-                //     //         //         })
-
-                //     //         //     }
-
-                //     //         // }
-
-                //     //         // Compare children styles
-
-
-                //     //         // Set children for property
-                //     //         children = children && children.length > 1 ? children : null;
-
-                //     //         // Get rid instance once it has outlived its usefulness
-                //     //         instance.remove();
-
-                //     //     }
-
-                //     //     property = new Property(name, type, styles, options, children);
-                //     //     compProps.push(property);
-
-                //     // }
-
-                //     sortArray(compProps, 'type'); // Sort component properties by type
-
-                // }
 
                 // Remove base instance once it's done it's job
                 if (baseInstance) { baseInstance.remove() }
 
                 // Create raw component object
                 const rawComponent = new Component(compName, compID, compDocs, compProps, compStyles);
-
-                // Clean up styles
-                const component = cleanComponent(rawComponent, baseInstance);
-
                 
                 toDocument.push(rawComponent);
 
@@ -300,177 +167,8 @@ if (cs && cs.length > 0) {
 
         });
 
-        console.log(toDocument);
-        
-        // Check if there is anything to document
-        // if (toDocument && toDocument.length > 0) {
-
-        //     // Create the main frame (lol)
-        //     // const mainFrameStroke   = baseStroke;
-        //     // const mainFrameVisual   = new Visual(null, mainFrameStroke, null, null);
-        //     // const mainFrameProps    = new Frame('HORIZONTAL', 24, 24, 5, mainFrameVisual, null, {minWidth: 980, maxWidth: 980, minHeight: 100, maxHeight: null});
-        //     // const mainFrame         = createFrame(mainFrameProps, 'documentation');
-
-        //     // Loop thru components to document
-        //     toDocument.forEach(i => {
-
-        //         const props     = i.properties;
-        //         const styles    = i.styles;
-        //         const docs      = i.documentation;
-        //         const name      = i.name;
-        //         const seen      = new Set();
-
-        //         let items: any | null = null;
-
-        //         // Clean up styles
-        //         if (props && props.length > 0) {
-
-        //             items = [];
-
-        //             props.forEach(p => {
-
-        //                 const style = p.styles
-
-        //                 // Check if styles exist
-        //                 if (style) {
-
-        //                     //
-        //                     const layout    = style.layout;
-        //                     const fills     = style.fills;
-        //                     const strokes   = style.strokes;
-        //                     const effects   = style.effects;
-        //                     const text      = style.text;
-
-        //                     // Layout
-        //                     if (layout && layout.length > 0) {
-
-        //                         layout.forEach(l => {
-
-        //                             const uLayout = getUniques(layout, seen);
-                                
-        //                             console.log(uLayout);
-
-        //                             items.push(uLayout);
-
-        //                         })
-
-        //                     }
-
-        //                 }
-                        
-        //             });
-
-        //         }
-
-        //         // // Create frame & heading for each component
-        //         // const componentDocs = createFrame(compFrame, `component: ${cleanName(i.name, null)}`);
-        //         // const componentHead = createText(`component: ${cleanName(i.name, null)}`, compHead, 'component-heading');
-
-        //         // componentDocs.appendChild(componentHead);
-
-        //         // // Check if there is information available
-        //         // if (docs && docs.description) {
-
-        //         //     let link: any | null = null;
-
-        //         //     // Create information frame
-        //         //     const frame = createSection('information', baseFrame, sectHead);
-
-        //         //     // Add to information frame
-        //         //     const info = createText(docs.description, regCopy, 'information-text');
-
-        //         //     // Add link if available
-        //         //     if (docs.link) {
-
-        //         //         link = createText(`🔗 ${docs.link}`, regCopy, 'information-link');
-        //         //         link.hyperlink = {type: 'URL', value: docs.link};
-                        
-        //         //     }
-
-        //         //     // Append everything
-        //         //     frame.appendChild(info);
-        //         //     if (link) { frame.appendChild(link) }
-        //         //     componentDocs.appendChild(frame);
-
-        //         //     info.layoutSizingHorizontal = 'FILL';
-        //         //     if (link) { link.layoutSizingHorizontal = 'FILL' }
-        //         //     frame.layoutSizingHorizontal = 'FILL';
-
-        //         // }
-
-        //         // // Check if there are properties available
-        //         // if (props) {
-
-        //         //     // Create properties frame
-        //         //     const frame = createSection('properties', baseFrame, sectHead);
-        //         //     const inner = createFrame(innerFrame, 'content');
-
-        //         //     props.forEach(p => {
-
-        //         //         // Create property and type frames and labels
-        //         //         const property      = createFrame(itemFrame, 'property');
-        //         //         const label         = createText(p.name, regCopy, 'property-label');
-        //         //         const type          = createFrame(propFrame, 'type');
-        //         //         const typeLabel     = createText(p.type, propValue, 'type-label');
-
-        //         //         let options: any | null = null;
-
-        //         //         // // Check if there are any options
-        //         //         if (p.options && p.options.length > 0) {
-
-        //         //             // Create options frame
-        //         //             options = createFrame(innerFrameAlt, 'options');
-
-        //         //             p.options.forEach(o => {
-
-        //         //                 // Create option frame & label
-        //         //                 const option        = createFrame(valueFrame, 'option');
-        //         //                 const optionLabel   = createText(o.name, propValue, 'option-label');
-
-        //         //                 option.appendChild(optionLabel);
-        //         //                 options.appendChild(option);
-
-        //         //             })
-
-        //         //         }
-
-        //         //         // Append to inner
-        //         //         type.appendChild(typeLabel);
-        //         //         property.appendChild(label);
-
-        //         //         if (options) { property.appendChild(options) } // Append options if available
-
-        //         //         property.appendChild(type);
-        //         //         inner.appendChild(property);
-                        
-        //         //         property.layoutSizingHorizontal     = 'FILL';
-        //         //         label.layoutSizingHorizontal        = 'FILL';
-
-        //         //     })
-
-        //         //     // Append everything
-        //         //     frame.appendChild(inner);
-        //         //     componentDocs.appendChild(frame);
-
-        //         //     inner.layoutSizingHorizontal = 'FILL';
-        //         //     frame.layoutSizingHorizontal = 'FILL';
-
-        //         // }
-
-        //         // // Document the layout
-        //         // console.log(i);
-
-        //         // // Add to main frame (lol)
-        //         // mainFrame.appendChild(componentDocs);
-
-        //         // componentDocs.layoutSizingHorizontal = 'FILL';
-
-        //     })
-            
-        //     // Go to documentation created
-        //     // figma.viewport.scrollAndZoomIntoView([mainFrame]);
-
-        // }
+        console.log('--------------');
+        console.log('Finished prepping components for documentating:', toDocument);
 
     }
 
