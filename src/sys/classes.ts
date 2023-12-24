@@ -44,11 +44,7 @@ export class Style {
     constructor (
 
         public name:            any,
-        public layout:          any,
-        public fills:           any,
-        public strokes:         any,
-        public effects:         any,
-        public text:            any
+        public styles:          any
 
     ) {}
 

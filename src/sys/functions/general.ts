@@ -154,3 +154,10 @@ export function sortArray(array: any, key: any) {
 
     });
 }
+
+// Is it an array?
+export function isArray(array: any[]) {
+
+    return Array.isArray(array) && array.length > 0 ? true : false;
+
+}

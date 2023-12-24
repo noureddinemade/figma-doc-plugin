@@ -1,6 +1,7 @@
 // Imports
-import { Child, DropShadow, Item, Style } from "../classes";
-import { cleanName, convertColour } from "./general";
+import { styles } from "../arrays";
+import { DropShadow, Item, Style } from "../classes";
+import { cleanName, convertColour, isArray } from "./general";
 
 // Define hierarchy
 export function defineHierarchy(i: any, level: any) {
@@ -15,7 +16,7 @@ export function defineHierarchy(i: any, level: any) {
 
     else { return level }
 
-} 
+}
 
 // Get a token
 export function getToken(id: any) {
@@ -193,53 +194,38 @@ export function getStyles(array: any, i: any) {
 }
 
 // Get properties of an item
-export function getAllStyles(i: any) {
+export function getAllStyles(item: any) {
 
     let response: any | null = null;
 
-    if (i) {
+    if (item) {
+
+        response = [];
 
         // Define arrays
-        const layoutArray   = ['width', 'minWidth', 'maxWidth', 'height', 'minHeight', 'maxHeight', 'itemSpacing', 'topRightRadius'];
-        const fillsArray    = ['fills'];
-        const strokesArray  = ['strokes'];
-        const effectsArray  = ['effects'];
-        const textArray     = ['fontName', 'fontSize', 'fontWeight', 'textAlignHorizontal', 'textAlignVertical', 'textAutoResize', 'textCase', 'textDecoration', 'textTruncation', 'lineHeight', 'letterSpacing'];
 
-        // Check if it is an array or not
-        if (i.length > 0) {
+        const array = ['general', 'layout', 'fills', 'strokes', 'effects', 'text'];
 
-            response = []
+        // Loop thru style arrays
+        array.forEach(a => {
 
-            i.forEach(p => {
+            const propArray = getStyles(styles[a], item);
 
-                // Get base property sets
-                const layout    = getStyles(layoutArray, p);
-                const fills     = getStyles(fillsArray, p);
-                const strokes   = getStyles(strokesArray, p);
-                const effects   = getStyles(effectsArray, p);
-                const text      = getStyles(textArray, p);
+            let result: any | null = null;
 
-                response.push(new Style(p.name, layout, fills, strokes, effects, text));
+            if (propArray && propArray.length > 0) {
 
-            })
+                result = [];
+                result.push(propArray);
+                response.push(new Style(a, result));
 
-        }
+            };
 
-        else {
-
-            // Get base property sets
-            const layout    = getStyles(layoutArray, i);
-            const fills     = getStyles(fillsArray, i);
-            const strokes   = getStyles(strokesArray, i);
-            const effects   = getStyles(effectsArray, i);
-            const text      = getStyles(textArray, i);
-
-            response = new Style(i.name, layout, fills, strokes, effects, text);
-
-        }
+        })
 
     }
+
+    response && response.length > 0 ? response = response : response = null;
 
     return response;
 
@@ -267,199 +253,57 @@ export function getChildren(i: any, name: any) {
 
 }
 
-// Find out if a single item is shared or unique
-export function sharedOrUnique(a: any, b: any) {
+// Clean coomponent
+export function sharedOrUnique(array: any) {
 
-    let response: string = '';
+    const allStyles         = {};
+    const shared: never[]   = [];
+    const unique: never[]   = [];
+      
+    // Loop through each object in componentStyles
+    array.forEach(i => {
 
-    if (a.name === b.name) {
+        const topStyles = i.top;
+    
+        // Loop through style areas in the 'top' property
+        Object.values(topStyles).forEach((ts) => {
 
-        // Set up conditions
-        const c1 = a.value === b.value;
-        const c2 = a.token === b.token;
+            const styles        = ts.styles;
+            const styleShared   = { name: ts.name, styles:[] };
+            const styleUnique   = { name: ts.name, styles:[] };
+    
+            // Loop through styles in the current style area
+            styles.forEach((s) => {
 
-        if (c1 || c2) { response = 'shared'}
-        else { response = 'unique' }
+                const styleKey = JSON.stringify(s);
+        
+                // Check if the style is already in allStyles
+                if (allStyles[styleKey]) {
 
-    }
+                    if (!styleShared.styles.some((sharedStyle) => JSON.stringify(sharedStyle) === styleKey)) {
 
-    return response;
+                        styleShared.styles.push(s);
 
-}
+                    }
 
-// Get all shared or unique for a style
-export function getSharedAndUnique(a: any, b: any, key: string) {
+                } else {
 
-    let response = { shared: [], unique: [] };
+                    // If no, add it to the allStyles object and the unique array
+                    allStyles[styleKey] = s;
+                    if (!styleUnique.styles.some((sharedStyle) => JSON.stringify(sharedStyle) === styleKey)) {
+                        styleUnique.styles.push(s);
+                    }
 
-    if (a[key] && b[key]) {
-
-        a.layout.forEach(x => {
-
-            b.layout.forEach(y => {
-
-                const result = sharedOrUnique(x, y);
-
-                if (result === 'shared') { response.shared.push(x) }
-                if (result === 'unique') { response.unique.push(x) }
-                
+                }
             });
-            
+
+            if (styleShared.styles && styleShared.styles.length > 0) { shared.push(styleShared) }
+            if (styleUnique.styles && styleUnique.styles.length > 0) { unique.push(styleUnique) }
+
         });
 
-    }
+    })
 
-    return response;
-    
-}
-
-// Clean coomponent
-export function getAllSharedAndUnique(item: any, array: any, key: any) {
-
-    let response: any;
-
-    // Start getting shared and unique
-    if (item.length > 0) {
-
-        response = [];
-
-        item.forEach(p => {
-
-            // Prep response
-            let r: any = {
-
-                name: item.name,
-                
-                shared: {
-
-                    layout:     [],
-                    fills:      [],
-                    strokes:    [],
-                    effects:    [],
-                    text:       []
-
-                }, 
-                
-                unique: {
-
-                    layout:     [],
-                    fills:      [],
-                    strokes:    [],
-                    effects:    [],
-                    text:       []
-
-                } 
-            
-            };
-
-            //
-
-            array.forEach((base: any) => {
-
-                const i = p[key];
-                const b = base[key];
-    
-                if (i && b) {
-    
-                    if (i.name !== b.name) {
-    
-                        const layout    = getSharedAndUnique(i, b, 'layout');
-                        const fills     = getSharedAndUnique(i, b, 'fills');
-                        const strokes   = getSharedAndUnique(i, b, 'strokes');
-                        const effects   = getSharedAndUnique(i, b, 'fills');
-                        const text      = getSharedAndUnique(i, b, 'fills');
-    
-                        r.shared.layout.push(layout.shared);
-                        r.shared.fills.push(fills.shared);
-                        r.shared.strokes.push(strokes.shared);
-                        r.shared.effects.push(effects.shared);
-                        r.shared.text.push(text.shared);
-    
-                        r.unique.layout.push(layout.unique);
-                        r.unique.fills.push(fills.unique);
-                        r.unique.strokes.push(strokes.unique);
-                        r.unique.effects.push(effects.unique);
-                        r.unique.text.push(text.unique);
-                    
-                    }
-    
-                }
-    
-            });
-
-            response.push(r);
-
-
-        })
-
-    }
-
-    else {
-
-        // Prep response
-        response = {
-
-            name: item.name,
-            
-            shared: {
-
-                layout:     [],
-                fills:      [],
-                strokes:    [],
-                effects:    [],
-                text:       []
-
-            }, 
-            
-            unique: {
-
-                layout:     [],
-                fills:      [],
-                strokes:    [],
-                effects:    [],
-                text:       []
-
-            } 
-        
-        };
-
-        //
-
-        array.forEach((base: any) => {
-
-            const i = item[key];
-            const b = base[key];
-
-            if (i && b) {
-
-                if (i.name !== b.name) {
-
-                    const layout    = getSharedAndUnique(i, b, 'layout');
-                    const fills     = getSharedAndUnique(i, b, 'fills');
-                    const strokes   = getSharedAndUnique(i, b, 'strokes');
-                    const effects   = getSharedAndUnique(i, b, 'fills');
-                    const text      = getSharedAndUnique(i, b, 'fills');
-
-                    response.shared.layout.push(layout.shared);
-                    response.shared.fills.push(fills.shared);
-                    response.shared.strokes.push(strokes.shared);
-                    response.shared.effects.push(effects.shared);
-                    response.shared.text.push(text.shared);
-
-                    response.unique.layout.push(layout.unique);
-                    response.unique.fills.push(fills.unique);
-                    response.unique.strokes.push(strokes.unique);
-                    response.unique.effects.push(effects.unique);
-                    response.unique.text.push(text.unique);
-                
-                }
-
-            }
-
-        })
-
-    }
-
-    return response;
+    return {shared, unique};
 
 }

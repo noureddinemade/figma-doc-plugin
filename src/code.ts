@@ -2,7 +2,7 @@
 import { Component, Property, Visual, Frame } from "./sys/classes";
 import { cleanName, sortArray } from "./sys/functions/general";
 import { createText, createFrame, createSection } from "./sys/functions/create";
-import { getAllStyles, getAllSharedAndUnique, getChildren } from "./sys/functions/document";
+import { getAllStyles, sharedOrUnique, getChildren } from "./sys/functions/document";
 import { baseStroke, baseFill, baseToken, baseFrame, innerFrame, propFill, propToken, propFrame, valueFill, valueToken, valueFrame, compHead, sectHead, regCopy, propText, propValue, compFrame, itemFrame, innerFrameAlt } from "./sys/styles";
 
 // Set base constructs
@@ -89,8 +89,11 @@ if (cs && cs.length > 0) {
                                 instance.name = `${name}=${o}`;
 
                                 // Get styles from each size
-                                const topStyles = getAllStyles(instance);
-                                const allStyles = getAllStyles(getChildren(instance, null));
+                                const topStyles         = getAllStyles(instance);
+                                const instanceChildren  = getChildren(instance, null);
+                                const allStyles         = [];
+                            
+                                instanceChildren?.forEach(c => allStyles.push(getAllStyles(c)));
 
                                 // Add to array to clean and sort
                                 styles.push({name: `${name}=${o}`, top: topStyles, all: allStyles});
@@ -111,8 +114,11 @@ if (cs && cs.length > 0) {
                             instance.name = `${name}`;
 
                             // Get styles from each size
-                            const topStyles = getAllStyles(instance);
-                            const allStyles = getAllStyles(getChildren(instance, null));
+                            const topStyles         = getAllStyles(instance);
+                            const instanceChildren  = getChildren(instance, null);
+                            const allStyles         = [];
+                            
+                            instanceChildren?.forEach(c => allStyles.push(getAllStyles(c)));
 
                             // Add to array to clean and sort
                             styles.push({name: name, top: topStyles, all: allStyles});
@@ -140,18 +146,7 @@ if (cs && cs.length > 0) {
                 // Get unique and shared styles
 
                 // Clean and sort styles
-                if (styles && styles.length > 0) {
-
-                    styles.forEach(s => {
-
-                        const j1 = getAllSharedAndUnique(s, styles, 'top');
-                        const j2 = getAllSharedAndUnique(s, styles, 'all');
-
-                        console.log(j2);
-
-                    })
-
-                }
+                console.log(sharedOrUnique(styles));
 
                 // Sort component properties by type
                 sortArray(compProps, 'type');
