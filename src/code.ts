@@ -2,7 +2,7 @@
 import { Component, Property, Visual, Frame } from "./sys/classes";
 import { cleanName, sortArray } from "./sys/functions/general";
 import { createText, createFrame, createSection } from "./sys/functions/create";
-import { getAllStyles, sharedOrUnique, getChildren } from "./sys/functions/document";
+import { getAllStyles, sharedOrUnique, getChildren, cleanStyles } from "./sys/functions/document";
 import { baseStroke, baseFill, baseToken, baseFrame, innerFrame, propFill, propToken, propFrame, valueFill, valueToken, valueFrame, compHead, sectHead, regCopy, propText, propValue, compFrame, itemFrame, innerFrameAlt } from "./sys/styles";
 
 // Set base constructs
@@ -146,7 +146,10 @@ if (cs && cs.length > 0) {
                 // Get unique and shared styles
 
                 // Clean and sort styles
-                console.log(sharedOrUnique(styles));
+                const sharedAndUnique   = sharedOrUnique(styles);
+                const cleanedStyles     = cleanStyles(sharedAndUnique);
+
+                // console.log(cleanedStyles);
 
                 // Sort component properties by type
                 sortArray(compProps, 'type');

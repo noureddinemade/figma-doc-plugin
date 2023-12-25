@@ -1,5 +1,5 @@
 // Imports
-import { styles } from "../arrays";
+import { styleAreas, styles } from "../arrays";
 import { DropShadow, Item, Style } from "../classes";
 import { cleanName, convertColour, isArray } from "./general";
 
@@ -88,11 +88,11 @@ export function checkName(p: any, i: any) {
 
     if (p === 'itemSpacing')        { response = 'gap' }
     if (p === 'topRightRadius')     { response = 'radius' }
-    if (p === 'strokes')            { response = 'around' }
+    if (p === 'strokes')            { response = 'border' }
 
     // Check type then adjust name
-    if (i.type === 'TEXT') { if (p === 'fills') { response = 'inner' } }
-    else { if (p === 'fills') { response = 'surface' } }
+    if (i.type === 'TEXT') { if (p === 'fills') { response = 'color' } }
+    else { if (p === 'fills') { response = 'backgroundColor' } }
 
     return response;
 
@@ -253,17 +253,18 @@ export function getChildren(i: any, name: any) {
 
 }
 
-// Clean coomponent
+// Get shared and unique styles
 export function sharedOrUnique(array: any) {
 
     const allStyles         = {};
-    const shared: never[]   = [];
-    const unique: never[]   = [];
+    
+    let response : any | null = [];
       
     // Loop through each object in componentStyles
     array.forEach(i => {
 
         const topStyles = i.top;
+        const item      = { name: i.name, styles: { shared: [], unique: [] } }
     
         // Loop through style areas in the 'top' property
         Object.values(topStyles).forEach((ts) => {
@@ -282,7 +283,7 @@ export function sharedOrUnique(array: any) {
 
                     if (!styleShared.styles.some((sharedStyle) => JSON.stringify(sharedStyle) === styleKey)) {
 
-                        styleShared.styles.push(s);
+                        styleShared.styles.push({element: i.name, style: s });
 
                     }
 
@@ -290,20 +291,130 @@ export function sharedOrUnique(array: any) {
 
                     // If no, add it to the allStyles object and the unique array
                     allStyles[styleKey] = s;
-                    if (!styleUnique.styles.some((sharedStyle) => JSON.stringify(sharedStyle) === styleKey)) {
+
+                    const existingUniqueStyleArea = styleUnique.styles.find(
+                        (uniqueStyleArea) => uniqueStyleArea.ts.name === ts.name
+                    );
+
+                    if (existingUniqueStyleArea) {
+
+                        existingUniqueStyleArea.ts.styles.push(s);
+
+                    } else {
                         styleUnique.styles.push(s);
                     }
 
                 }
             });
 
-            if (styleShared.styles && styleShared.styles.length > 0) { shared.push(styleShared) }
-            if (styleUnique.styles && styleUnique.styles.length > 0) { unique.push(styleUnique) }
+            if (styleShared.styles && styleShared.styles.length > 0) { item.styles.shared.push(styleShared) }
+            if (styleUnique.styles && styleUnique.styles.length > 0) { item.styles.unique.push(styleUnique) }
 
         });
 
+        response.push(item);
+
     })
 
-    return {shared, unique};
+    return response;
+
+}
+
+// Clean styles
+export function cleanStyles(array: any) {
+
+    let response: any = { shared: null, unique: [] };
+
+    const allStrings    = [];
+    const allShared     = [];
+    const stylesArray   = styleAreas;
+
+    // Add unique items
+    array.forEach(i => {
+
+        let item: any | null = { name: i.name, styles: [] }
+
+        const unique = i.styles.unique;
+
+        // Loop thru unique if available and add styles to the response.unique array
+        if (unique && unique.length > 0) { unique.forEach(u => { item.styles.push(u) }) };
+
+        // Check item
+        item.styles && item.styles.length > 0 ? item.styles = item.styles : item = null;
+
+        // Add to response
+        response.unique.push(item);
+
+    })
+
+    // Sort and clean shared items
+    stylesArray.forEach(s => {
+
+        const inArray   = [];
+        const allArray  = [];
+
+        console.log(s);
+        console.log('-----------');
+
+        array.forEach(i => {
+
+            const shared        = i.styles.shared;
+            const stylesInArea  = shared.filter(a => a.name === s);
+
+            let item: any | null = { name: i.name, styles: [], styleArea: '' }
+
+            if (stylesInArea && stylesInArea.length > 0) { 
+                
+                stylesInArea.forEach(s2 => {
+
+                    if (s2.styles && s2.styles.length > 0) {
+
+                        s2.styles.forEach(s3 => {
+
+                            item.styles.push(s3.style);
+                            item.styleArea = s2.name;
+
+                            inArray.push(item);
+
+                        })
+
+                    }
+                
+                }) 
+            
+            }
+
+        })
+
+        if (inArray && inArray.length > 0) {
+
+            inArray.forEach(i => {
+
+                const getStyle = JSON.stringify(i.styles);
+
+                console.log(getStyle);
+
+                if (!allArray[getStyle]) {
+
+                    allArray.push(getStyle);
+                    allShared.push(i);
+
+                }
+
+            })
+
+        }
+
+    })
+
+    // Clean array
+    const newArray = response.unique.filter(a => a !== null);
+    response.unique = newArray;
+
+    console.log(response);
+
+    if (allShared && allShared.length > 0) { response.shared = allShared };
+
+    return response;
 
 }
