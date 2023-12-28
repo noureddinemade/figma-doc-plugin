@@ -1,10 +1,10 @@
 // Imports
 import { styleAreas, styles } from "../arrays";
-import { DropShadow, Item, Style } from "../classes";
+import { DropShadow, Item } from "../classes";
 import { cleanName, convertColour, isArray } from "./general";
 
 // Define hierarchy
-export function defineHierarchy(i: any, level: any) {
+function defineHierarchy(i: any, level: any) {
 
     if (i.parent && i.parent.type !== 'PAGE') {
 
@@ -19,7 +19,7 @@ export function defineHierarchy(i: any, level: any) {
 }
 
 // Get a token
-export function getToken(id: any) {
+function getToken(id: any) {
 
     let string;
 
@@ -39,7 +39,7 @@ export function getToken(id: any) {
 }
 
 // Get a value
-export function getValue(i: any) {
+function getValue(i: any) {
 
     let response;
 
@@ -59,7 +59,7 @@ export function getValue(i: any) {
 }
 
 // Is there a text style?
-export function hasText(i: any) {
+function hasText(i: any) {
 
     let response;
 
@@ -82,7 +82,7 @@ export function hasText(i: any) {
 }
 
 // Check name
-export function checkName(p: any, i: any) {
+function checkName(p: any, i: any) {
 
     let response = p;
 
@@ -99,7 +99,7 @@ export function checkName(p: any, i: any) {
 }
 
 // Is it a fill or stroke?
-export function getValueType(p: any, i: any) {
+function getValueType(p: any, i: any) {
 
     let response;
 
@@ -111,7 +111,7 @@ export function getValueType(p: any, i: any) {
 }
 
 // Check if a property exists
-export function checkProperty(p: any, i: any, t: any) {
+function checkProperty(p: any, i: any, t: any) {
 
     let response;
     
@@ -158,32 +158,24 @@ export function checkProperty(p: any, i: any, t: any) {
 }
 
 // Get fill values
-export function getStyles(array: any, i: any) {
+function getStyles(array: any, i: any, cat: any) {
 
     let response: any = [];
 
     // Loop thru layout properties
     array.forEach(p => {
         
-        const token = checkProperty(p, i, 'token');
-        const value = checkProperty(p, i, 'value');
-        const name  = checkName(p, i);
+        const token     = checkProperty(p, i, 'token');
+        const value     = checkProperty(p, i, 'value');
+        const name      = checkName(p, i);
+        const parent    = i.parent.type === 'PAGE' ? null : i.parent.name
 
         if (value || token) {
 
-            const prop = new Item(value, token, name);
+            const prop = {name: i.name, parent: parent, style: new Item(value, token, name, cat)};
 
-            if (!Array.isArray(value)) {
-
-                response.push(prop);
-
-            }
-
-            else {
-
-                response = null;
-
-            }
+            if (!Array.isArray(value)) { response.push(prop) }
+            else { response = null }
 
         }
 
@@ -192,6 +184,30 @@ export function getStyles(array: any, i: any) {
     return response;
 
 }
+
+// Match item
+function matchItem(i: any, array: any) {
+
+    const c1 = array.filter(a => a.name === i.name);
+    const c2 = c1.filter(a => a.style.name === i.style.name);
+
+    return isArray(c2) ? true : false
+
+}
+
+// Match styles
+function matchStyle(i: any, base: any) {
+
+    const c1 = base.filter(a => a.style.category === i.style.category);
+    const c2 = c1.filter(a => a.style.name === i.style.name);
+    const c3 = c2.filter(a => a.style.value === i.style.value);
+    const c4 = c2.filter(a => a.style.token === i.style.token);
+
+    return isArray(c3) || isArray(c4) ? true : false;
+
+}
+
+//
 
 // Get properties of an item
 export function getAllStyles(item: any) {
@@ -202,50 +218,41 @@ export function getAllStyles(item: any) {
 
         response = [];
 
-        // Define arrays
-
-        const array = ['general', 'layout', 'fills', 'strokes', 'effects', 'text'];
-
         // Loop thru style arrays
-        array.forEach(a => {
+        styleAreas.forEach(a => {
 
-            const propArray = getStyles(styles[a], item);
+            const propArray = getStyles(styles[a], item, a);
 
             let result: any | null = null;
 
-            if (propArray && propArray.length > 0) {
-
-                result = [];
-                result.push(propArray);
-                response.push(new Style(a, result));
-
-            };
+            if (isArray(propArray)) { propArray.forEach(p => response.push(p) ) };
 
         })
 
     }
 
-    response && response.length > 0 ? response = response : response = null;
+    isArray(response) ? response = response : response = null;
 
     return response;
 
 }
 
 // Get the children of an item
-export function getChildren(i: any, name: any) {
+export function getChildren(i: any, parent: any) {
 
     let response: any[] | null = null;
 
     // Check if there are any children
-    if (i.children && i.children.length > 0) {
+    if (isArray(i.children)) {
 
         // Set the response to be an array
         response = [];
 
         // Get all children
-        const array = name ? i.findAll(n => n.name === name) : i.findAll();
+        let array = parent ? i.findAll(n => n.name !== parent) : i.findAll();
+            array = parent ? array.filter(n => n.parent !== parent) : array;
 
-        if (array && array.length > 0) { array.forEach(c => response?.push(c) )}
+        if (isArray(array)) { array.forEach(c => { response?.push(c) }) }
 
     }
 
@@ -254,167 +261,98 @@ export function getChildren(i: any, name: any) {
 }
 
 // Get shared and unique styles
-export function sharedOrUnique(array: any) {
+export function getSharedAndUnique(item: any, base: any) {
 
-    const allStyles         = {};
-    
-    let response : any | null = [];
-      
-    // Loop through each object in componentStyles
-    array.forEach(i => {
+    // Set up
+    let response: any | null  = null;
 
-        const topStyles = i.top;
-        const item      = { name: i.name, styles: { shared: [], unique: [] } }
-    
-        // Loop through style areas in the 'top' property
-        Object.values(topStyles).forEach((ts) => {
+    if (isArray(item)) {
 
-            const styles        = ts.styles;
-            const styleShared   = { name: ts.name, styles:[] };
-            const styleUnique   = { name: ts.name, styles:[] };
-    
-            // Loop through styles in the current style area
-            styles.forEach((s) => {
+        response = { shared: [], unique: [] };
 
-                const styleKey = JSON.stringify(s);
-        
-                // Check if the style is already in allStyles
-                if (allStyles[styleKey]) {
+        item.forEach(i => matchStyle(i, base) ? response.shared.push(i) : response.unique.push(i) );
 
-                    if (!styleShared.styles.some((sharedStyle) => JSON.stringify(sharedStyle) === styleKey)) {
+    }
 
-                        styleShared.styles.push({element: i.name, style: s });
-
-                    }
-
-                } else {
-
-                    // If no, add it to the allStyles object and the unique array
-                    allStyles[styleKey] = s;
-
-                    const existingUniqueStyleArea = styleUnique.styles.find(
-                        (uniqueStyleArea) => uniqueStyleArea.ts.name === ts.name
-                    );
-
-                    if (existingUniqueStyleArea) {
-
-                        existingUniqueStyleArea.ts.styles.push(s);
-
-                    } else {
-                        styleUnique.styles.push(s);
-                    }
-
-                }
-            });
-
-            if (styleShared.styles && styleShared.styles.length > 0) { item.styles.shared.push(styleShared) }
-            if (styleUnique.styles && styleUnique.styles.length > 0) { item.styles.unique.push(styleUnique) }
-
-        });
-
-        response.push(item);
-
-    })
-
+    // Return response
     return response;
 
 }
 
-// Clean styles
-export function cleanStyles(array: any) {
+// Remove duplicate styles
+export function removeDuplicates(array: any) {
 
-    let response: any = { shared: null, unique: [] };
+    // Set up response
+    let response:   any | null = null;
+    let tempArray:  any | null = null;
 
-    const allStrings    = [];
-    const allShared     = [];
-    const stylesArray   = styleAreas;
+    // Loop thru array
+    if (isArray(array)) {
 
-    // Add unique items
-    array.forEach(i => {
+        response    = [];
+        tempArray   = []; 
 
-        let item: any | null = { name: i.name, styles: [] }
+        // Add contents of array into response
+        array.forEach(item => { if (isArray(item)) { item.forEach(i => tempArray.push(i)) } });
 
-        const unique = i.styles.unique;
+        // Clean up duplicates
+        if (isArray(tempArray)) {
 
-        // Loop thru unique if available and add styles to the response.unique array
-        if (unique && unique.length > 0) { unique.forEach(u => { item.styles.push(u) }) };
+            tempArray.forEach(i => {
 
-        // Check item
-        item.styles && item.styles.length > 0 ? item.styles = item.styles : item = null;
+                let matched = response.filter(a => a.style.name === i.style.name);
 
-        // Add to response
-        response.unique.push(item);
-
-    })
-
-    // Sort and clean shared items
-    stylesArray.forEach(s => {
-
-        const inArray   = [];
-        const allArray  = [];
-
-        console.log(s);
-        console.log('-----------');
-
-        array.forEach(i => {
-
-            const shared        = i.styles.shared;
-            const stylesInArea  = shared.filter(a => a.name === s);
-
-            let item: any | null = { name: i.name, styles: [], styleArea: '' }
-
-            if (stylesInArea && stylesInArea.length > 0) { 
-                
-                stylesInArea.forEach(s2 => {
-
-                    if (s2.styles && s2.styles.length > 0) {
-
-                        s2.styles.forEach(s3 => {
-
-                            item.styles.push(s3.style);
-                            item.styleArea = s2.name;
-
-                            inArray.push(item);
-
-                        })
-
-                    }
-                
-                }) 
-            
-            }
-
-        })
-
-        if (inArray && inArray.length > 0) {
-
-            inArray.forEach(i => {
-
-                const getStyle = JSON.stringify(i.styles);
-
-                console.log(getStyle);
-
-                if (!allArray[getStyle]) {
-
-                    allArray.push(getStyle);
-                    allShared.push(i);
-
-                }
+                if (!isArray(matched)) { response.push(i) };
 
             })
 
         }
+        
 
-    })
+    }
 
-    // Clean array
-    const newArray = response.unique.filter(a => a !== null);
-    response.unique = newArray;
+    // Return response
+    return response;
 
-    console.log(response);
+}
 
-    if (allShared && allShared.length > 0) { response.shared = allShared };
+// Clean all styles
+export function cleanAllStyles(array:any, dependencies: any) {
+    
+    // Set up response
+    let response:   any | null = null;
 
+    if (isArray(array)) {
+
+        response = [];
+
+        array.forEach(item => {
+
+            if (isArray(item)) {
+
+                item.forEach(i => {
+
+                    if (!isArray(dependencies.filter(a => a.name === i.name))) {
+
+                        if (!isArray(dependencies.filter(a => a.name === i.parent))) {
+
+                            const match = matchItem(i, response);
+
+                            if (!match) { response.push(i) }
+
+                        }
+
+                    }
+                    
+                });
+
+            }
+
+        })
+
+    }
+
+    // Return response
     return response;
 
 }

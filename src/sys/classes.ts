@@ -6,7 +6,8 @@ export class Component {
         public id:              any,
         public documentation:   any | null,
         public properties:      any | null,
-        public styles:          any | null
+        public styles:          any | null,
+        public dependencies:    any | null
         
     ) {}
 
@@ -39,24 +40,14 @@ export class Child {
 
 }
 
-export class Style {
-
-    constructor (
-
-        public name:            any,
-        public styles:          any
-
-    ) {}
-
-}
-
 export class Item {
 
     constructor (
 
-        public value: any,
-        public token: any,
-        public name: any
+        public value:       any,
+        public token:       any,
+        public name:        any,
+        public category:    any
     
     ) {}
 

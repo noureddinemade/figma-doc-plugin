@@ -1,7 +1,8 @@
 export const styles = {
 
-    general:    ['opacity', 'visible'],
-    layout:     ['width', 'minWidth', 'maxWidth', 'height', 'minHeight', 'maxHeight', 'itemSpacing', 'topRightRadius'],
+    general:    ['opacity', 'visible', 'topRightRadius'],
+    layout:     ['width', 'minWidth', 'maxWidth', 'height', 'minHeight', 'maxHeight', 'layoutMode', 'primaryAxisAlignItems', 'counterAxisAlignItems'],
+    spacing:    ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'itemSpacing'],
     fills:      ['fills'],
     strokes:    ['strokes'],
     effects:    ['effects'],
@@ -9,4 +10,4 @@ export const styles = {
 
 }
 
-export const styleAreas = ['general', 'layout', 'fills', 'strokes', 'effects', 'text'];
+export const styleAreas = Object.keys(styles);

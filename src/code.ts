@@ -1,8 +1,8 @@
 // Import classes
 import { Component, Property, Visual, Frame } from "./sys/classes";
-import { cleanName, sortArray } from "./sys/functions/general";
+import { cleanName, isArray, sortArray } from "./sys/functions/general";
 import { createText, createFrame, createSection } from "./sys/functions/create";
-import { getAllStyles, sharedOrUnique, getChildren, cleanStyles } from "./sys/functions/document";
+import { cleanAllStyles, getAllStyles, getChildren, getSharedAndUnique, removeDuplicates } from "./sys/functions/document";
 import { baseStroke, baseFill, baseToken, baseFrame, innerFrame, propFill, propToken, propFrame, valueFill, valueToken, valueFrame, compHead, sectHead, regCopy, propText, propValue, compFrame, itemFrame, innerFrameAlt } from "./sys/styles";
 
 // Set base constructs
@@ -11,7 +11,7 @@ const toDocument:       any[]       = [];
 const doNotDocument:    any[]       = [];
 
 // Check if a user has selected anything
-if (cs && cs.length > 0) {
+if (isArray(cs)) {
 
     try {
         
@@ -28,17 +28,21 @@ if (cs && cs.length > 0) {
                 // Set up component props
                 const compName              = cleanName(e.name, null);
                 const compID                = e.id;
-                const compURL               = e.documentationLinks && e.documentationLinks.length > 0 ? e.documentationLinks[0].uri : null;
+                const compURL               = isArray(e.documentationLinks) ? e.documentationLinks[0].uri : null;
                 const compDesc              = e.description ? e.description : null;
                 const compDocs              = { description: compDesc, link: compURL };
-                const compProps:    any     = [];
-                const compStyles:   any     = { shared: null, individual: null };
                 const compChildren          = e.children ? getChildren(e, null) : null;
-
+                const compInstances         = [];
+                
                 // Set up base
                 const baseComp              = e.children.find((a) => a.type === 'COMPONENT');
                 const baseInstance          = baseComp ? baseComp.createInstance() : null;
-                const styles:       any     = [];
+                
+
+                // Set up dynamics
+                let compProps:              any | null = [];
+                let compStyles:             any | null = { shared: { top: null, all: null }, unique: { top: null, all: null } };
+                let compDependencies:       any | null = [];
 
                 // Get properties and styles for component
                 if (e.componentPropertyDefinitions && baseComp) {
@@ -53,10 +57,13 @@ if (cs && cs.length > 0) {
                         const defaultName = p.key;
                         
                         let name:           any | null      = p.key.split('#');
-                            name                            = name && name.length > 0 ? cleanName(name[0], null) : null;
-                        let type:           any | null      = p.type;
+                            name                            = isArray(name) ? cleanName(name[0], null) : null;
+                        let type:           any | null      = p.type === 'INSTANCE_SWAP' ? 'DEPENDENCY' : p.type;
                         let value:          any | null      = p.defaultValue;
                         let options:        any | null      = [];
+
+                        // Check if there are dependencies
+                        if (type === 'DEPENDENCY') { compDependencies.push(figma.getNodeById(value)) };
 
                         // Fix the type and options if it's a variant boolean
                         if ((value === 'true' || value === 'false') || (value === true || value === false)) {
@@ -67,18 +74,12 @@ if (cs && cs.length > 0) {
 
                         }
 
-                        // Set conditions
-                        const c1 = p.variantOptions && p.variantOptions.length > 0;
-                        const c2 = options && options.length > 0;
-
                         // Loop thru variants options if available and add them to properties
-                        if (c1 || c2) { if (c1) { p.variantOptions.forEach(o => options.push(o) ) } } 
+                        if (isArray(p.variantOptions) || isArray(options)) { if (isArray(p.variantOptions)) { p.variantOptions.forEach(o => options.push(o) ) } } 
                         else { options = null }
 
-                        // Get styles from variants
-                        if (options && options.length > 0) {
-                            
-                            // Loop thru variant options
+                        if (isArray(options)) {
+
                             options.forEach(o => {
 
                                 // Create instance for each size
@@ -88,22 +89,12 @@ if (cs && cs.length > 0) {
                                 instance.setProperties({[defaultName]: o});
                                 instance.name = `${name}=${o}`;
 
-                                // Get styles from each size
-                                const topStyles         = getAllStyles(instance);
-                                const instanceChildren  = getChildren(instance, null);
-                                const allStyles         = [];
-                            
-                                instanceChildren?.forEach(c => allStyles.push(getAllStyles(c)));
-
-                                // Add to array to clean and sort
-                                styles.push({name: `${name}=${o}`, top: topStyles, all: allStyles});
-
-                                // Remove instance once it has outlived it's purpose
-                                instance.remove();
+                                // Push to compInstances array
+                                compInstances.push(instance);
 
                             })
 
-                        } 
+                        }
                         
                         else {
 
@@ -113,43 +104,91 @@ if (cs && cs.length > 0) {
                             // Customise each instance
                             instance.name = `${name}`;
 
-                            // Get styles from each size
-                            const topStyles         = getAllStyles(instance);
-                            const instanceChildren  = getChildren(instance, null);
-                            const allStyles         = [];
-                            
-                            instanceChildren?.forEach(c => allStyles.push(getAllStyles(c)));
-
-                            // Add to array to clean and sort
-                            styles.push({name: name, top: topStyles, all: allStyles});
-
-                            // Remove instance once it has outlived it's purpose
-                            instance.remove();
+                            // Push to compInstances array
+                            compInstances.push(instance);
 
                         }
 
                         // Create property and style objects
                         const property  = new Property(name, type, value, options);
-                        const style     = {shared: null, individual: []};
 
                         // Add property and style objects to the component
                         compProps.push(property);
-
-                        compStyles.individual   = style.individual;
-                        compStyles.shared       = style.shared;
 
                     })
 
 
                 }
 
-                // Get unique and shared styles
+                // Sort styles into uniue and shared
+                if (isArray(compInstances)){
 
-                // Clean and sort styles
-                const sharedAndUnique   = sharedOrUnique(styles);
-                const cleanedStyles     = cleanStyles(sharedAndUnique);
+                    // Set up
+                    let styles:         any | null  = { shared: { top: [], all: [] }, unique: { top: [], all: [] } };
+                    let shared                      = styles.shared ? styles.shared : null;
+                    let unique                      = styles.unique ? styles.unique : null;
 
-                // console.log(cleanedStyles);
+                    // Get dependencies list
+                    const dependencies = compProps.filter(a => a.type === 'DEPENDENCY');
+
+                    const baseChildren  = getChildren(baseComp, null);
+                    const baseStyles    = getAllStyles(baseComp);
+
+                    // Sort instances by alphabetical order
+                    sortArray(compInstances, 'name');
+
+                    // Loop thru instances
+                    compInstances.forEach(i => {
+
+                        const anyDependencies = dependencies.filter(a => a.name === i.name);
+
+                        if (!isArray(anyDependencies)) {
+
+                            // Set up
+                            const instChildren  = getChildren(i, null);
+                            const instStyles    = getAllStyles(i);
+
+                            // Compare instance frame styles with base frame styles
+                            const topStyles = getSharedAndUnique(instStyles, baseStyles)
+
+                            // Add styles to 
+                            shared.top.push(topStyles.shared);
+                            unique.top.push(topStyles.unique);
+
+                            // Compare instance children styles with base children styles
+                            if (isArray(instChildren)) {
+
+                                instChildren?.forEach(c => {
+
+                                    let baseChild               = baseChildren.filter(a => a.name === c.name);
+                                    let baseChildStyle          = getAllStyles(baseChild[0]);
+                                    let childStyle              = getAllStyles(c);
+                                    let childSharedAndUnique    = getSharedAndUnique(childStyle, baseChildStyle);
+
+                                    // childSharedAndUnique.shared = removeDuplicates(childSharedAndUnique.shared);
+
+                                    shared.all.push(childSharedAndUnique.shared);
+                                    unique.all.push(childSharedAndUnique.unique);
+
+                                })
+
+
+                            }
+                            
+                            // Remove instance once it has outlived its' purpose
+                            i.remove();
+
+                        }
+
+                    })
+
+                    // Clean styles and add to compStyles
+                    if (isArray(shared.top)) { compStyles.shared.top = (removeDuplicates(shared.top)) };
+                    if (isArray(shared.all)) { compStyles.shared.all = (cleanAllStyles(shared.all, dependencies)) };
+                    if (isArray(unique.top)) { compStyles.unique.top = (unique.top.filter(item => item.length > 0 )) };
+                    if (isArray(unique.all)) { compStyles.unique.all = (unique.all.filter(item => item.length > 0 )) };
+                    
+                }
 
                 // Sort component properties by type
                 sortArray(compProps, 'type');
@@ -158,7 +197,7 @@ if (cs && cs.length > 0) {
                 if (baseInstance) { baseInstance.remove() }
 
                 // Create raw component object
-                const rawComponent = new Component(compName, compID, compDocs, compProps, compStyles);
+                const rawComponent = new Component(compName, compID, compDocs, compProps, compStyles, compDependencies);
                 
                 toDocument.push(rawComponent);
 
@@ -168,6 +207,7 @@ if (cs && cs.length > 0) {
 
         });
 
+        console.log(toDocument);
         console.log('--------------');
         console.log('Finished prepping components for documentating:', toDocument);
 
