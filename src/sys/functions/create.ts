@@ -1,5 +1,6 @@
 // Imports
-import { convertColour, setSides  } from "./general";
+import { sectionFrame, sectionTitle } from "../styles";
+import { isArray  } from "./general";
 
 // Create Figma text
 export function createText(string: string, p: any, label: string) {
@@ -22,104 +23,49 @@ export function createText(string: string, p: any, label: string) {
 }
 
 // Create Figma frame
-export function createFrame(p: any, name: string) {
+export function create(name: string, props: any, text: any, type: any) {
 
-    // Create frame
-    const frameNode = figma.createFrame();
+    // Setup response
+    let response;
 
-    // Set base properties
-    frameNode.primaryAxisSizingMode     = 'AUTO';
-    frameNode.counterAxisSizingMode     = 'AUTO';
+    // Create based on type
+    if (type === 'frame')   { response = figma.createFrame(); }
+    if (type === 'text')    { response = figma.createText();  }
 
-    // Set dynamic properties
-    frameNode.layoutMode                = p.direction;
-    frameNode.itemSpacing               = p.gap;
-    frameNode.name                      = name;
-    frameNode.cornerRadius              = p.radius;
+    // Assign name
+    response.name = name;
 
-    // Set alignment
-    let align;
+    // Check if there are any props and then loop thru them and assign them to the frame
+    if (isArray(props)) {
 
-    p.align ? align = p.align : align = {p:'MIN', s:'MIN'};
+        props.forEach(p => {
 
-    frameNode.primaryAxisAlignItems     = align.p;
-    frameNode.counterAxisAlignItems     = align.s;
+            if (isArray(p)) { p.forEach(i => response[i.key] = i.value ) }
+            else { response[p.key] = p.value }
 
-    // Set sizes
-    let size;
-
-    p.size ? size = p.size : size = { minWidth: null, maxWidth: null, minHeight: null, maxHeight: null }
-
-    frameNode.minWidth                  = size.minWidth;
-    frameNode.maxWidth                  = size.maxWidth;
-    frameNode.minHeight                 = size.minHeight;
-    frameNode.maxHeight                 = size.maxHeight;
-
-    // Set padding
-    setSides('padding',frameNode,p.padding);
-
-    // Set dynamic styling
-
-    // Check if there is a style token
-    if (p.token) {
-
-        // Is there a fill token? Ok apply it!
-        if (p.token.fill) { 
-            
-            if (p.token.fill.value !== null) { frameNode.fills = [{ type: 'SOLID', color: convertColour(p.token.fill.value) }] }
-            else { frameNode.fills = [] }
-        
-        } else { frameNode.fills = [] }
-
-        // Is there a stroke token? Ok apply it!
-        if (p.token.stroke) {
-
-            if (p.token.stroke.value !== null) {
-
-                frameNode.strokes = [{ type: 'SOLID', color: convertColour(p.token.stroke.fill.value) }];     // Set stroke fill
-
-            } else { frameNode.strokes = [] }
-
-            if (p.token.stroke.dash !== null) {
-
-                frameNode.dashPattern = p.token.stroke.dash;                                                  // Set stroke dash
-
-            }
-
-            if (p.token.stroke.weight !== null) {
-
-                setSides('stroke', frameNode, p.token.stroke.weight);                                         // Set stroke weight
-
-            }
-
-        } else { frameNode.strokes = [] }
+        })
 
     }
 
-    else {
+    // Add text if needed
+    if (type === 'text' && text) { response.characters = text };
 
-        frameNode.fills     = [];
-        frameNode.strokes   = [];
-
-    }
-
-    return frameNode;
+    // Return frame
+    return response;
 
 }
 
 // Create Section
-export function createSection(name: string, frame: any, text: any) {
+export function createSection(text: string) {
 
-    // Create section frame
-    const sectionFrame = createFrame(frame, `component-${name}`);
-
-    // Create section heading
-    const sectionHeading = createText(name, text, 'section-heading');
+    // Create section frame and heading
+    const frame = create(`section: ${text}`, sectionFrame, null, 'frame');
+    const title = create('section-title', sectionTitle, text, 'text');
 
     // Append heading and set to fill
-    sectionFrame.appendChild(sectionHeading);
-    sectionHeading.layoutSizingHorizontal = 'FILL';
+    frame.appendChild(title);
+    title.layoutSizingHorizontal = 'FILL';
 
-    return sectionFrame;
+    return frame;
 
 }

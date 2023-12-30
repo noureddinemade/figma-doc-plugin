@@ -21,7 +21,7 @@ function defineHierarchy(i: any, level: any) {
 // Get a token
 function getToken(id: any) {
 
-    let string;
+    let string: any | null = null;
 
     if (id) {
 
@@ -32,52 +32,45 @@ function getToken(id: any) {
 
     }
 
-    else { string = null; }
-
     return cleanName(string, null);
 
 }
 
-// Get a value
-function getValue(i: any) {
+// Get a style
+function getStyle(id: any) {
 
-    let response;
+    let string: any | null = null;
 
-    const value     = i[0];
-    const hex       = convertColour([value.color.r, value.color.g, value.color.b]);
-
-    if (value.type === 'SOLID') { response = hex }
-
-    if (value.type === 'DROP_SHADOW') {
-
-        response = new DropShadow(hex, value.offset, value.radius, value.spread, Math.round(value.color.a * 10) / 10);
+    if (id) { 
+        
+        string = figma.getStyleById(id);
+        string = cleanName(string.name, null);
 
     }
 
-    return response;
+    return string;
 
 }
 
-// Is there a text style?
-function hasText(i: any) {
+// Get a value
+function getValue(value: any) {
 
-    let response;
+    // Set up response
+    let response : any | null = null;
 
-    if (i.type === 'TEXT') {
+    const hex   = value.color ? convertColour([value.color.r, value.color.g, value.color.b]) : null;
+    const alpha = value.color && value.color.a ? Math.round(value.color.a * 10) / 10 : null;
 
-        let text = i.getRangeTextStyleId(0, i.characters.length);
+    response = {
 
-        text !== null ? response = getToken(text, 'text') : response = null;
-
-    }
-
-    else {
-
-        response = null;
+        SOLID: hex,
+        DROP_SHADOW: new DropShadow(hex, value.offset, value.radius, value.spread, alpha),
+        LAYER_BLUR: { blur: value.blur }
 
     }
 
-    return response;
+    // Return response
+    return response[value.type];
 
 }
 
@@ -86,74 +79,91 @@ function checkName(p: any, i: any) {
 
     let response = p;
 
-    if (p === 'itemSpacing')        { response = 'gap' }
-    if (p === 'topRightRadius')     { response = 'radius' }
-    if (p === 'strokes')            { response = 'border' }
-
-    // Check type then adjust name
-    if (i.type === 'TEXT') { if (p === 'fills') { response = 'color' } }
-    else { if (p === 'fills') { response = 'backgroundColor' } }
-
-    return response;
-
-}
-
-// Is it a fill or stroke?
-function getValueType(p: any, i: any) {
-
-    let response;
-
-    if (Array.isArray(i[p]) && i[p].length > 0) { response = true }
-    else { response = false }
+    if (p === 'itemSpacing')                { response = 'gap'              };
+    if (p === 'topRightRadius')             { response = 'radius'           };
+    if (p === 'strokes')                    { response = 'borderColor'      };
+    if (p === 'fills')                      { response = 'backgroundColor'  };
+    if (i.type === 'text' && p === 'fills') { response = 'color'            };
 
     return response;
 
 }
 
 // Check if a property exists
-function checkProperty(p: any, i: any, t: any) {
+function checkProperty(p: any, i: any, type: type) {
 
-    let response;
-    
+    // Set up response
+    let token       : any | null = null;
+    let value       : any | null = null;
+    let text        : any | null = null;
+    let effect      : any | null = null;
+    let response    : any | null = null;
+
+    if (type === 'token')                       { token     = i.boundVariables[p]                       }
+    if (type === 'value')                       { value     = i[p]                                      }
+    if (type === 'text' && i.type === 'TEXT')   { text      = i.getStyledTextSegments(['textStyleId'])  }
+    if (type === 'effect' && i.effects)         { effect    = i.effectStyleId                           }
+
     // Get token if it exists
-    if (t === 'token') {
+    if (token) {
 
-        const tokens = i.boundVariables;
+        // Check if there are multiple tokens
+        if (token.length === 1) { response = getToken(token[0].id) }
 
-        if (tokens[p]) {
+        else if (token.length > 1) {
 
-            // Check if fill or stroke
-            if (getValueType(p, tokens)) { response = getToken(tokens[p][0].id) }
-            else { response = getToken(tokens[p].id) }
+            const multiple = [];
 
-        } else { response = null }
+            token.forEach(t => multiple.push(getToken(t.id)))
+
+            response = multiple;
+
+        }
+
+        else { response = getToken(token.id) }
 
     }
 
     // Get value if it exists
-    if (t === 'value') {
+    if (value) {
 
-        if (i[p]) {
+        const valueArray = Array.isArray(value);
 
-            // Check if fill or stroke
-            if (getValueType(p, i)) { response = getValue(i[p])}
-            else { response = i[p] }
+        // Check if there are multiple values
+        if (valueArray && value.length === 1) { response = getValue(value[0]) }
+        else if (valueArray && value.length > 1) {
 
-        } else { response = null}
+            const multiple = [];
+
+            value.forEach(v => multiple.push(getValue(v)))
+
+            response = multiple;
+
+        }
+        else { response = value }
 
     }
 
-    // Get style if it exists
-    // if (t === 'style') {
+    // Get text style if it exists
+    if (text) {
 
-    //     if (i[p])
+        // Check if there are multiple values
+        if (text.length === 1) { response = getStyle(text[0].textStyleId) }
+        else if (text.length > 1) {
 
-    // }
+            const multiple = [];
 
-    // 
+            text.forEach(t => multiple.push(getStyle(t.textStyleId)))
 
+            response = multiple;
+
+        }
+        else { response = null }
+
+    }
+
+    // Return response
     return response;
-
 
 }
 
@@ -164,18 +174,28 @@ function getStyles(array: any, i: any, cat: any) {
 
     // Loop thru layout properties
     array.forEach(p => {
-        
-        const token     = checkProperty(p, i, 'token');
-        const value     = checkProperty(p, i, 'value');
-        const name      = checkName(p, i);
-        const parent    = i.parent.type === 'PAGE' ? null : i.parent.name
 
-        if (value || token) {
+        if (i[p]) {
 
-            const prop = {name: i.name, parent: parent, style: new Item(value, token, name, cat)};
+            const name      = checkName(p, i);
+            const parent    = i.parent.type === 'PAGE' ? null : i.parent.name;
+            
+            let value       = checkProperty(p, i, 'value');
+                value       = value && value.length === 0 ? null : value;
+                value       = value && value.length === 1 ? value[0] : value;
+            let token       = checkProperty(p, i, 'token');
+                token       = token && token.length === 0 ? null : token;
+                token       = token && token.length === 1 ? token[0] : token;
+            let text        = cat === 'text' ? checkProperty(p, i, 'text') : null;
+                text        = text && text.length === 0 ? null : text;
+                text        = text && text.length === 1 ? text[0] : text;
+            let effect      = cat === 'effects' ? checkProperty(p, i, 'effect') : null;
+                effect      = effect && effect.length === 0 ? null : effect;
+                effect      = effect && effect.length === 1 ? text[0] : effect;
 
-            if (!Array.isArray(value)) { response.push(prop) }
-            else { response = null }
+            const prop = {name: i.name, parent: parent, style: new Item(value, token, text, effect, name, cat)};
+
+            response.push(prop);
 
         }
 
@@ -202,6 +222,8 @@ function matchStyle(i: any, base: any) {
     const c2 = c1.filter(a => a.style.name === i.style.name);
     const c3 = c2.filter(a => a.style.value === i.style.value);
     const c4 = c2.filter(a => a.style.token === i.style.token);
+    const c5 = c2.filter(a => a.style.text === i.style.text);
+    const c6 = c2.filter(a => a.style.effect === i.style.effect);
 
     return isArray(c3) || isArray(c4) ? true : false;
 
@@ -221,11 +243,50 @@ export function getAllStyles(item: any) {
         // Loop thru style arrays
         styleAreas.forEach(a => {
 
-            const propArray = getStyles(styles[a], item, a);
-
             let result: any | null = null;
 
-            if (isArray(propArray)) { propArray.forEach(p => response.push(p) ) };
+            const propArray = getStyles(styles[a], item, a);
+
+            if (isArray(propArray)) { 
+
+                propArray.forEach(p => {
+
+                    let s       = p.style;
+                    let result: any | null = null;
+
+                    if (s) {
+
+                        if (s.value || s.token || s.text || s.effect) {
+
+                            result = p;
+
+                        }
+
+                        // Fix stroke issue
+                        const c1 = propArray.filter(a => a.style.name === 'borderColor');
+                        const c2 = c1.filter(a => a.style.value === null);
+
+                        if (isArray(c2)) {
+
+                            c1.forEach(c => {
+
+                                if (p.name === c.name) {
+
+                                    result = null;
+
+                                }
+
+                            })
+
+                        }
+
+                    };
+
+                    if (result) { response.push(result); };
+                
+                });
+            
+            };
 
         })
 

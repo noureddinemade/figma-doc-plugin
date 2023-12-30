@@ -4,9 +4,9 @@ export const styles = {
     layout:     ['width', 'minWidth', 'maxWidth', 'height', 'minHeight', 'maxHeight', 'layoutMode', 'primaryAxisAlignItems', 'counterAxisAlignItems'],
     spacing:    ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'itemSpacing'],
     fills:      ['fills'],
-    strokes:    ['strokes'],
+    strokes:    ['strokes', 'strokeTopWeight', 'strokeRightWeight', 'strokeBottomWeight', 'strokeLeftWeight', 'strokeAlign', 'dashPattern'],
     effects:    ['effects'],
-    text:       ['fontName', 'fontSize', 'fontWeight', 'textAlignHorizontal', 'textAlignVertical', 'textAutoResize', 'textCase', 'textDecoration', 'textTruncation', 'lineHeight', 'letterSpacing'],
+    text:       ['fontName', 'fontSize', 'fontWeight', 'textAlignHorizontal', 'textAlignVertical', 'textAutoResize', 'textCase', 'textDecoration', 'textTruncation', 'lineHeight', 'letterSpacing', 'textStyleId'],
 
 }
 

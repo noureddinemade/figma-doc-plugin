@@ -1,9 +1,9 @@
 // Import classes
 import { Component, Property, Visual, Frame } from "./sys/classes";
-import { cleanName, isArray, sortArray } from "./sys/functions/general";
-import { createText, createFrame, createSection } from "./sys/functions/create";
+import { cleanName, isArray, sortArray, convertColour } from "./sys/functions/general";
+import { createText, createFrame, createSection, create } from "./sys/functions/create";
 import { cleanAllStyles, getAllStyles, getChildren, getSharedAndUnique, removeDuplicates } from "./sys/functions/document";
-import { baseStroke, baseFill, baseToken, baseFrame, innerFrame, propFill, propToken, propFrame, valueFill, valueToken, valueFrame, compHead, sectHead, regCopy, propText, propValue, compFrame, itemFrame, innerFrameAlt } from "./sys/styles";
+import { compFrame, compTitle, mainFrame, sectionCopy, sectionLink } from "./sys/styles";
 
 // Set base constructs
 const cs                            = figma.currentPage.selection;
@@ -37,7 +37,6 @@ if (isArray(cs)) {
                 // Set up base
                 const baseComp              = e.children.find((a) => a.type === 'COMPONENT');
                 const baseInstance          = baseComp ? baseComp.createInstance() : null;
-                
 
                 // Set up dynamics
                 let compProps:              any | null = [];
@@ -165,18 +164,13 @@ if (isArray(cs)) {
                                     let childStyle              = getAllStyles(c);
                                     let childSharedAndUnique    = getSharedAndUnique(childStyle, baseChildStyle);
 
-                                    // childSharedAndUnique.shared = removeDuplicates(childSharedAndUnique.shared);
-
-                                    shared.all.push(childSharedAndUnique.shared);
-                                    unique.all.push(childSharedAndUnique.unique);
+                                    if (childSharedAndUnique) { shared.all.push(childSharedAndUnique.shared) }
+                                    if (childSharedAndUnique) { unique.all.push(childSharedAndUnique.unique) }
 
                                 })
 
 
                             }
-                            
-                            // Remove instance once it has outlived its' purpose
-                            i.remove();
 
                         }
 
@@ -197,7 +191,7 @@ if (isArray(cs)) {
                 if (baseInstance) { baseInstance.remove() }
 
                 // Create raw component object
-                const rawComponent = new Component(compName, compID, compDocs, compProps, compStyles, compDependencies);
+                const rawComponent = new Component(compName, compID, compDocs, compProps, compStyles, compDependencies, compInstances);
                 
                 toDocument.push(rawComponent);
 
@@ -207,9 +201,68 @@ if (isArray(cs)) {
 
         });
 
-        console.log(toDocument);
         console.log('--------------');
         console.log('Finished prepping components for documentating:', toDocument);
+
+        // Loop thru toDocument array and start documenting
+        if (isArray(toDocument)) {
+
+            // Create main frame (lol)
+            const document = create('documentation', mainFrame, null, 'frame');
+
+            toDocument.forEach(i => {
+
+                // Set up
+                const compWrap  = create(`component: ${i.name}`, compFrame, null, 'frame');
+                const compHead  = create('component-title', compTitle, i.name, 'text');
+
+                // Append
+                compWrap.appendChild(compHead);
+
+                // Display documentation info and links if available
+                if (i.documentation) {
+
+                    // Create frame
+                    const compDocs = createSection('documentation');
+
+                    // Display info
+                    if (i.documentation.description) {
+
+                        const desc = create('component-description', sectionCopy, i.documentation.description, 'text');
+                        compDocs.appendChild(desc);
+
+                    }
+
+                    // Display link
+                    if (i.documentation.link) {
+
+                        const link = create('component-description', sectionLink, i.documentation.link, 'text');
+                        link.hyperlink = {type: 'URL', value: i.documentation.link};
+                        compDocs.appendChild(link);
+
+                    }
+
+                    // Display properties
+
+                    // Loop thru styles
+
+                    // Append
+                    compWrap.appendChild(compDocs);
+                    compDocs.layoutSizingHorizontal = 'FILL';
+
+                }
+
+                // Append
+                document.appendChild(compWrap);
+                compWrap.layoutSizingHorizontal = 'FILL';
+
+            })
+
+            // Go to documentation
+            figma.viewport.scrollAndZoomIntoView([document]);
+
+
+        } else { console.clear(); figma.closePlugin(`There's nothing to document!`); }
 
     }
 
@@ -222,7 +275,7 @@ if (isArray(cs)) {
     finally {
 
         // console.clear();
-        figma.closePlugin(`Wow, look at all that we've documented, we make a good team!`);
+        figma.closePlugin(`Wow, look at all that documentation!`);
 
     }
 

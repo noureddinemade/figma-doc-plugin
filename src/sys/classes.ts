@@ -7,7 +7,8 @@ export class Component {
         public documentation:   any | null,
         public properties:      any | null,
         public styles:          any | null,
-        public dependencies:    any | null
+        public dependencies:    any | null,
+        public instances:       any | null
         
     ) {}
 
@@ -46,6 +47,8 @@ export class Item {
 
         public value:       any,
         public token:       any,
+        public text:        any,
+        public effect:      any,
         public name:        any,
         public category:    any
     
@@ -129,7 +132,7 @@ export class Frame {
         public gap: any,
         public padding: any,
         public radius: any,
-        public token: any,
+        public style: any,
         public align: any,
         public size: any
 
