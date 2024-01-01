@@ -1,6 +1,6 @@
 // Imports
-import { styleAreas, styles } from "../arrays";
-import { DropShadow, Item } from "../classes";
+import { styleAreas, styles } from "../helpers/arrays";
+import { DropShadow, Item } from "../helpers/classes";
 import { cleanName, convertColour, isArray } from "./general";
 
 // Define hierarchy
@@ -25,8 +25,8 @@ function getToken(id: any) {
 
     if (id) {
 
-        const token         = figma.variables.getVariableById(id);
-        const collection    = figma.variables.getVariableCollectionById(token.variableCollectionId);        
+        const token:        any = figma.variables.getVariableById(id);
+        const collection:   any = figma.variables.getVariableCollectionById(token.variableCollectionId);        
     
         string = `${collection.name}/${token.name}`;
 
@@ -90,7 +90,7 @@ function checkName(p: any, i: any) {
 }
 
 // Check if a property exists
-function checkProperty(p: any, i: any, type: type) {
+function checkProperty(p: any, i: any, type: any) {
 
     // Set up response
     let token       : any | null = null;
@@ -112,9 +112,9 @@ function checkProperty(p: any, i: any, type: type) {
 
         else if (token.length > 1) {
 
-            const multiple = [];
+            const multiple: any[] = [];
 
-            token.forEach(t => multiple.push(getToken(t.id)))
+            token.forEach((t: { id: any; }) => multiple.push(getToken(t.id)))
 
             response = multiple;
 
@@ -133,9 +133,9 @@ function checkProperty(p: any, i: any, type: type) {
         if (valueArray && value.length === 1) { response = getValue(value[0]) }
         else if (valueArray && value.length > 1) {
 
-            const multiple = [];
+            const multiple: any[] = [];
 
-            value.forEach(v => multiple.push(getValue(v)))
+            value.forEach((v: any) => multiple.push(getValue(v)))
 
             response = multiple;
 
@@ -151,9 +151,9 @@ function checkProperty(p: any, i: any, type: type) {
         if (text.length === 1) { response = getStyle(text[0].textStyleId) }
         else if (text.length > 1) {
 
-            const multiple = [];
+            const multiple: any[] = [];
 
-            text.forEach(t => multiple.push(getStyle(t.textStyleId)))
+            text.forEach((t: { textStyleId: any; }) => multiple.push(getStyle(t.textStyleId)))
 
             response = multiple;
 
@@ -173,7 +173,7 @@ function getStyles(array: any, i: any, cat: any) {
     let response: any = [];
 
     // Loop thru layout properties
-    array.forEach(p => {
+    array.forEach((p: any) => {
 
         if (i[p]) {
 
@@ -208,8 +208,8 @@ function getStyles(array: any, i: any, cat: any) {
 // Match item
 function matchItem(i: any, array: any) {
 
-    const c1 = array.filter(a => a.name === i.name);
-    const c2 = c1.filter(a => a.style.name === i.style.name);
+    const c1 = array.filter((a: { name: any; }) => a.name === i.name);
+    const c2 = c1.filter((a: { style: { name: any; }; }) => a.style.name === i.style.name);
 
     return isArray(c2) ? true : false
 
@@ -218,14 +218,20 @@ function matchItem(i: any, array: any) {
 // Match styles
 function matchStyle(i: any, base: any) {
 
-    const c1 = base.filter(a => a.style.category === i.style.category);
-    const c2 = c1.filter(a => a.style.name === i.style.name);
-    const c3 = c2.filter(a => a.style.value === i.style.value);
-    const c4 = c2.filter(a => a.style.token === i.style.token);
-    const c5 = c2.filter(a => a.style.text === i.style.text);
-    const c6 = c2.filter(a => a.style.effect === i.style.effect);
+    if (i && base) {
 
-    return isArray(c3) || isArray(c4) ? true : false;
+        const c1 = base.filter((a: { style: { category: any; }; }) => a.style.category === i.style.category);
+        const c2 = c1.filter((a: { style: { name: any; }; }) => a.style.name === i.style.name);
+        const c3 = c2.filter((a: { style: { value: any; }; }) => a.style.value === i.style.value);
+        const c4 = c2.filter((a: { style: { token: any; }; }) => a.style.token === i.style.token);
+        const c5 = c2.filter((a: { style: { text: any; }; }) => a.style.text === i.style.text);
+        const c6 = c2.filter((a: { style: { effect: any; }; }) => a.style.effect === i.style.effect);
+
+        return isArray(c3) || isArray(c4) ? true : false;
+
+    }
+
+    else { return false; }
 
 }
 
@@ -249,7 +255,7 @@ export function getAllStyles(item: any) {
 
             if (isArray(propArray)) { 
 
-                propArray.forEach(p => {
+                propArray.forEach((p: { style: any; name: any; }) => {
 
                     let s       = p.style;
                     let result: any | null = null;
@@ -263,12 +269,12 @@ export function getAllStyles(item: any) {
                         }
 
                         // Fix stroke issue
-                        const c1 = propArray.filter(a => a.style.name === 'borderColor');
-                        const c2 = c1.filter(a => a.style.value === null);
+                        const c1 = propArray.filter((a: { style: { name: string; }; }) => a.style.name === 'borderColor');
+                        const c2 = c1.filter((a: { style: { value: null; }; }) => a.style.value === null);
 
                         if (isArray(c2)) {
 
-                            c1.forEach(c => {
+                            c1.forEach((c: { name: any; }) => {
 
                                 if (p.name === c.name) {
 
@@ -310,10 +316,10 @@ export function getChildren(i: any, parent: any) {
         response = [];
 
         // Get all children
-        let array = parent ? i.findAll(n => n.name !== parent) : i.findAll();
-            array = parent ? array.filter(n => n.parent !== parent) : array;
+        let array = parent ? i.findAll((n: { name: any; }) => n.name !== parent) : i.findAll();
+            array = parent ? array.filter((n: { parent: any; }) => n.parent !== parent) : array;
 
-        if (isArray(array)) { array.forEach(c => { response?.push(c) }) }
+        if (isArray(array)) { array.forEach((c: any) => { response?.push(c) }) }
 
     }
 
@@ -331,7 +337,7 @@ export function getSharedAndUnique(item: any, base: any) {
 
         response = { shared: [], unique: [] };
 
-        item.forEach(i => matchStyle(i, base) ? response.shared.push(i) : response.unique.push(i) );
+        item.forEach((i: any) => matchStyle(i, base) ? response.shared.push(i) : response.unique.push(i) );
 
     }
 
@@ -354,14 +360,14 @@ export function removeDuplicates(array: any) {
         tempArray   = []; 
 
         // Add contents of array into response
-        array.forEach(item => { if (isArray(item)) { item.forEach(i => tempArray.push(i)) } });
+        array.forEach((item: any[]) => { if (isArray(item)) { item.forEach((i: any) => tempArray.push(i)) } });
 
         // Clean up duplicates
         if (isArray(tempArray)) {
 
-            tempArray.forEach(i => {
+            tempArray.forEach((i: { style: { name: any; }; }) => {
 
-                let matched = response.filter(a => a.style.name === i.style.name);
+                let matched = response.filter((a: { style: { name: any; }; }) => a.style.name === i.style.name);
 
                 if (!isArray(matched)) { response.push(i) };
 
@@ -387,15 +393,15 @@ export function cleanAllStyles(array:any, dependencies: any) {
 
         response = [];
 
-        array.forEach(item => {
+        array.forEach((item: any[]) => {
 
             if (isArray(item)) {
 
-                item.forEach(i => {
+                item.forEach((i: { name: any; parent: any; }) => {
 
-                    if (!isArray(dependencies.filter(a => a.name === i.name))) {
+                    if (!isArray(dependencies.filter((a: { name: any; }) => a.name === i.name))) {
 
-                        if (!isArray(dependencies.filter(a => a.name === i.parent))) {
+                        if (!isArray(dependencies.filter((a: { name: any; }) => a.name === i.parent))) {
 
                             const match = matchItem(i, response);
 

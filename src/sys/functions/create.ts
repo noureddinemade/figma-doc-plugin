@@ -1,36 +1,17 @@
 // Imports
-import { sectionFrame, sectionTitle } from "../styles";
+import { sectionFrame, sectionTitle } from "../helpers/styles";
 import { isArray  } from "./general";
-
-// Create Figma text
-export function createText(string: string, p: any, label: string) {
-
-    // Create text
-    const textNode = figma.createText();
-
-    // Style text
-    textNode.fontName           = p.font;
-    textNode.textCase           = p.textCase;
-    textNode.textDecoration     = p.decoration;
-    textNode.fontSize           = p.size;
-    textNode.name               = label;
-
-    // Fill text
-    textNode.characters = string;
-
-    return textNode;
-
-}
 
 // Create Figma frame
 export function create(name: string, props: any, text: any, type: any) {
 
     // Setup response
-    let response;
+    let response: any | null;
 
     // Create based on type
-    if (type === 'frame')   { response = figma.createFrame(); }
-    if (type === 'text')    { response = figma.createText();  }
+    if (type === 'frame')   { response = figma.createFrame();   }
+    if (type === 'text')    { response = figma.createText();    }
+    if (type === 'vector')  { response = figma.createVector();  }
 
     // Assign name
     response.name = name;
@@ -38,9 +19,9 @@ export function create(name: string, props: any, text: any, type: any) {
     // Check if there are any props and then loop thru them and assign them to the frame
     if (isArray(props)) {
 
-        props.forEach(p => {
+        props.forEach((p: any) => {
 
-            if (isArray(p)) { p.forEach(i => response[i.key] = i.value ) }
+            if (isArray(p)) { p.forEach((i: { key: string | number; value: any; }) => response[i.key] = i.value ) }
             else { response[p.key] = p.value }
 
         })
@@ -59,8 +40,8 @@ export function create(name: string, props: any, text: any, type: any) {
 export function createSection(text: string) {
 
     // Create section frame and heading
-    const frame = create(`section: ${text}`, sectionFrame, null, 'frame');
-    const title = create('section-title', sectionTitle, text, 'text');
+    const frame: any = create(`section: ${text}`, sectionFrame, null, 'frame');
+    const title: any = create('section-title', sectionTitle, text, 'text');
 
     // Append heading and set to fill
     frame.appendChild(title);

@@ -8,7 +8,8 @@ export class Component {
         public properties:      any | null,
         public styles:          any | null,
         public dependencies:    any | null,
-        public instances:       any | null
+        public instances:       any | null,
+        public anatomy:         any | null
         
     ) {}
 
@@ -22,6 +23,7 @@ export class Property {
         public type:            string,
         public defaultValue:    string,
         public options:         any | null,
+        public defaultName:     any
 
     ) {}
 

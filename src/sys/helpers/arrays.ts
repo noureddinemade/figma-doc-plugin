@@ -1,4 +1,4 @@
-export const styles = {
+export const styles: any = {
 
     general:    ['opacity', 'visible', 'topRightRadius'],
     layout:     ['width', 'minWidth', 'maxWidth', 'height', 'minHeight', 'maxHeight', 'layoutMode', 'primaryAxisAlignItems', 'counterAxisAlignItems'],
