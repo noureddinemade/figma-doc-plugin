@@ -22,7 +22,7 @@ if (isArray(cs)) {
         loop(cs, toDocument);
 
         // Loop thru toDocument array and document the component
-        showAll(toDocument);
+        // showAll(toDocument);
 
     }
 

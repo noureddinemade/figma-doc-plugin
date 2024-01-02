@@ -2,6 +2,26 @@
 import { sectionFrame, sectionTitle } from "../helpers/styles";
 import { isArray  } from "./general";
 
+// Create instance
+export function makeInstance(base: any, name: string, props: any, array: any[]) {
+
+    // Clone from base
+    const instance = base.clone();
+
+    // Set properties if available
+    if (isArray(props)) { props.forEach((p: any) => instance.setProperties(p) ) };
+
+    // Set name
+    instance.name = name;
+
+    // Add to array
+    array.push(instance);
+
+    // Return instance
+    return instance;
+
+}
+
 // Create Figma frame
 export function create(name: string, props: any, text: any, type: any) {
 

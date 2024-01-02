@@ -1,7 +1,7 @@
 // Import
-import { create, createSection } from "../functions/create";
-import { isArray } from "../functions/general";
-import { mdVFrame } from "../helpers/styles";
+import { create, createSection } from "../create";
+import { isArray } from "../general";
+import { mdVFrame } from "../../helpers/styles";
 
 // Show anatomy of selected component/s
 export function showAnatomy(i: any, compWrap: any) {

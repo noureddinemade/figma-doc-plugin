@@ -216,7 +216,7 @@ function matchItem(i: any, array: any) {
 }
 
 // Match styles
-function matchStyle(i: any, base: any) {
+export function matchStyle(i: any, base: any) {
 
     if (i && base) {
 

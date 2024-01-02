@@ -1,11 +1,11 @@
 // Imports
-import { showInformation } from "./show/information";
-import { showProperties } from "./show/properties";
-import { showStyles } from "./show/styles";
+import { showInformation } from "./functions/show/information";
+import { showProperties } from "./functions/show/properties";
+import { showStyles } from "./functions/show/styles";
 import { create } from "./functions/create";
 import { isArray } from "./functions/general";
 import { mainFrame, compFrame, compTitle } from "./helpers/styles";
-import { showAnatomy } from "./show/anatomy";
+import { showAnatomy } from "./functions/show/anatomy";
 
 // Document function
 export function showAll(array: any[]) {

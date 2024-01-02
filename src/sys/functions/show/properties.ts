@@ -1,7 +1,7 @@
 // Import
-import { create, createSection } from "../functions/create";
-import { isArray } from "../functions/general";
-import { defValueFrame, dependFrame, mdVFrame, propFrame, propTitle, smHFrame, typeFrame, valueFrame, valueLabel, iconVector } from "../helpers/styles";
+import { create, createSection } from "../create";
+import { isArray } from "../general";
+import { defValueFrame, dependFrame, mdVFrame, propFrame, propTitle, smHFrame, typeFrame, valueFrame, valueLabel, iconVector } from "../../helpers/styles";
 
 // Show properties related to component
 export function showProperties(i: any, compWrap: any) {

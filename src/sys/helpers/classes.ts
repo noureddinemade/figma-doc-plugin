@@ -4,12 +4,12 @@ export class Component {
 
         public name:            string,
         public id:              any,
-        public documentation:   any | null,
-        public properties:      any | null,
-        public styles:          any | null,
-        public dependencies:    any | null,
-        public instances:       any | null,
-        public anatomy:         any | null
+        public documentation:   any[] | null,
+        public properties:      any[] | null,
+        public styles:          any[] | null,
+        public dependencies:    any[] | null,
+        public instances:       any[] | null,
+        public anatomy:         any[] | null
         
     ) {}
 
@@ -22,8 +22,10 @@ export class Property {
         public name:            string,
         public type:            string,
         public defaultValue:    string,
-        public options:         any | null,
-        public defaultName:     any
+        public options:         any[] | null,
+        public defaultName:     string,
+        public id:              string,
+        public linked:          any[] | null
 
     ) {}
 

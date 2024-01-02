@@ -1,6 +1,6 @@
 // Import
-import { getChildren, getAllStyles, getSharedAndUnique, removeDuplicates, cleanAllStyles } from "../functions/document";
-import { isArray, sortArray } from "../functions/general";
+import { getChildren, getAllStyles, getSharedAndUnique, removeDuplicates, cleanAllStyles } from "../document";
+import { isArray, sortArray } from "../general";
 
 // Get styles from selected component/s
 export function getStyles(compInstances: any, compProps: any, baseComp: any, compStyles: any) {

@@ -1,7 +1,7 @@
 // Import
-import { getAnatomy } from "./get/anatomy";
-import { getProperties } from "./get/properties";
-import { getStyles } from "./get/styles";
+import { getAnatomy } from "./functions/get/anatomy";
+import { getProperties } from "./functions/get/properties";
+import { getStyles } from "./functions/get/styles";
 
 // Get everything from selected component/s
 export function getAll(i: any, baseComp: any, baseInstance: any, dependencies: any, compInstances: any, compProps: any, compStyles: any, compAnatomy: any) {

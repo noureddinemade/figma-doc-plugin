@@ -1,5 +1,5 @@
-import { createSection, create } from "../functions/create";
-import { sectionCopy, sectionLink } from "../helpers/styles";
+import { createSection, create } from "../create";
+import { sectionCopy, sectionLink } from "../../helpers/styles";
 
 export function showInformation(i: any, compWrap: any) {
 

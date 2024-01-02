@@ -161,3 +161,24 @@ export function isArray(array: any[]) {
     return Array.isArray(array) && array.length > 0 ? true : false;
 
 }
+
+// Is there a dependency
+export function isDependent(node: any, array: any) {
+
+    if (isArray(array) && node) {
+
+        // Loop thru all dependency properties
+        array.forEach((d: any) => {
+
+            let name    = d.name;
+                name    = `dependentOn=${name}`;
+            let item    = node.getPluginData('isDependent');
+
+            if (item && item === name) { return true }
+            else { return false }
+
+        });
+
+    } else { return false };
+
+}

@@ -1,9 +1,9 @@
 // Import
 
-import { create, createSection } from "../functions/create";
-import { isArray } from "../functions/general";
-import { styleAreas } from "../helpers/arrays";
-import { mdVFrame } from "../helpers/styles";
+import { create, createSection } from "../create";
+import { isArray } from "../general";
+import { styleAreas } from "../../helpers/arrays";
+import { mdVFrame } from "../../helpers/styles";
 
 // Show all styles related to component
 export function showStyles(i: any, compWrap: any) {

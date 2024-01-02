@@ -1,6 +1,6 @@
 // Import
-import { getChildren } from "../functions/document"
-import { cleanName, isArray } from "../functions/general";
+import { getChildren } from "../document"
+import { cleanName, isArray, isDependent } from "../general";
 
 // Get anatomy from selected component/s
 export function getAnatomy(baseInstance: any, compAnatomy: any, compProps: any) {
@@ -10,10 +10,13 @@ export function getAnatomy(baseInstance: any, compAnatomy: any, compProps: any) 
         // Get all boolean properties for this component so we can turn them on
         const booleanProps = compProps.filter((a: any) => a.type === 'BOOLEAN');
 
+        // Get all dependency properties for this component
+        const dependProps = compProps.filter((a: any) => a.type === 'DEPENDENCY');
+
         if (isArray(booleanProps)) { booleanProps.forEach((b: any) => baseInstance.setProperties({[b.defaultName]: true})) };
 
         // Get children
-        const children: any | any[] = baseInstance.children;
+        const children: any | any[] = baseInstance.findAll();
 
         // Check if there are any children
         if (isArray(children)) {
@@ -23,8 +26,17 @@ export function getAnatomy(baseInstance: any, compAnatomy: any, compProps: any) 
             // Loop thru children
             children.forEach((c: any) => {
 
+                // Set up 
+                let dependency: boolean = false;
+                let name:       any     = cleanName(c.name, null);
+
+                // Check if this child is a dependency or not
+                let response = isDependent(c, dependProps);
+
+                if (response) { dependency = true };
+
                 // Set up anatomy object
-                const child = { name: cleanName(c.name, null), number: number = number +1, id: c.id };
+                const child = { name: name, number: number = number +1, id: c.id, dependency: dependency };
 
                 // Add to compAnatomy
                 compAnatomy.push(child);
