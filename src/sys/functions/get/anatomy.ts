@@ -1,5 +1,5 @@
 // Import
-import { getChildren } from "../document"
+import { defineHierarchy, getChildren } from "../document"
 import { cleanName, isArray, isDependent } from "../general";
 
 // Get anatomy from selected component/s
@@ -29,19 +29,24 @@ export function getAnatomy(baseInstance: any, compAnatomy: any, compProps: any) 
                 // Set up 
                 let dependency: boolean = false;
                 let name:       any     = cleanName(c.name, null);
+                let heirachy:   any     = defineHierarchy(c, 0);
 
                 // Check if this child is a dependency or not
                 let response = isDependent(c, dependProps);
 
                 if (response) { dependency = true };
 
-                // Set up anatomy object
-                const child = { name: name, number: number = number +1, id: c.id, dependency: dependency };
+                if (response && heirachy < 2 || !response) {
 
-                // Add to compAnatomy
-                compAnatomy.push(child);
+                    // Set up anatomy object
+                    const child = { name: name, number: number = number +1, id: c.id, dependency: dependency };
+
+                    // Add to compAnatomy
+                    compAnatomy.push(child);
+
+                }
                 
-            })
+            });
 
         } else { console.log('No children found.') }
 

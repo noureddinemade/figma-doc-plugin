@@ -4,7 +4,7 @@ import { DropShadow, Item } from "../helpers/classes";
 import { cleanName, convertColour, isArray } from "./general";
 
 // Define hierarchy
-function defineHierarchy(i: any, level: any) {
+export function defineHierarchy(i: any, level: any) {
 
     if (i.parent && i.parent.type !== 'PAGE') {
 

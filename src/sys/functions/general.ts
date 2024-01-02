@@ -165,6 +165,9 @@ export function isArray(array: any[]) {
 // Is there a dependency
 export function isDependent(node: any, array: any) {
 
+    // Set up
+    let response : boolean = false;
+
     if (isArray(array) && node) {
 
         // Loop thru all dependency properties
@@ -174,11 +177,37 @@ export function isDependent(node: any, array: any) {
                 name    = `dependentOn=${name}`;
             let item    = node.getPluginData('isDependent');
 
-            if (item && item === name) { return true }
-            else { return false }
+            if (item && item === name) { response = true };
 
         });
 
-    } else { return false };
+    };
+
+    return response;
 
 }
+
+// Does this belong to a specific parent
+export function belongToParent(item: any, parent: any) {
+
+    // Set up
+    let response: any = false;
+
+    if (parent) { 
+
+        if (parent.name === parent.name) { 
+            
+            response = true;
+
+        }
+        else {
+
+            response = belongToParent(item.parent, parent);
+
+        }
+    
+    };
+
+    return response;
+
+} 

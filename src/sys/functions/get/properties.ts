@@ -1,5 +1,5 @@
 // Import
-import { isArray, cleanName, isDependent } from "../general";
+import { isArray, cleanName, isDependent, belongToParent } from "../general";
 import { Property } from "../../helpers/classes";
 import { makeInstance } from "../create";
 import { getAllStyles, getChildren, matchStyle } from "../document";
@@ -145,13 +145,24 @@ export function getProperties(i: any, baseComp: any, baseInstance: any, dependen
 
                     depCompInstances.forEach((di: any) => {
 
-                        di.setPluginData('isDependent', `dependentOn=${name}`);
+                        const inComponent = belongToParent(di, baseInstance);
 
-                        const diChildren: any = di.findAll();
+                        if (inComponent) {
 
-                        if (isArray(diChildren)) { diChildren.forEach((dic: any) => { dic.setPluginData('isDependent', `dependentOn=${name}`); }) };
+                            di.setPluginData('isDependent', `dependentOn=${name}`);
 
-                    })
+                            const diChildren: any = di.findAll();
+
+                            if (isArray(diChildren)) { diChildren.forEach((dic: any) => { dic.setPluginData('isDependent', `dependentOn=${name}`); }) };
+
+                            // Check if linked node already exists in the linkedNodes array
+                            const exists = linkedNodes.filter((a: any) => a === di.name);
+
+                            if (!isArray(exists)) { linkedNodes.push(di.name) };
+
+                        }
+
+                    });
 
                 }
 
