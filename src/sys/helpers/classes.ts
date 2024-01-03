@@ -51,8 +51,6 @@ export class Item {
 
         public value:       any,
         public token:       any,
-        public text:        any,
-        public effect:      any,
         public name:        any,
         public category:    any
     

@@ -1,7 +1,7 @@
 // Imports
 import { styleAreas, styles } from "../helpers/arrays";
 import { DropShadow, Item } from "../helpers/classes";
-import { cleanName, convertColour, isArray } from "./general";
+import { cleanName, convertColour, inArrayAlready, isArray } from "./general";
 
 // Define hierarchy
 export function defineHierarchy(i: any, level: any) {
@@ -99,10 +99,10 @@ function checkProperty(p: any, i: any, type: any) {
     let effect      : any | null = null;
     let response    : any | null = null;
 
-    if (type === 'token')                       { token     = i.boundVariables[p]                       }
-    if (type === 'value')                       { value     = i[p]                                      }
-    if (type === 'text' && i.type === 'TEXT')   { text      = i.getStyledTextSegments(['textStyleId'])  }
-    if (type === 'effect' && i.effects)         { effect    = i.effectStyleId                           }
+    if (type === 'token')                       { token     = i.boundVariables[p]                           }
+    if (type === 'value')                       { value     = i[p]                                          }
+    if (type === 'text' && i.type === 'TEXT')   { text      = i.getStyledTextSegments(['textStyleId'])      }
+    if (type === 'effect' && i.effects)         { effect    = i.getStyledEffectSegments(['effectStyleId'])  }
 
     // Get token if it exists
     if (token) {
@@ -162,6 +162,9 @@ function checkProperty(p: any, i: any, type: any) {
 
     }
 
+    // Get effect style if it exists
+    if (effect) {}
+
     // Return response
     return response;
 
@@ -170,30 +173,45 @@ function checkProperty(p: any, i: any, type: any) {
 // Get fill values
 function getStyles(array: any, i: any, cat: any) {
 
+    // Set up
     let response: any = [];
 
     // Loop thru layout properties
     array.forEach((p: any) => {
 
+        // Check if there's anything to get
         if (i[p]) {
 
-            const name      = checkName(p, i);
-            const parent    = i.parent.type === 'PAGE' ? null : i.parent.name;
+            // Set up
+            const name:     any = checkName(p, i);
+            const parent:   any = i.parent.type === 'PAGE' ? null : i.parent.name;
             
-            let value       = checkProperty(p, i, 'value');
-                value       = value && value.length === 0 ? null : value;
-                value       = value && value.length === 1 ? value[0] : value;
-            let token       = checkProperty(p, i, 'token');
-                token       = token && token.length === 0 ? null : token;
-                token       = token && token.length === 1 ? token[0] : token;
+            let token: any | null = [];
+            
+            // Get properties
             let text        = cat === 'text' ? checkProperty(p, i, 'text') : null;
-                text        = text && text.length === 0 ? null : text;
-                text        = text && text.length === 1 ? text[0] : text;
-            let effect      = cat === 'effects' ? checkProperty(p, i, 'effect') : null;
-                effect      = effect && effect.length === 0 ? null : effect;
-                effect      = effect && effect.length === 1 ? text[0] : effect;
+                text        = isArray(text, 0, 'e') ? null : text;
+                text        = isArray(text, 1, 'e') ? text[0] : text;
+            let effect      = cat === 'effect' ? checkProperty(p, i, 'effect') : null;
+                effect      = isArray(effect, 0, 'e') ? null : effect;
+                effect      = isArray(effect, 1, 'e') ? effect[0] : effect;
+            let value       = checkProperty(p, i, 'value');
+                value       = isArray(value, 0, 'e') ? null : value;
+                value       = isArray(value, 1, 'e') ? value[0] : value;
+            let variable    = checkProperty(p, i, 'token');
+                variable    = isArray(variable, 0, 'e') ? null : variable;
+                variable    = isArray(variable, 1, 'e') ? variable[0] : variable;
 
-            const prop = {name: i.name, parent: parent, style: new Item(value, token, text, effect, name, cat)};
+            // Generate the token
+            if (text)       { token.push(text)      };
+            if (effect)     { token.push(effect)    };
+            if (variable)   { token.push(variable)  };
+
+            if (isArray(token, 1, 'e')) { token = token[0]  };
+            if (isArray(token, 0, 'e')) { token = null      };
+            
+            // Construct the property and add to response
+            const prop = {name: i.name, parent: parent, style: new Item(value, token, name, cat)};
 
             response.push(prop);
 
@@ -218,20 +236,22 @@ function matchItem(i: any, array: any) {
 // Match styles
 export function matchStyle(i: any, base: any) {
 
+    // Set up
+    let response : any | null = null;
+
+    // Check if there is anything to match
     if (i && base) {
 
-        const c1 = base.filter((a: { style: { category: any; }; }) => a.style.category === i.style.category);
-        const c2 = c1.filter((a: { style: { name: any; }; }) => a.style.name === i.style.name);
-        const c3 = c2.filter((a: { style: { value: any; }; }) => a.style.value === i.style.value);
-        const c4 = c2.filter((a: { style: { token: any; }; }) => a.style.token === i.style.token);
-        const c5 = c2.filter((a: { style: { text: any; }; }) => a.style.text === i.style.text);
-        const c6 = c2.filter((a: { style: { effect: any; }; }) => a.style.effect === i.style.effect);
+        let condition = base
+            condition = condition.filter((a: any) => { return a.style.category === i.style.category && a.style.name === i.style.name });
+            condition = condition.filter((a: any) => { return a.style.token === i.style.token || a.style.value === i.style.value});
 
-        return isArray(c3) || isArray(c4) ? true : false;
+        if (isArray(condition)) { response = i.style.name }
 
     }
 
-    else { return false; }
+    // Return response
+    return response;
 
 }
 
@@ -305,7 +325,7 @@ export function getAllStyles(item: any) {
 }
 
 // Get the children of an item
-export function getChildren(i: any, parent: any) {
+export function getChildren(i: any, parent: any | null = null) {
 
     let response: any[] | null = null;
 
@@ -347,7 +367,7 @@ export function getSharedAndUnique(item: any, base: any) {
 }
 
 // Remove duplicate styles
-export function removeDuplicates(array: any) {
+export function removeDuplicates(array: any, type: any = 'style') {
 
     // Set up response
     let response:   any | null = null;
@@ -360,16 +380,24 @@ export function removeDuplicates(array: any) {
         tempArray   = []; 
 
         // Add contents of array into response
-        array.forEach((item: any[]) => { if (isArray(item)) { item.forEach((i: any) => tempArray.push(i)) } });
+        array.forEach((item: any) => { tempArray.push(item) });
 
         // Clean up duplicates
         if (isArray(tempArray)) {
 
-            tempArray.forEach((i: { style: { name: any; }; }) => {
+            tempArray.forEach((i: any) => {
 
-                let matched = response.filter((a: { style: { name: any; }; }) => a.style.name === i.style.name);
+                let matched: any;
 
-                if (!isArray(matched)) { response.push(i) };
+                if (type === 'style')   { matched = matchStyle(i, response) };
+                if (type === 'item')    {
+                    
+                    matched = response.filter((a: any) => JSON.stringify(a) === JSON.stringify(i) ) 
+                    matched = isArray(matched);
+                
+                }
+
+                if (!matched) { response.push(i) };
 
             })
 
@@ -379,6 +407,41 @@ export function removeDuplicates(array: any) {
     }
 
     // Return response
+    return response;
+
+}
+
+// Compare styles
+export function compareStyles(array: any | null) {
+
+    // Set up
+    let response:   any | null = null;
+    let tempArray:  any         = array[0].styles;
+
+    // Check if array is suitable
+    if (isArray(array)) {
+
+        response    = { shared: [], unique: [] };
+
+        const shared = response.shared;
+        const unique = response.unique;
+
+        // Loop thru array
+        array.forEach((i: any) => {
+
+            // Check if there are styles
+            if (isArray(i.styles)) {
+
+                // Loop thru styles
+                i.styles.forEach((s: any) => { !matchStyle(s, tempArray) ? unique.push(s) : shared.push(s) });
+
+            }
+
+        });
+
+    }
+
+    // Return
     return response;
 
 }

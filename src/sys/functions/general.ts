@@ -141,7 +141,7 @@ export function cleanName(string: any, type: any) {
 }
 
 // Sort array
-export function sortArray(array: any, key: any) {
+export function sortArray(array: any, key: any, reverse: any | null = null) {
 
     array.sort((a: any, b: any) => {
 
@@ -149,16 +149,20 @@ export function sortArray(array: any, key: any) {
         const valueA = Array.isArray(a[key]) ? a[key][0] : a[key];
         const valueB = Array.isArray(b[key]) ? b[key][0] : b[key];
 
-        // Compare the values
-        return valueA.localeCompare(valueB);
+        if (reverse) { return -valueA.localeCompare(valueB) }
+        else { return valueA.localeCompare(valueB) };
 
     });
 }
 
 // Is it an array?
-export function isArray(array: any[]) {
+export function isArray(array: any[], length: number = 0, operator: any = 'o') {
 
-    return Array.isArray(array) && array.length > 0 ? true : false;
+    if (operator === 'o'    ) { return Array.isArray(array) && array.length > length ? true : false;    };
+    if (operator === 'u'    ) { return Array.isArray(array) && array.length < length ? true : false;    };
+    if (operator === 'e'    ) { return Array.isArray(array) && array.length === length ? true : false;  };
+    if (operator === 'oe'   ) { return Array.isArray(array) && array.length >= length ? true : false;   };
+    if (operator === 'ue'   ) { return Array.isArray(array) && array.length <= length ? true : false;   };
 
 }
 
@@ -193,9 +197,9 @@ export function belongToParent(item: any, parent: any) {
     // Set up
     let response: any = false;
 
-    if (parent) { 
+    if (item.parent && parent) { 
 
-        if (parent.name === parent.name) { 
+        if (item.parent.id === parent.id) { 
             
             response = true;
 
@@ -210,4 +214,65 @@ export function belongToParent(item: any, parent: any) {
 
     return response;
 
-} 
+}
+
+// Link to children
+export function linkToChildren(matched: any[], children: any[]) {
+
+    // Set up
+    let response: any[] | null = null
+
+    // Check if arrays are available
+    if (isArray(matched) && isArray(children)) {
+
+        matched.forEach((m: any) => {
+
+            // Check if there are any linked children
+            if (isArray(m.linked)) {
+
+                m.linked.forEach((l: any) => {
+
+                    // Find linked children
+                    const linkedChildren = children.filter((a: any) => a.name === l);
+
+                    // Check if there are any linked children
+                    if (isArray(linkedChildren)) {
+
+                        response = [];
+
+                        // Loop thru linked children
+                        linkedChildren.forEach((lc: any) => { response?.push(lc) });
+
+                    }
+
+                });
+
+            }
+
+        });
+
+    }
+
+    // Return response
+    return response;
+
+}
+
+// Is it already in the array
+export function inArrayAlready(item: any, array: any) {
+
+    // Set up
+    let response: any;
+
+    // Check if there is anything to do
+    if (item && isArray(array)) {
+
+        response = array.filter((a: any) => JSON.stringify(a) === JSON.stringify(item) );
+        response = isArray(response) ? true : false;
+
+    }
+
+    // Return response
+    return response;
+
+}

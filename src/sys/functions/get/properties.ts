@@ -1,5 +1,5 @@
 // Import
-import { isArray, cleanName, isDependent, belongToParent } from "../general";
+import { isArray, cleanName, isDependent, belongToParent, sortArray } from "../general";
 import { Property } from "../../helpers/classes";
 import { makeInstance } from "../create";
 import { getAllStyles, getChildren, matchStyle } from "../document";
@@ -13,6 +13,8 @@ export function getProperties(i: any, baseComp: any, baseInstance: any, dependen
 
         let props:  any[]   = i.componentPropertyDefinitions;
             props           = Object.entries(props).map(([key, value]) => ({ key, ...value }));
+
+        sortArray(props, 'type', true);
     
         // Loop thru properties
         props.forEach((p: { key: string; type: string; defaultValue: any; variantOptions: any[]; }) => {
@@ -41,6 +43,48 @@ export function getProperties(i: any, baseComp: any, baseInstance: any, dependen
             if (isArray(p.variantOptions) || isArray(options)) { if (isArray(p.variantOptions)) { p.variantOptions.forEach(o => options.push(o) ) } } 
             else { options = null }
 
+            // If type is dependency
+            if (type === 'DEPENDENCY') {
+
+                // Find main component
+                const mainComp: any = figma.getNodeById(value);
+
+                // Add custom data to each instance of that mainComp
+                if (mainComp) {
+
+                    const depCompInstances: any = mainComp.instances;
+
+                    depCompInstances.forEach((di: any) => {
+
+                        const inComponent = belongToParent(di, baseInstance);
+
+                        if (inComponent) {
+
+                            di.setPluginData('isDependent', `dependentOn=${name}`);
+
+                            const diChildren: any = getChildren(di);
+
+                            if (isArray(diChildren)) { diChildren.forEach((dic: any) => { dic.setPluginData('isDependent', `dependentOn=${name}`); }) };
+
+                            // Check if linked node already exists in the linkedNodes array
+                            const exists = linkedNodes.filter((a: any) => a === di.name);
+
+                            if (!isArray(exists)) { linkedNodes.push(di.name) };
+
+                        }
+
+                    });
+
+                }
+
+                // Add to comp dependencies
+                dependencies.push({name: defaultName, component: figma.getNodeById(value)})
+    
+                // Create and customise each instance, then add to compInstances array
+                const instance = makeInstance(baseInstance, name, null, compInstances);
+    
+            }
+
             // If type has options but is not a boolean
             if (isArray(options) && type !== 'BOOLEAN') {
     
@@ -68,8 +112,11 @@ export function getProperties(i: any, baseComp: any, baseInstance: any, dependen
                 const instance = makeInstance(baseInstance, name, [{[defaultName]: state}], compInstances);
 
                 // Find out which node is affected by this property
-                const instC: any | null = getChildren(instance, null);
-                const baseC: any | null = getChildren(baseInstance, null);
+                const instC: any | null = getChildren(instance);
+                const baseC: any | null = getChildren(baseInstance);
+
+                // Get existing dependencies
+                const existingDs = compProps.filter((a: any) => a.type === 'DEPENDENCY');
 
                 // Check if instance and base have children
                 if (isArray(instC) && isArray(baseC)) {
@@ -80,8 +127,11 @@ export function getProperties(i: any, baseComp: any, baseInstance: any, dependen
                         // Match base children with instance children
                         const matched: any | null = baseC.filter((a: any) => a.name === c.name);
 
+                        // Check if child is part of dependency
+                        const dependent: boolean = isDependent(c, existingDs);
+
                         // Check if there are matches
-                        if (isArray(matched)) {
+                        if (isArray(matched) && !dependent) {
 
                             // Loop thru matches
                             matched.forEach((m: any) => {
@@ -130,48 +180,6 @@ export function getProperties(i: any, baseComp: any, baseInstance: any, dependen
                 // Change text back to defaultValue
                 instance.setProperties({[defaultName]: value});
 
-            }
-            
-            // If type is dependency
-            if (type === 'DEPENDENCY') {
-
-                // Find main component
-                const mainComp: any = figma.getNodeById(value);
-
-                // Add custom data to each instance of that mainComp
-                if (mainComp) {
-
-                    const depCompInstances: any = mainComp.instances;
-
-                    depCompInstances.forEach((di: any) => {
-
-                        const inComponent = belongToParent(di, baseInstance);
-
-                        if (inComponent) {
-
-                            di.setPluginData('isDependent', `dependentOn=${name}`);
-
-                            const diChildren: any = di.findAll();
-
-                            if (isArray(diChildren)) { diChildren.forEach((dic: any) => { dic.setPluginData('isDependent', `dependentOn=${name}`); }) };
-
-                            // Check if linked node already exists in the linkedNodes array
-                            const exists = linkedNodes.filter((a: any) => a === di.name);
-
-                            if (!isArray(exists)) { linkedNodes.push(di.name) };
-
-                        }
-
-                    });
-
-                }
-
-                // Add to comp dependencies
-                dependencies.push({name: defaultName, component: figma.getNodeById(value)})
-    
-                // Create and customise each instance, then add to compInstances array
-                const instance = makeInstance(baseInstance, name, null, compInstances);
-    
             }
     
             // Create property and style objects
