@@ -25,14 +25,25 @@ export function belongsToInstance(node: any): boolean {
 
 }
 
+// Set up the base component
+export function setBaseComp(selected: any) {
+
+    // Set up    
+    let baseComp: any;
+
+    // Check what the selected item is
+    selected.type === 'COMPONENT_SET' ? baseComp = selected.children[0] : selected;
+
+    baseComp.setPluginData('baseComponent', 'true');
+
+}
+
 // Find base component
 export function findBaseComp() {
 
     // Set up
-    const base = figma.currentPage.findOne((a: any) => a.getPluginData('baseComponent') === 'true');
+    let base: any   = figma.currentPage.findAllWithCriteria({ types: ['COMPONENT'], pluginData: { keys: ['baseComponent'] } });
 
-    console.log(base)
-
-    return base ? base : null;
+    return isArray(base) ? base[0] : null;
 
 }

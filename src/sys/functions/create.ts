@@ -3,7 +3,7 @@ import { findBaseComp } from "./component";
 import { isArray } from "./general";
 
 // Create Figma frame
-export function make(name: string, props: any, text: any, type: any) {
+export function make(name: string, props: any, type: any, text: any = null) {
 
     // Setup response
     let response: any | null;
@@ -53,8 +53,6 @@ export function makeSection(text: string) {
 
 // Create instance
 export function makeInstance(name: string, props: any = null, pluginData: any = null) {
-
-    console.log('hello')
 
     // Clone from base
     let instance: any   = findBaseComp();

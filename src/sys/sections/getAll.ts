@@ -1,4 +1,5 @@
 // Import
+import { setBaseComp } from "../functions/component";
 import { sortArray } from "../functions/general";
 import { getAnatomy } from "./get/anatomy";
 import { getChildren } from "./get/children";
@@ -18,13 +19,8 @@ export function getAll(selection: any) {
 
         if (c.type === 'COMPONENT' || c.type === 'COMPONENT_SET' ) {
 
-            // Set up
-            let baseComp: any;
-
-            if (c.type === 'COMPONENT_SET') { baseComp = c.children[0].createInstance() }
-            if (c.type === 'COMPONENT')     { baseComp = c.createInstance()             }
-
-            baseComp.setPluginData('baseComponent', 'true');
+            // Set up base component
+            setBaseComp(c);
 
             // Get component information
             const compInfo: any = getInfo(c);
@@ -43,13 +39,8 @@ export function getAll(selection: any) {
             const compAnatomy: any = getAnatomy(compProps, compChildren);
 
             // Get component style
-            const compStyles: any = getStyles
+            const compStyles: any = getStyles(c);
 
-            // console.log(compInfo);
-            // console.log(compProps);
-            // console.log(compChildren);
-            // console.log(compDependencies);
-            // console.log(compAnatomy);
             // console.log(compStyles);
 
             // Add each component to response
