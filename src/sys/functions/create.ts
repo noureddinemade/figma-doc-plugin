@@ -1,4 +1,4 @@
-import { sectionFrame, sectionTitle } from "../data/styles";
+import { frame, text } from "../data/styles";
 import { findBaseComp } from "./component";
 import { isArray } from "./general";
 
@@ -12,6 +12,7 @@ export function make(name: string, props: any, type: any, text: any = null) {
     if (type === 'frame')   { response = figma.createFrame();   }
     if (type === 'text')    { response = figma.createText();    }
     if (type === 'vector')  { response = figma.createVector();  }
+    if (type === 'line')    { response = figma.createLine();    }
 
     // Assign name
     response.name = name;
@@ -37,17 +38,17 @@ export function make(name: string, props: any, type: any, text: any = null) {
 }
 
 // Create Section
-export function makeSection(text: string) {
+export function makeSection(name: string) {
 
     // Create section frame and heading
-    const frame: any = make(`section: ${text}`, sectionFrame, null, 'frame');
-    const title: any = make('section-title', sectionTitle, text, 'text');
+    const section: any = make(`section: ${text}`, frame.section, 'frame');
+    const title: any = make('section-title', text.title.section, 'text', name);
 
     // Append heading and set to fill
-    frame.appendChild(title);
+    section.appendChild(title);
     title.layoutSizingHorizontal = 'FILL';
 
-    return frame;
+    return section;
 
 }
 

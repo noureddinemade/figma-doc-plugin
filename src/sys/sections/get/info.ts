@@ -9,7 +9,8 @@ export function getInfo(component: any) {
         compId          = compId ? compId : null;
     let compDesc:   any = component.description;
         compDesc        = compDesc ? compDesc : null;
-    let compLink:   any = component.documentationLinks[0].uri;
+    let compLink:   any = component.documentationLink;
+        compLink        = compLink ? compLink[0].uri : compLink;
         compLink        = compLink ? compLink : null;
 
     //

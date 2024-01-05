@@ -1,21 +1,24 @@
 // Import
 import { convertColour } from "../functions/general";
 
-// Fills
+// Fill
 const fillWhite         = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('FFFFFF') }]};
 const fillOrange        = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('FFEEDA') }]};
 const fillBlue          = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('DAEDFF') }]};
 const fillRed           = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('FFC7C7') }]};
+const fillPurple        = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('622BA9') }]};
 const fillBlack         = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('000000') }]};
 const fillGrey          = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('222222') }]};
+const fillSubtle        = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('BBBBBB') }]};
 const fillLightGrey     = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('EBEBEB') }]};
 const fillLink          = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('0000C9') }]};
 const fillNone          = { key: 'fills', value:[]};
 
-// Strokes
+// Stroke
 const strokePurple      = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('9747FF') }]};
 const strokeBlack       = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('000000') }]};
 const strokeLight       = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('EBEBEB') }]};
+const strokeWhite       = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('FFFFFF') }]};
 const strokeNone        = { key: 'strokes', value: [] };
 const strokeDashed      = { key: 'dashPattern', value: [10,5] };
 const strokeSolid       = { key: 'dashPattern', value: [] };
@@ -66,12 +69,21 @@ const gap12             = { key: 'itemSpacing', value: 12 };
 const gap16             = { key: 'itemSpacing', value: 16 };
 const gap24             = { key: 'itemSpacing', value: 24 };
 const gap32             = { key: 'itemSpacing', value: 32 };
+const wrapGap4          = { key: 'counterAxisSpacing', value: 4 };
+const wrapGap8          = { key: 'counterAxisSpacing', value: 8 };
+const wrapGap12         = { key: 'counterAxisSpacing', value: 12 };
+const wrapGap16         = { key: 'counterAxisSpacing', value: 16 };
+const wrapGap24         = { key: 'counterAxisSpacing', value: 24 };
+const wrapGap32         = { key: 'counterAxisSpacing', value: 32 };
 
 // Redius
 const radius4           = { key: 'cornerRadius', value: 4 };
 const radius6           = { key: 'cornerRadius', value: 6 };
 const radius8           = { key: 'cornerRadius', value: 8 };
 const radius10          = { key: 'cornerRadius', value: 10 };
+const radiusSm          = { key: 'cornerRadius', value: 16 };
+const radiusMd          = { key: 'cornerRadius', value: 24 };
+const radiusLg          = { key: 'cornerRadius', value: 32 };
 
 // Alignment
 const primaryMin        = { key: 'primaryAxisAlignItems', value: 'MIN' };
@@ -87,15 +99,22 @@ const counterBaseline   = { key: 'counterAxisAlignItems', value: 'BASELINE' };
 const autoLayout        = [ { key: 'primaryAxisSizingMode', value: 'AUTO' }, { key: 'counterAxisSizingMode', value: 'AUTO' } ];
 const horizontal        = { key: 'layoutMode', value: 'HORIZONTAL' };
 const vertical          = { key: 'layoutMode', value: 'VERTICAL' };
+const wrap              = { key: 'layoutWrap', value: 'WRAP' };
+const noContentClip     = { key: 'clipsContent', value: false };
+const absolute          = { key: 'layoutPositioning', value: 'ABSOLUTE' };
 
 // Size
+const maxWidthXl        = { key: 'maxWidth', value: 1200 };
 const minWidthLg        = { key: 'minWidth', value: 980 };
 const maxWidthLg        = { key: 'maxWidth', value: 980 };
 const minWidthMd        = { key: 'minWidth', value: 600 };
 const maxWidthMd        = { key: 'maxWidth', value: 600 };
 const minWidthSm        = { key: 'minWidth', value: 380 };
 const maxWidthSm        = { key: 'maxWidth', value: 380 };
-const minHeight         = { key: 'minHeight', value: 100 }
+const minHeight         = { key: 'minHeight', value: 100 };
+const equalSm           = [ { key: 'minWidth', value: 16 },{ key: 'maxWidth', value: 16 }, { key: 'minHeight', value: 16 }, { key: 'maxHeight', value: 16 } ];
+const equalMd           = [ { key: 'minWidth', value: 24 },{ key: 'maxWidth', value: 24 }, { key: 'minHeight', value: 24 }, { key: 'maxHeight', value: 24 } ];
+const equalLg           = [ { key: 'minWidth', value: 32 },{ key: 'maxWidth', value: 32 }, { key: 'minHeight', value: 32 }, { key: 'maxHeight', value: 32 } ];
 
 // Font
 const fontPlexReg       = { key: 'fontName', value: { family: "IBM Plex Mono", style: "Regular" } };
@@ -117,41 +136,81 @@ const font20            = { key: 'fontSize', value: 20 };
 const font24            = { key: 'fontSize', value: 24 };
 
 // Vectors
-const iconBoolean       = { key: 'vectorPaths', value: [{ windingRule: 'NONZERO', data: 'M 15 0 C 6.081703186035156 0 0.32098812609910965 9.211180254817009 0.216796875 9.37890625 C 0.07655338943004608 9.555562853813171 0.00015162266208790243 9.774443432688713 0 10 C 0.00017740319890435785 10.193499132990837 0.056489989161491394 10.38279077410698 0.162109375 10.544921875 C 0.1634045746177435 10.546879453351721 0.1647066727746278 10.548832840519026 0.166015625 10.55078125 C 0.18320928514003754 10.586261250078678 5.018831253051758 20 15 20 C 24.93882179260254 20 29.76732587441802 10.678741127252579 29.826171875 10.564453125 C 29.830152227077633 10.557987491600215 29.834058563923463 10.55147648602724 29.837890625 10.544921875 C 29.943509876728058 10.382790744304657 29.999822709854925 10.193499103188515 30 10 C 29.999964718004776 9.77534581720829 29.924284145236015 9.557247951626778 29.78515625 9.380859375 C 29.784506149357185 9.380207476264331 29.78385502373567 9.379556350642815 29.783203125 9.37890625 C 29.67901212722063 9.211180254817009 23.918296813964844 0 15 0 Z M 15 3 C 18.865999937057495 3 22 6.134000062942505 22 10 C 22 13.865999937057495 18.865999937057495 17 15 17 C 11.134000062942505 17 8 13.865999937057495 8 10 C 8 6.134000062942505 11.134000062942505 3 15 3 Z M 15 7 C 14.204350531101227 7 13.441288411617279 7.316070139408112 12.878679275512695 7.878679275512695 C 12.316070139408112 8.441288411617279 12 9.204350531101227 12 10 C 12 10.795649468898773 12.316070139408112 11.558711588382721 12.878679275512695 12.121320724487305 C 13.441288411617279 12.683929860591888 14.204350531101227 12.999999999999996 15 13 C 15.795649468898773 12.999999999999996 16.55871158838272 12.683929860591888 17.121320724487305 12.121320724487305 C 17.68392986059189 11.558711588382721 17.999999999999996 10.795649468898773 18 10 C 17.999999999999996 9.204350531101227 17.68392986059189 8.441288411617279 17.121320724487305 7.878679275512695 C 16.55871158838272 7.316070139408112 15.795649468898773 7 15 7 Z' }]};
-const iconVariant       = { key: 'vectorPaths', value: [{ windingRule: 'NONZERO', data: 'M 20.000001907348633 10 L 10.059524081258825 20 L 0 10 L 10.059524081258825 0 L 20.000001907348633 10 Z' }] };
-const iconText          = { key: 'vectorPaths', value: [ { windingRule: 'NONZERO', data: 'M 9.042126625776291 0.00008567828651848181 C 8.9554449917751 0.0021602089926668275 8.86902342782887 0.010447164779382748 8.783527117967605 0.024882891084978424 L 0.9068695068359374 0.024882891084978424 C 0.4062775696208215 0.024882891084978424 0 0.43116045258374647 0 0.9317523687312483 L 0 3.652360682301611 C 0 4.152952598449113 0.4062775696208215 4.559230216253752 0.9068695068359374 4.559230216253752 L 1.8137390136718747 4.559230216253752 C 2.3143309508869905 4.559230216253752 2.7206085205078123 4.152952598449113 2.7206085205078123 3.652360682301611 L 2.7206085205078123 2.74549114834947 L 7.254956054687499 2.74549114834947 L 7.254956054687499 17.25540369158373 L 6.348086547851562 17.25540369158373 C 5.847494610636446 17.25540369158373 5.441217041015625 17.661681309388367 5.441217041015625 18.16227322553587 L 5.441217041015625 19.069142759488013 C 5.441217041015625 19.569734675635516 5.847494610636446 19.976012293440153 6.348086547851562 19.976012293440153 L 8.77467097043991 19.976012293440153 C 8.969382451243352 20.007996694973283 9.168007685475397 20.007996694973283 9.362719166278838 19.976012293440153 L 11.789303588867186 19.976012293440153 C 12.289895526082303 19.976012293440153 12.696173095703124 19.569734675635516 12.696173095703124 19.069142759488013 L 12.696173095703124 18.16227322553587 C 12.696173095703124 17.661681309388367 12.289895526082303 17.25540369158373 11.789303588867186 17.25540369158373 L 10.88243408203125 17.25540369158373 L 10.88243408203125 2.74549114834947 L 15.416781616210937 2.74549114834947 L 15.416781616210937 3.652360682301611 C 15.416781616210937 4.152952598449113 15.823059185831756 4.559230216253752 16.323651123046872 4.559230216253752 L 17.23052062988281 4.559230216253752 C 17.731112567097927 4.559230216253752 18.13739013671875 4.152952598449113 18.13739013671875 3.652360682301611 L 18.13739013671875 0.9317523687312483 C 18.13739013671875 0.43116045258374647 17.731112567097927 0.024882891084978424 17.23052062988281 0.024882891084978424 L 9.359175554123551 0.024882891084978424 C 9.254422096323953 0.007350976989208412 9.148332036278468 -0.0009466116686223691 9.042126625776291 0.00008567828651848181 Z' } ] };
+const iconBoolean       = { key: 'vectorPaths', value: [{ windingRule: 'NONZERO', data: 'M 10 0 C 4.487111303541395 0 0 4.487111303541395 0 10 C 0 15.51288816663954 4.487111303541395 20 10 20 C 15.51288816663954 20 20 15.51288816663954 20 10 C 20 4.487111303541395 15.51288816663954 0 10 0 Z M 15.896809895833334 4.103190104166667 C 17.40362909105089 5.6100095642937555 18.333333333333336 7.69394424226549 18.333333333333336 10 C 18.333333333333336 14.61211151546902 14.61211151546902 18.333333333333336 10 18.333333333333336 C 7.69394424226549 18.333333333333336 5.6100095642937555 17.40362909105089 4.103190104166667 15.896809895833334 L 15.896809895833334 4.103190104166667 Z' }]};
+const iconVariant       = { key: 'vectorPaths', value: [{ windingRule: 'NONZERO', data: 'M 20.000001907348633 10 L 10.059524536132812 20 L 0 10 L 10.059524536132812 0 L 20.000001907348633 10 Z' }] };
+const iconText          = { key: 'vectorPaths', value: [ { windingRule: 'NONZERO', data: 'M 7.2337005637586085 0.00006854262319393456 C 7.164355263700881 0.0017281672742683442 7.095218198408244 0.008357731252908706 7.026821160465457 0.019906312227249146 L 0.725495548248289 0.019906312227249146 C 0.32502204338073243 0.019906312227249146 0 0.3449283599853516 0 0.7454019069671631 L 0 2.921888542175293 C 0 3.322362089157105 0.32502204338073243 3.647384262084961 0.725495548248289 3.647384262084961 L 1.450991096496578 3.647384262084961 C 1.8514646013641345 3.647384262084961 2.1764865493774455 3.322362089157105 2.1764865493774455 2.921888542175293 L 2.1764865493774455 2.1963930130004883 L 5.803964385986312 2.1963930130004883 L 5.803964385986312 13.804322814941408 L 5.078468551635758 13.804322814941408 C 4.677995046768202 13.804322814941408 4.352973098754891 14.129345178604128 4.352973098754891 14.529818725585939 L 4.352973098754891 15.25531463623047 C 4.352973098754891 15.65578818321228 4.677995046768202 15.980810546875 5.078468551635758 15.980810546875 L 7.019735742509396 15.980810546875 C 7.175504907380057 16.00639806687832 7.334405676116035 16.00639806687832 7.490174840986697 15.980810546875 L 9.431442031860335 15.980810546875 C 9.831915536727893 15.980810546875 10.156937103271517 15.65578818321228 10.156937103271517 15.25531463623047 L 10.156937103271517 14.529818725585939 C 10.156937103271517 14.129345178604128 9.831915536727893 13.804322814941408 9.431442031860335 13.804322814941408 L 8.705946197509782 13.804322814941408 L 8.705946197509782 2.1963930130004883 L 12.333423843383805 2.1963930130004883 L 12.333423843383805 2.921888542175293 C 12.333423843383805 3.322362089157105 12.658445409927428 3.647384262084961 13.058918914794985 3.647384262084961 L 13.784414749145538 3.647384262084961 C 14.184888254013096 3.647384262084961 14.509910583496094 3.322362089157105 14.509910583496094 2.921888542175293 L 14.509910583496094 0.7454019069671631 C 14.509910583496094 0.3449283599853516 14.184888254013096 0.019906312227249146 13.784414749145538 0.019906312227249146 L 7.487339758277026 0.019906312227249146 C 7.403537001481986 0.005880780518054962 7.31866488382795 -0.0007572893227916211 7.2337005637586085 0.00006854262319393456 Z' } ] };
 const iconDependency    = { key: 'vectorPaths', value: [{ windingRule: 'EVENODD', data: 'M 11.482161521911621 22.82843780517578 L 22.828441619873047 11.414219856262207 L 11.482161521911621 0 L 0 11.414219856262207 L 11.482161521911621 22.82843780517578 Z M 5.15818452835083 11.414219856262207 L 11.466404914855957 5.142427921295166 L 17.70176887512207 11.414219856262207 L 11.466404914855957 17.686010360717773 L 5.15818452835083 11.414219856262207 Z' }] };
 
+// Frame
+const mainFrame         = [ fillNone, strokePurple, strokeDashed, autoLayout, horizontal, minWidthLg, minHeight, primaryMin, counterMin, radius6, gap32, padding32 ];
+const compFrame         = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24, noContentClip, minWidthLg, maxWidthXl ];
+const sectionFrame      = [ fillWhite, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24, padding24, radius8, noContentClip ];
+const propFrame         = [ fillNone, strokeLight, strokeBottomSm, autoLayout, horizontal, primaryMin, counterMin, gap12, paddingBottom16 ];
+const propFrameNoBorder = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterMin, gap12, paddingBottom16 ];
+const typeFrame         = [ fillLightGrey, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
+const valueFrame        = [ fillOrange, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
+const defValueFrame     = [ fillBlue, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
+const dependFrame       = [ fillRed, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
+const optionsFrame      = [ fillNone, strokeNone, autoLayout, horizontal, wrap, primaryMax, counterMin, gap8, maxWidthMd, wrapGap8 ];
+const smHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap8 ];
+const mdHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap16 ];
+const lgHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap24 ];
+const smVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap8 ];
+const mdVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap16 ];
+const lgVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24 ];
+const iconFrame         = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterCenter, { key: 'minWidth', value: 20 } ];
+const diagramFrame      = [ fillLightGrey, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, padding24, radius4, minWidthSm ];
+const keyFrame          = [ fillPurple, strokeWhite, strokeWeightSm, autoLayout, vertical, primaryCenter, counterCenter, equalSm, radiusSm ];
+
+// Text
+const compTitle         = [ fontInterSbl, font24, fontDefault, fillBlack ];
+const sectionTitle      = [ fontInterMed, font18, fontTitle, fillBlack, fontUnderline ];
+const sectionCopy       = [ fontInterReg, font16, fontDefault, fillGrey ];
+const sectionLink       = [ fontPlexReg, font16, fontDefault, fillLink, fontUnderline ];
+const propTitle         = [ fontPlexReg, font14, fontLower, fillBlack ];
+const valueLabel        = [ fontPlexReg, font12, fontUpper, fillBlack ];
+const keyLabel          = [ fontPlexReg, font10, fontUpper, fillWhite ];
+
+// Shapes
+const keyLine           = [ strokePurple, strokeWeightMd ];
+
 // Create styles
-export const mainFrame      = [ fillNone, strokePurple, strokeDashed, autoLayout, horizontal, minWidthLg, minHeight, primaryMin, counterMin, radius6, gap32, padding32 ];
-export const compFrame      = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24 ];
+export const frame:         any = {
 
-export const sectionFrame   = [ fillWhite, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24, padding24, radius8 ];
-export const propFrame      = [ fillNone, strokeLight, strokeBottomSm, autoLayout, horizontal, primaryMin, counterCenter, gap12, paddingBottom16 ];
-export const typeFrame      = [ fillLightGrey, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
-export const valueFrame     = [ fillOrange, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
-export const defValueFrame  = [ fillBlue, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
-export const dependFrame    = [ fillRed, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
+    main:       mainFrame,
+    comp:       compFrame,
+    section:    sectionFrame,
+    property:   { reg: propFrame, last: propFrameNoBorder },
+    type:       typeFrame,
+    value:      valueFrame,
+    default:    defValueFrame,
+    dependency: dependFrame,
+    h:          { sm: smHFrame, md: mdHFrame, lg: lgHFrame },
+    v:          { sm: smVFrame, md: mdVFrame, lg: lgVFrame },
+    icon:       iconFrame,
+    diagram:    diagramFrame,
+    key:        keyFrame,
+    options:    optionsFrame
 
-export const smHFrame       = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap8 ];
-export const mdHFrame       = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap16 ];
-export const lgHFrame       = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap24 ];
-export const smVFrame       = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterCenter, gap8 ];
-export const mdVFrame       = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterCenter, gap16 ];
-export const lgVFrame       = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterCenter, gap24 ];
+}
+export const text:          any = {
 
-export const compTitle      = [ fontInterSbl, font18, fontDefault, fillBlack ];
-export const sectionTitle   = [ fontInterMed, font16, fontTitle, fillBlack, fontUnderline ];
-export const sectionCopy    = [ fontInterReg, font14, fontDefault, fillGrey ];
-export const sectionLink    = [ fontPlexReg, font14, fontDefault, fillLink, fontUnderline ];
-export const propTitle      = [ fontPlexMed, font14, fontLower, fillBlack ];
-export const valueLabel     = [ fontPlexReg, font12, fontUpper, fillBlack ];
+    title:      { comp: compTitle, section: sectionTitle, prop: propTitle },
+    section:    { copy: sectionCopy, link: sectionLink },
+    label:      { value: valueLabel, key: keyLabel }
 
-export const iconVector        = {
+}
+export const iconVector:    any = {
 
-    BOOLEAN:    [iconBoolean, fillGrey, strokeNone, strokeWeightNone],
-    TEXT:       [iconText, fillGrey, strokeNone, strokeWeightNone],
-    VARIANT:    [iconVariant, fillGrey, strokeNone, strokeWeightNone],
-    DEPENDENCY: [iconDependency, fillGrey, strokeNone, strokeWeightNone]
+    BOOLEAN:        [iconBoolean, fillSubtle, strokeNone, strokeWeightNone],
+    TEXT:           [iconText, fillSubtle, strokeNone, strokeWeightNone],
+    VARIANT:        [iconVariant, fillSubtle, strokeNone, strokeWeightNone],
+    INSTANCE_SWAP:  [iconDependency, fillSubtle, strokeNone, strokeWeightNone]
+
+}
+
+export const shape:         any = {
+
+    key: keyLine
 
 }

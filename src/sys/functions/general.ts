@@ -88,9 +88,47 @@ export function sortArray(array: any, key: any, reverse: any | null = null) {
         const valueA = Array.isArray(a[key]) ? a[key][0] : a[key];
         const valueB = Array.isArray(b[key]) ? b[key][0] : b[key];
 
-        if (reverse)    { return -valueA.localeCompare(valueB)  }
-        else            { return valueA.localeCompare(valueB)   };
+        // Convert values to numbers if possible
+        const numA = parseFloat(valueA);
+        const numB = parseFloat(valueB);
+
+        if (!isNaN(numA) && !isNaN(numB)) {
+
+            // Both values are numbers, compare them directly
+            return reverse ? numB - numA : numA - numB;
+
+        } else {
+
+            // Use localeCompare for string comparison
+            return reverse ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
+            
+        }
 
     });
+
+}
+
+// Clean a string
+export function cleanString(string: string, type: any = null) {
+
+    // Set up
+    let response: any | null = null;
+
+    // Check if there is a string
+    if (string) {
+
+        // Check what type needs to be cleaned
+        if (type === 'property') {
+
+            response = string;
+            response = response.includes('#') ? response.split('#') : response;
+            response = isArray(response) ? response[0] : response;
+
+        }
+
+    }
+
+    //
+    return response;
 
 }

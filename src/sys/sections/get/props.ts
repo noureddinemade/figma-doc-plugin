@@ -18,9 +18,14 @@ export function getProps(component: any) {
             // Get key information for property
             let name:       any | null  = p.key ? p.key : null;
             let type:       any | null  = p.type ? p.type : null;
-                type                    = type === 'INSTANCE_SWAP' ? 'DEPENDENCY' : type;
             let value:      any | null  = p.defaultValue ? p.defaultValue : null;
             let options:    any | null  = p.variantOptions ? p.variantOptions : null;
+
+            // Specify display order
+            let order:      number      = 3 ;
+                order                   = type === 'TEXT' ? 0 : order;
+                order                   = type === 'BOOLEAN' ? 1 : order;
+                order                   = type === 'INSTANCE_SWAP' ? 2 : order;
 
             // Check if there are options
             if (isArray(options)) {
@@ -36,7 +41,7 @@ export function getProps(component: any) {
 
             }
 
-            compProps.push({ name: name, type: type, value: value, options: options });
+            compProps.push({ name: name, type: type, value: value, options: options, order: order });
 
         });
 

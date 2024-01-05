@@ -1,7 +1,10 @@
 // Import
-import { mainFrame } from "../data/styles";
+import { frame, text } from "../data/styles";
 import { make } from "../functions/create";
 import { isArray } from "../functions/general";
+import { showAnatomy } from "./show/anatomy";
+import { showInfo } from "./show/info";
+import { showProps } from "./show/props";
 
 // Get everything required for documentation from a component
 export function showAll(toBeDocumented: any[]) {
@@ -13,7 +16,7 @@ export function showAll(toBeDocumented: any[]) {
     if (isArray(toBeDocumented)) {
 
         // Set up the main frame (lol) for documentation
-        document = make('Documentation', mainFrame, 'frame');
+        document = make('Documentation', frame.main, 'frame');
 
         // Loop thru each item to document
         toBeDocumented.forEach((i: any) => {
@@ -28,22 +31,35 @@ export function showAll(toBeDocumented: any[]) {
             const deps:     any = i.dependencies;
 
             let name:   any = info.name;
-                // name        = 
 
             // Create component frame & title
-            // const compFrame: any = make(`Component: ${i.information.name}`)
+            const cFrame:       any = make(`component`, frame.comp, 'frame');
+            const cTitle:       any = make('label', text.title.comp, 'text', name);
+
+            // Add title to component and component to main frame (lol)
+            cFrame.appendChild(cTitle);
 
             // Show component information
-
-            // Show component properties
+            showInfo(info, cFrame);
 
             // Show component anatomy
+            showAnatomy(anatomy, cFrame);
+
+            // Show component properties
+            showProps(props, cFrame);
 
             // Show component styles
 
             // Show component dependencies
 
+            // Append to document
+            document.appendChild(cFrame);
+            cFrame.layoutSizingHorizontal = 'HUG';
+
         });
+
+        //
+        document.layoutSizingHorizontal = 'HUG';
 
     }
 

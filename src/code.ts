@@ -14,13 +14,10 @@ if (isArray(selection)) {
     if (isArray(fonts)) { for (const f of fonts) { await figma.loadFontAsync(f) } };
 
     // Run the plugin
-    try { runPlugin(selection) }
+    try { runPlugin(selection); notifyAndClose('All done baby!'); }
 
     // Catch any errors, log in the console and close plugin
     catch(error: any) { handleError('😢😢 Something went wrong', error) }
-
-    // Close plugin and clear console once all is done
-    finally { notifyAndClose('All done baby!') }
 
 }
 
