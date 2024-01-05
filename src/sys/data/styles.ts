@@ -6,6 +6,7 @@ const fillWhite         = { key: 'fills', value:[{ type: 'SOLID', color: convert
 const fillOrange        = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('FFEEDA') }]};
 const fillBlue          = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('DAEDFF') }]};
 const fillRed           = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('FFC7C7') }]};
+const fillRedDark       = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('910000') }]};
 const fillPurple        = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('622BA9') }]};
 const fillBlack         = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('000000') }]};
 const fillGrey          = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('222222') }]};
@@ -15,7 +16,7 @@ const fillLink          = { key: 'fills', value:[{ type: 'SOLID', color: convert
 const fillNone          = { key: 'fills', value:[]};
 
 // Stroke
-const strokePurple      = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('9747FF') }]};
+const strokePurple      = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('622BA9') }]};
 const strokeBlack       = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('000000') }]};
 const strokeLight       = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('EBEBEB') }]};
 const strokeWhite       = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('FFFFFF') }]};
@@ -101,7 +102,10 @@ const horizontal        = { key: 'layoutMode', value: 'HORIZONTAL' };
 const vertical          = { key: 'layoutMode', value: 'VERTICAL' };
 const wrap              = { key: 'layoutWrap', value: 'WRAP' };
 const noContentClip     = { key: 'clipsContent', value: false };
-const absolute          = { key: 'layoutPositioning', value: 'ABSOLUTE' };
+const rotate45          = { key: 'rotation', value: 45  };
+const rotate90          = { key: 'rotation', value: 90  };
+const rotate180         = { key: 'rotation', value: 180 };
+
 
 // Size
 const maxWidthXl        = { key: 'maxWidth', value: 1200 };
@@ -111,6 +115,7 @@ const minWidthMd        = { key: 'minWidth', value: 600 };
 const maxWidthMd        = { key: 'maxWidth', value: 600 };
 const minWidthSm        = { key: 'minWidth', value: 380 };
 const maxWidthSm        = { key: 'maxWidth', value: 380 };
+const minHeightSm       = { key: 'minHeight', value: 380 };
 const minHeight         = { key: 'minHeight', value: 100 };
 const equalSm           = [ { key: 'minWidth', value: 16 },{ key: 'maxWidth', value: 16 }, { key: 'minHeight', value: 16 }, { key: 'maxHeight', value: 16 } ];
 const equalMd           = [ { key: 'minWidth', value: 24 },{ key: 'maxWidth', value: 24 }, { key: 'minHeight', value: 24 }, { key: 'maxHeight', value: 24 } ];
@@ -153,14 +158,15 @@ const defValueFrame     = [ fillBlue, strokeNone, autoLayout, vertical, primaryC
 const dependFrame       = [ fillRed, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
 const optionsFrame      = [ fillNone, strokeNone, autoLayout, horizontal, wrap, primaryMax, counterMin, gap8, maxWidthMd, wrapGap8 ];
 const smHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap8 ];
-const mdHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap16 ];
+const mdHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterMin, gap16 ];
 const lgHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap24 ];
+const xsVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap4 ];
 const smVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap8 ];
 const mdVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap16 ];
 const lgVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24 ];
 const iconFrame         = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterCenter, { key: 'minWidth', value: 20 } ];
 const diagramFrame      = [ fillLightGrey, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, padding24, radius4, minWidthSm ];
-const keyFrame          = [ fillPurple, strokeWhite, strokeWeightSm, autoLayout, vertical, primaryCenter, counterCenter, equalSm, radiusSm ];
+const keyFrame          = [ fillPurple, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, equalSm, radiusSm ];
 
 // Text
 const compTitle         = [ fontInterSbl, font24, fontDefault, fillBlack ];
@@ -170,9 +176,10 @@ const sectionLink       = [ fontPlexReg, font16, fontDefault, fillLink, fontUnde
 const propTitle         = [ fontPlexReg, font14, fontLower, fillBlack ];
 const valueLabel        = [ fontPlexReg, font12, fontUpper, fillBlack ];
 const keyLabel          = [ fontPlexReg, font10, fontUpper, fillWhite ];
+const dependencyLabel   = [ fontPlexMed, font12, fontUpper, fillRedDark ];
 
 // Shapes
-const keyLine           = [ strokePurple, strokeWeightMd ];
+const keyLine           = [ strokePurple, rotate90 ];
 
 // Create styles
 export const frame:         any = {
@@ -186,7 +193,7 @@ export const frame:         any = {
     default:    defValueFrame,
     dependency: dependFrame,
     h:          { sm: smHFrame, md: mdHFrame, lg: lgHFrame },
-    v:          { sm: smVFrame, md: mdVFrame, lg: lgVFrame },
+    v:          { xs: xsVFrame, sm: smVFrame, md: mdVFrame, lg: lgVFrame },
     icon:       iconFrame,
     diagram:    diagramFrame,
     key:        keyFrame,
@@ -197,7 +204,7 @@ export const text:          any = {
 
     title:      { comp: compTitle, section: sectionTitle, prop: propTitle },
     section:    { copy: sectionCopy, link: sectionLink },
-    label:      { value: valueLabel, key: keyLabel }
+    label:      { value: valueLabel, key: keyLabel, dependency: dependencyLabel }
 
 }
 export const iconVector:    any = {

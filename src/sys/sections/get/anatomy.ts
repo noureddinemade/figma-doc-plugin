@@ -2,7 +2,7 @@
 import { frame, shape, text } from "../../data/styles";
 import { belongsToInstance, anyChildren, isInstance, findBaseComp } from "../../functions/component";
 import { make, makeInstance } from "../../functions/create";
-import { isArray } from "../../functions/general";
+import { convertColour, isArray } from "../../functions/general";
 
 // Get the anatomy of the component
 export function getAnatomy(props: any, children: any) {
@@ -85,21 +85,20 @@ export function getAnatomy(props: any, children: any) {
                     count = count + 1;
                     const keyFrame  = make('number', frame.key, 'frame');
                     const keyLabel  = make('label', text.label.key, 'text', String(count));
-                    // const keyLine   = make('line', shape.key, 'line');
 
                     // Append
                     keyFrame.appendChild(keyLabel);
-                    // diagram.appendChild(keyLine);
                     diagram.appendChild(keyFrame);
 
                     // Position & size
                     const match     = matches[0];
                     const matchX    = match.x + match.width / 2;
-                    const matchY    = key % 2 === 0 ? match.y + 32 : match.y - 32;
+                    const matchY    = key % 2 === 0 ? match.y + 8 : match.y - 8;
 
                     keyFrame.layoutPositioning = 'ABSOLUTE';
-                    keyFrame.x = matchX;
-                    keyFrame.y = matchY;
+                    keyFrame.x  = matchX - 8;
+                    keyFrame.y  = matchY;
+                    keyFrame.rescale(.8);
 
                 
                 };

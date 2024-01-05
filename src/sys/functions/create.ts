@@ -12,7 +12,7 @@ export function make(name: string, props: any, type: any, text: any = null) {
     if (type === 'frame')   { response = figma.createFrame();   }
     if (type === 'text')    { response = figma.createText();    }
     if (type === 'vector')  { response = figma.createVector();  }
-    if (type === 'line')    { response = figma.createLine();    }
+    // if (type === 'line')    { response = figma.createLine();    }
 
     // Assign name
     response.name = name;

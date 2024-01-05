@@ -54,17 +54,32 @@ export function showAnatomy(anatomy: any, appendTo: any) {
         anatomy.children.forEach((c: any, key: number) => {
 
             // Create needed objects for item
-            const itemFrame = make('key', frame.h.sm, 'frame');
-            const itemLabel = make('label', text.title.prop, 'text', c.name);
+            const itemFrame = make('item', frame.h.md, 'frame');
+            const textFrame = make('labels', frame.v.xs, 'frame');
+            const itemLabel = make('name', text.section.copy, 'text', c.name);
+            const typeLabel = make('type', text.label.value, 'text', c.type);
             const keyFrame  = make('number', frame.key, 'frame');
             const keyNumber = key+1
             const keyLabel  = make('label', text.label.key, 'text', String(keyNumber));
+            
+            let depends: any | null = null;
+
+            if (c.type === 'INSTANCE') {
+
+                depends = make('dependency', text.label.dependency, 'text', `Dependency: ${c.mainComponent.name}`);
+
+            } 
+            
 
             // Append
             keyFrame.appendChild(keyLabel);
             itemFrame.appendChild(keyFrame);
-            itemFrame.appendChild(itemLabel);
+            textFrame.appendChild(itemLabel);
+            textFrame.appendChild(typeLabel);
+            if (depends) { textFrame.appendChild(depends) };
+            itemFrame.appendChild(textFrame);
             keys.appendChild(itemFrame);
+            itemFrame.layoutSizingHorizontal = 'FILL';
 
         });
 
@@ -72,12 +87,10 @@ export function showAnatomy(anatomy: any, appendTo: any) {
         content.appendChild(keys);
         content.appendChild(diagramFrame);
         keys.layoutSizingHorizontal = 'FILL';
+        diagramFrame.layoutSizingHorizontal = 'FILL';
         diagramFrame.layoutSizingVertical = 'FILL';
 
     }
-
-    // To produce the anatomy, the plugin traverses the node’s layers to itemize and mark text, instances, and other shapes as elements.
-    // Each itemized component is enumerated in the content, with instances highlighting dependency name and relevant prop values and other nodes reflecting visual attributes and styles. In the artwork, markers are placed on the periphery, prioritizing the left edge and finding a location on any edge that hasn’t already been used.
 
     // Append to component frame if available
     if (section && appendTo) {
