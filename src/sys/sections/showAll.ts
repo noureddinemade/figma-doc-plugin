@@ -46,7 +46,7 @@ export function showAll(toBeDocumented: any[]) {
             showProps(props, cFrame);
 
             // Show component anatomy
-            showAnatomy(anatomy, cFrame);
+            // showAnatomy(anatomy, cFrame);
 
             // Show component styles
 

@@ -1,4 +1,4 @@
-import { frame, text } from "../data/styles";
+import { frame, text, iconVector } from "../data/styles";
 import { findBaseComp } from "./component";
 import { isArray } from "./general";
 
@@ -75,82 +75,56 @@ export function makeInstance(name: string, props: any = null, pluginData: any = 
 }
 
 // Make item
-export function makeItem(label: any = null, icon: any = null, type: any = null, options: any = null, dependency: any = null, last: boolean = false, value: any = null) {
+export function makeItem(type: any, properties: any = null) {
 
     // Set up
-    const itemFrame:    any = make('item', frame.property, 'frame');
-    const itemHeader:   any = make('header', frame.h.md, 'frame');
-    const itemInfo:     any = make('info', frame.h.sm, 'frame');
-    const itemIcon:     any = make('icon', frame.h.sm, 'frame');
-    const typeFrame:    any = make('type', frame.type, 'frame');
+    const item:             any = make('item', frame.property, 'frame');
+    const itemLabel:        any = make('label', text.section.copy, 'text', String(type));
+    const itemIconFrame:    any = make('icon', frame.h.sm, 'frame');
+    const itemIcon:         any = make(type, iconVector[type], 'vector');
+    const itemHeader:       any = make('header', frame.h.md, 'frame');
+    const itemOptions:      any = properties ? makeProperties(properties) : null;
 
-    // Append properties if available
-    if (icon) {
+    // Append
+    itemIconFrame.appendChild(itemIcon);
+    itemHeader.appendChild(itemIconFrame);
+    itemHeader.appendChild(itemLabel);
+    item.appendChild(itemHeader);
 
-        itemIcon.appendChild(icon);
-        itemHeader.appendChild(itemIcon);
-        icon.resize(10, 10);
+    // Add options if available
+    if (isArray(itemOptions)) { itemOptions.forEach((i: any) => item.appendChild(i) ) };
 
-    };
-    
-    if (label) { 
-        
-        itemHeader.appendChild(label);
-    };
+    return item;
 
-    if (type) {
-        
-        typeFrame.appendChild(type);
-        itemInfo.appendChild(typeFrame);
-    
-    };
-    
-    if (isArray(options)) { 
+}
 
-        // Create options frame
-        const optionsFrame = make('options', frame.options, 'frame');
+// Make Options
+export function makeProperties(properties: any[]) {
 
-        // Loop thru options
-        options.forEach((o: any) => {
+    // Set up
+    const items: any[] = [];
 
-            // Create frame and label
-            const frameprops    = o === value ? frame.default : frame.value;
-            const optionFrame   = make('option', frameprops, 'frame');
-            const optionLabel   = make('label', text.label.value, 'text', String(o));
+    // Loop thru options and create a label and frame for each one
+    properties.forEach((o: any) => {
 
-            // Append
-            optionFrame.appendChild(optionLabel);
-            optionsFrame.appendChild(optionFrame);
-
-        });
-        
-        itemInfo.appendChild(optionsFrame);
-    };
-
-    if (dependency) {
-    
-        // Create frame and label
-        const depends   = make('dependency', frame.dependency, 'frame');
-        const depLabel  = make('label', text.label.dependency, 'text', `Dependency: ${dependency}`);
+        // Create required items
+        const property: any = make('options', frame.options, 'frame');
 
         // Append
-        depends.appendChild(depLabel);
-        
-        itemInfo.appendChild(depends);
-    
-    };
+        // optionFrame.appendChild(optionLabel);
+        // item.appendChild(optionFrame);
 
-    // Append header and info to main frame (lol)
-    itemFrame.appendChild(itemHeader);
-    itemFrame.appendChild(itemInfo);
+        // Check if there are option for this item
+        if (isArray(o.options)) {
+            
+        }
 
-    // Edit properties
-    itemInfo.paddingLeft = 28;
-    itemHeader.counterAxisAlignItems = 'CENTER';
-    if (last) { itemFrame.strokes = [] };
+        // Add to items
+        items.push(property);
 
+    });
 
-    //
-    return label ? itemFrame : null;
+    // 
+    return items;
 
 }

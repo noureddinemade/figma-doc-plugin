@@ -54,6 +54,7 @@ const paddingTop24      = { key: 'paddingTop', value: 24 };
 const paddingRight24    = { key: 'paddingRight', value: 24 };
 const paddingBottom24   = { key: 'paddingBottom', value: 24 };
 const paddingLeft24     = { key: 'paddingLeft', value: 24 };
+const paddingLeft28     = { key: 'paddingLeft', value: 28 };
 const paddingTop32      = { key: 'paddingTop', value: 32 };
 const paddingRight32    = { key: 'paddingRight', value: 32 };
 const paddingBottom32   = { key: 'paddingBottom', value: 32 };
@@ -157,7 +158,7 @@ const typeFrame         = [ fillLightGrey, strokeNone, autoLayout, vertical, pri
 const valueFrame        = [ fillNone, strokeLight, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
 const defValueFrame     = [ fillNone, strokeBlack, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
 const dependFrame       = [ fillNone, strokeRedDark, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
-const optionsFrame      = [ fillNone, strokeNone, autoLayout, horizontal, wrap, primaryMax, counterMin, gap8, maxWidthMd, wrapGap8 ];
+const optionsFrame      = [ fillNone, strokeNone, autoLayout, horizontal, wrap, primaryMax, counterMin, gap8, maxWidthMd, wrapGap8, paddingLeft28 ];
 const smHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap8, noContentClip ];
 const mdHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterMin, gap16, noContentClip ];
 const lgHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap24, noContentClip ];
@@ -209,9 +210,9 @@ export const text:          any = {
 }
 export const iconVector:    any = {
 
-    BOOLEAN:        [iconBoolean, fillGrey, strokeNone, strokeWeightNone],
-    TEXT:           [iconText, fillGrey, strokeNone, strokeWeightNone],
-    VARIANT:        [iconVariant, fillGrey, strokeNone, strokeWeightNone],
-    INSTANCE_SWAP:  [iconDependency, fillGrey, strokeNone, strokeWeightNone]
+    Boolean:    [iconBoolean, fillGrey, strokeNone, strokeWeightNone],
+    Text:       [iconText, fillGrey, strokeNone, strokeWeightNone],
+    Variant:    [iconVariant, fillGrey, strokeNone, strokeWeightNone],
+    Instance:   [iconDependency, fillGrey, strokeNone, strokeWeightNone]
 
 }

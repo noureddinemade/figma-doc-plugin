@@ -19,8 +19,6 @@ export function getAll(selection: any) {
 
         if (c.type === 'COMPONENT' || c.type === 'COMPONENT_SET' ) {
 
-            console.log(c);
-
             // Set up base component
             setBaseComp(c);
 
@@ -29,8 +27,6 @@ export function getAll(selection: any) {
 
             // Get component properties
             const compProps: any = getProps(c);
-            
-            if (isArray(compProps)) { sortArray(compProps, 'type') };
 
             // Get component children
             const compChildren: any = getChildren(c);
@@ -43,8 +39,6 @@ export function getAll(selection: any) {
 
             // Get component style
             const compStyles: any = getStyles(c);
-
-            // console.log(compStyles);
 
             // Add each component to response
             response.push({

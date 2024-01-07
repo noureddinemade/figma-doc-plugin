@@ -10,7 +10,7 @@ export function getAnatomy(props: any) {
     let compAnatomy: any | null = null;
 
     // Get all boolean props from component
-    const booleanProps:     any     = isArray(props) ? props.filter((a: any) => a.type === 'BOOLEAN') : null;
+    const booleanProps:     any     = isArray(props.boolean) ? props.boolean : null;
     const propsForInstance: any[]   = [];
 
     // Check if there are any booleans props
@@ -34,7 +34,7 @@ export function getAnatomy(props: any) {
         // Loop thru children
         instChildren.forEach((c: any) => {
 
-            // Find out if this child or it's parent is an instance
+            // Label eligible children
             const c1 = isInstance(c);
             const c2 = c.parent.name === instance.name;
             const c3 = c.parent.type === 'INSTANCE';
