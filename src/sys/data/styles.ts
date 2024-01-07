@@ -9,6 +9,7 @@ const fillRed           = { key: 'fills', value:[{ type: 'SOLID', color: convert
 const fillRedDark       = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('910000') }]};
 const fillPurple        = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('622BA9') }]};
 const fillBlack         = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('000000') }]};
+const fillDarkGrey      = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('232323') }]};
 const fillGrey          = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('222222') }]};
 const fillSubtle        = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('BBBBBB') }]};
 const fillLightGrey     = { key: 'fills', value:[{ type: 'SOLID', color: convertColour('EBEBEB') }]};
@@ -20,6 +21,7 @@ const strokePurple      = { key: 'strokes', value:[{ type: 'SOLID', color: conve
 const strokeBlack       = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('000000') }]};
 const strokeLight       = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('EBEBEB') }]};
 const strokeWhite       = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('FFFFFF') }]};
+const strokeRedDark     = { key: 'strokes', value:[{ type: 'SOLID', color: convertColour('910000') }]};
 const strokeNone        = { key: 'strokes', value: [] };
 const strokeDashed      = { key: 'dashPattern', value: [10,5] };
 const strokeSolid       = { key: 'dashPattern', value: [] };
@@ -150,23 +152,22 @@ const iconDependency    = { key: 'vectorPaths', value: [{ windingRule: 'EVENODD'
 const mainFrame         = [ fillNone, strokePurple, strokeDashed, autoLayout, horizontal, minWidthLg, minHeight, primaryMin, counterMin, radius6, gap32, padding32 ];
 const compFrame         = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24, noContentClip, minWidthLg, maxWidthXl ];
 const sectionFrame      = [ fillWhite, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24, padding24, radius8, noContentClip ];
-const propFrame         = [ fillNone, strokeLight, strokeBottomSm, autoLayout, horizontal, primaryMin, counterMin, gap12, paddingBottom16 ];
-const propFrameNoBorder = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterMin, gap12, paddingBottom16 ];
+const propFrame         = [ fillNone, strokeLight, strokeBottomSm, autoLayout, vertical, primaryMin, counterMin, gap8, paddingBottom16 ];
 const typeFrame         = [ fillLightGrey, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
-const valueFrame        = [ fillOrange, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
-const defValueFrame     = [ fillBlue, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
-const dependFrame       = [ fillRed, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
+const valueFrame        = [ fillNone, strokeLight, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
+const defValueFrame     = [ fillNone, strokeBlack, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
+const dependFrame       = [ fillNone, strokeRedDark, autoLayout, vertical, primaryCenter, counterCenter, paddingTop4, paddingBottom4, paddingRight8, paddingLeft8, radius4 ];
 const optionsFrame      = [ fillNone, strokeNone, autoLayout, horizontal, wrap, primaryMax, counterMin, gap8, maxWidthMd, wrapGap8 ];
-const smHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap8 ];
-const mdHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterMin, gap16 ];
-const lgHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap24 ];
-const xsVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap4 ];
-const smVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap8 ];
-const mdVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap16 ];
-const lgVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24 ];
+const smHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap8, noContentClip ];
+const mdHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterMin, gap16, noContentClip ];
+const lgHFrame          = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterCenter, gap24, noContentClip ];
+const xsVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap4, noContentClip ];
+const smVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap8, noContentClip ];
+const mdVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap16, noContentClip ];
+const lgVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24, noContentClip ];
 const iconFrame         = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterCenter, { key: 'minWidth', value: 20 } ];
-const diagramFrame      = [ fillLightGrey, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, padding24, radius4, minWidthSm ];
-const keyFrame          = [ fillPurple, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, equalSm, radiusSm ];
+const diagramFrame      = [ fillLightGrey, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, padding24, radius4, minWidthSm, noContentClip ];
+const keyFrame          = [ strokeNone, autoLayout, vertical, primaryCenter, counterCenter, equalSm, radiusSm ];
 
 // Text
 const compTitle         = [ fontInterSbl, font24, fontDefault, fillBlack ];
@@ -174,12 +175,11 @@ const sectionTitle      = [ fontInterMed, font18, fontTitle, fillBlack, fontUnde
 const sectionCopy       = [ fontInterReg, font16, fontDefault, fillGrey ];
 const sectionLink       = [ fontPlexReg, font16, fontDefault, fillLink, fontUnderline ];
 const propTitle         = [ fontPlexReg, font14, fontLower, fillBlack ];
+const typeLabel         = [ fontPlexReg, font12, fontUpper, fillBlack ];
 const valueLabel        = [ fontPlexReg, font12, fontUpper, fillBlack ];
-const keyLabel          = [ fontPlexReg, font10, fontUpper, fillWhite ];
-const dependencyLabel   = [ fontPlexMed, font12, fontUpper, fillRedDark ];
-
-// Shapes
-const keyLine           = [ strokePurple, rotate90 ];
+const defValueLabel     = [ fontPlexReg, font12, fontUpper, fillBlack, fontUnderline ];
+const keyLabel          = [ fontPlexReg, font10, fontUpper, fillBlack ];
+const dependencyLabel   = [ fontPlexReg, font12, fontUpper, fillRedDark ];
 
 // Create styles
 export const frame:         any = {
@@ -187,7 +187,7 @@ export const frame:         any = {
     main:       mainFrame,
     comp:       compFrame,
     section:    sectionFrame,
-    property:   { reg: propFrame, last: propFrameNoBorder },
+    property:   propFrame,
     type:       typeFrame,
     value:      valueFrame,
     default:    defValueFrame,
@@ -204,20 +204,14 @@ export const text:          any = {
 
     title:      { comp: compTitle, section: sectionTitle, prop: propTitle },
     section:    { copy: sectionCopy, link: sectionLink },
-    label:      { value: valueLabel, key: keyLabel, dependency: dependencyLabel }
+    label:      { value: valueLabel, key: keyLabel, dependency: dependencyLabel, def: defValueLabel, type: typeLabel }
 
 }
 export const iconVector:    any = {
 
-    BOOLEAN:        [iconBoolean, fillSubtle, strokeNone, strokeWeightNone],
-    TEXT:           [iconText, fillSubtle, strokeNone, strokeWeightNone],
-    VARIANT:        [iconVariant, fillSubtle, strokeNone, strokeWeightNone],
-    INSTANCE_SWAP:  [iconDependency, fillSubtle, strokeNone, strokeWeightNone]
-
-}
-
-export const shape:         any = {
-
-    key: keyLine
+    BOOLEAN:        [iconBoolean, fillGrey, strokeNone, strokeWeightNone],
+    TEXT:           [iconText, fillGrey, strokeNone, strokeWeightNone],
+    VARIANT:        [iconVariant, fillGrey, strokeNone, strokeWeightNone],
+    INSTANCE_SWAP:  [iconDependency, fillGrey, strokeNone, strokeWeightNone]
 
 }

@@ -42,11 +42,11 @@ export function showAll(toBeDocumented: any[]) {
             // Show component information
             showInfo(info, cFrame);
 
-            // Show component anatomy
-            showAnatomy(anatomy, cFrame);
-
             // Show component properties
             showProps(props, cFrame);
+
+            // Show component anatomy
+            showAnatomy(anatomy, cFrame);
 
             // Show component styles
 

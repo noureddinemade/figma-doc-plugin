@@ -9,10 +9,11 @@ export function make(name: string, props: any, type: any, text: any = null) {
     let response: any | null;
 
     // Create based on type
-    if (type === 'frame')   { response = figma.createFrame();   }
-    if (type === 'text')    { response = figma.createText();    }
-    if (type === 'vector')  { response = figma.createVector();  }
-    // if (type === 'line')    { response = figma.createLine();    }
+    if (type === 'frame')   { response = figma.createFrame();       };
+    if (type === 'text')    { response = figma.createText();        };
+    if (type === 'vector')  { response = figma.createVector();      };
+    if (type === 'circle')  { response = figma.createEllipse();     };
+    if (type === 'rect')    { response = figma.createRectangle();   };
 
     // Assign name
     response.name = name;
@@ -70,5 +71,86 @@ export function makeInstance(name: string, props: any = null, pluginData: any = 
 
     // Return instance
     return instance;
+
+}
+
+// Make item
+export function makeItem(label: any = null, icon: any = null, type: any = null, options: any = null, dependency: any = null, last: boolean = false, value: any = null) {
+
+    // Set up
+    const itemFrame:    any = make('item', frame.property, 'frame');
+    const itemHeader:   any = make('header', frame.h.md, 'frame');
+    const itemInfo:     any = make('info', frame.h.sm, 'frame');
+    const itemIcon:     any = make('icon', frame.h.sm, 'frame');
+    const typeFrame:    any = make('type', frame.type, 'frame');
+
+    // Append properties if available
+    if (icon) {
+
+        itemIcon.appendChild(icon);
+        itemHeader.appendChild(itemIcon);
+        icon.resize(10, 10);
+
+    };
+    
+    if (label) { 
+        
+        itemHeader.appendChild(label);
+    };
+
+    if (type) {
+        
+        typeFrame.appendChild(type);
+        itemInfo.appendChild(typeFrame);
+    
+    };
+    
+    if (isArray(options)) { 
+
+        // Create options frame
+        const optionsFrame = make('options', frame.options, 'frame');
+
+        // Loop thru options
+        options.forEach((o: any) => {
+
+            // Create frame and label
+            const frameprops    = o === value ? frame.default : frame.value;
+            const optionFrame   = make('option', frameprops, 'frame');
+            const optionLabel   = make('label', text.label.value, 'text', String(o));
+
+            // Append
+            optionFrame.appendChild(optionLabel);
+            optionsFrame.appendChild(optionFrame);
+
+        });
+        
+        itemInfo.appendChild(optionsFrame);
+    };
+
+    if (dependency) {
+    
+        // Create frame and label
+        const depends   = make('dependency', frame.dependency, 'frame');
+        const depLabel  = make('label', text.label.dependency, 'text', `Dependency: ${dependency}`);
+
+        // Append
+        depends.appendChild(depLabel);
+        
+        itemInfo.appendChild(depends);
+    
+    };
+
+    // Append header and info to main frame (lol)
+    itemFrame.appendChild(itemHeader);
+    itemFrame.appendChild(itemInfo);
+
+    // Edit properties
+    itemInfo.paddingLeft = 28;
+    itemHeader.counterAxisAlignItems = 'CENTER';
+    if (last) { itemFrame.strokes = [] };
+
+
+    //
+    return label ? itemFrame : null;
 
 }

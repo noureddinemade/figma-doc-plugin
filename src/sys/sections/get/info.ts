@@ -1,5 +1,7 @@
 // Import
 
+import { isArray } from "../../functions/general";
+
 // Get name, id, description and link from component
 export function getInfo(component: any) {
 
@@ -10,7 +12,7 @@ export function getInfo(component: any) {
     let compDesc:   any = component.description;
         compDesc        = compDesc ? compDesc : null;
     let compLink:   any = component.documentationLinks;
-        compLink        = compLink ? compLink[0].uri : compLink;
+        compLink        = isArray(compLink) ? compLink[0].uri : compLink;
         compLink        = compLink ? compLink : null;
 
     //

@@ -112,17 +112,23 @@ export function sortArray(array: any, key: any, reverse: any | null = null) {
 export function cleanString(string: string, type: any = null) {
 
     // Set up
-    let response: any | null = null;
+    let response: any = string;
 
     // Check if there is a string
     if (string) {
 
-        // Check what type needs to be cleaned
+        // Remove number and hash from property name
         if (type === 'property') {
 
-            response = string;
             response = response.includes('#') ? response.split('#') : response;
             response = isArray(response) ? response[0] : response;
+
+        }
+
+        // Remove anatomy notes from child name
+        if (type === 'anatomy') {
+
+            response = response.replace('forAnatomy===', '');
 
         }
 

@@ -32,7 +32,7 @@ export function setBaseComp(selected: any) {
     let baseComp: any;
 
     // Check what the selected item is
-    selected.type === 'COMPONENT_SET' ? baseComp = selected.children[0] : selected;
+    selected.type === 'COMPONENT_SET' ? baseComp = selected.children[0] : baseComp = selected;
 
     baseComp.setPluginData('baseComponent', 'true');
 

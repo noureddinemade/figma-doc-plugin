@@ -1,7 +1,8 @@
 // Import
 import { frame, text } from "../../data/styles";
-import { make, makeSection } from "../../functions/create";
-import { isArray } from "../../functions/general";
+import { generateColours } from "../../functions/colours";
+import { make, makeItem, makeSection } from "../../functions/create";
+import { cleanString, convertColour } from "../../functions/general";
 import { getChildren } from "../get/children";
 
 // Show all the component information like id, description and link
@@ -12,7 +13,7 @@ export function showAnatomy(anatomy: any, appendTo: any) {
     let content: any | null = null;
 
     // Check if there is anatomy
-    if (anatomy && anatomy.instance && anatomy.diagram && isArray(anatomy.children)) {
+    if (anatomy) {
 
         // Create the anatomy frame and title
         section = makeSection('Anatomy');
@@ -21,65 +22,79 @@ export function showAnatomy(anatomy: any, appendTo: any) {
         // Create diagram frame and append diagram instance to it
         const diagramFrame = make('diagram', frame.diagram, 'frame');
         
-        diagramFrame.appendChild(anatomy.instance);
-        diagramFrame.appendChild(anatomy.diagram);
-        anatomy.diagram.layoutPositioning = 'ABSOLUTE';
-        anatomy.diagram.constraints = { horizontal: 'CENTER', vertical: 'CENTER' };
-        anatomy.diagram.x = anatomy.instance.x;
-        anatomy.diagram.y = anatomy.instance.y;
+        diagramFrame.appendChild(anatomy);
 
-        // Get children from diagram instance
-        const diagramChildren: any = getChildren(anatomy.instance);
+        // Create an overlay for the the diagram frame
+        const diagramOverlay = make('overlay', null, 'rect');
 
-        // Check if there are any children
-        if (isArray(diagramChildren)) {
+        diagramFrame.appendChild(diagramOverlay);
 
-            // Loop thru children and add custom ID
-            diagramChildren.forEach((c: any) => {
+        diagramOverlay.layoutPositioning = 'ABSOLUTE';
+        diagramOverlay.x = 0;
+        diagramOverlay.y = 0;
+        diagramOverlay.resize(diagramFrame.width, diagramFrame.height);
+        diagramOverlay.constraints = { horizontal: 'STRETCH', vertical: 'STRETCH' };
+        diagramOverlay.fills = [{ type: 'SOLID', color: convertColour('FFFFFF'), opacity: .7 }];
 
-                let newId = c.id;
-                    newId = c.id.split(';');
-                    newId = isArray(newId) ? newId[1] : newId;
-                
-                c.setPluginData('anatomyId', newId);
-            
-            })
+        // Create an overlay frame to house all the keys and resize it to match anatomy instance then append to diagramFrame
+        const keysOverlay = make('keysOverlay', frame.h.sm, 'frame');
 
-        }
+        keysOverlay.resize(anatomy.width, anatomy.height);
+        keysOverlay.x = anatomy.x;
+        keysOverlay.y = anatomy.y;
+        keysOverlay.clipsContent = false;
+        
+        diagramFrame.appendChild(keysOverlay);
+        keysOverlay.layoutPositioning = 'ABSOLUTE';
+        keysOverlay.constraints = { horizontal: 'CENTER', vertical: 'CENTER' };
+
+        let children: any   = getChildren(anatomy);
+            children        = children.filter((a: any) => a.name.includes('forAnatomy==='));
 
         // Create a frame to house keys
         const keys = make('keys', frame.v.md, 'frame');
 
+        // Unique colour set
+        const keyColours: Set<string> = new Set();
+
         // Loop thru children
-        anatomy.children.forEach((c: any, key: number) => {
+        children.forEach((c: any, key: number) => {
 
             // Create needed objects for item
-            const itemFrame = make('item', frame.h.md, 'frame');
-            const textFrame = make('labels', frame.v.xs, 'frame');
-            const itemLabel = make('name', text.section.copy, 'text', c.name);
-            const typeLabel = make('type', text.label.value, 'text', c.type);
-            const keyFrame  = make('number', frame.key, 'frame');
-            const keyNumber = key+1
-            const keyLabel  = make('label', text.label.key, 'text', String(keyNumber));
+            const cleanName = cleanString(c.name, 'anatomy');
+            const itemLabel = make('name', text.section.copy, 'text', cleanName);
+            const typeLabel = make('label', text.label.type, 'text', c.type);
+            const keyFrame  = make('key', null, 'circle');
+
+            let keyColour: any  = generateColours(1, keyColours);
+                keyColour       = keyColour[0];
+
+            // Edit item's properties
+            keyFrame.fills  = [{ type: 'SOLID', color: convertColour(keyColour) }];
             
-            let depends: any | null = null;
+            // Set up dependency text
+            let depends:    any | null  = null;
+            let last:       boolean     = false;
 
-            if (c.type === 'INSTANCE') {
+            if (c.type === 'INSTANCE') { depends = c.mainComponent.name };
 
-                depends = make('dependency', text.label.dependency, 'text', `Dependency: ${c.mainComponent.name}`);
+            // Clone keyFrame
+            const keyDot = keyFrame.clone();
 
-            } 
-            
+            // Create item
+            const itemFrame = makeItem(itemLabel, keyFrame, typeLabel, null, depends, last);
 
             // Append
-            keyFrame.appendChild(keyLabel);
-            itemFrame.appendChild(keyFrame);
-            textFrame.appendChild(itemLabel);
-            textFrame.appendChild(typeLabel);
-            if (depends) { textFrame.appendChild(depends) };
-            itemFrame.appendChild(textFrame);
             keys.appendChild(itemFrame);
+            keysOverlay.appendChild(keyDot);
+
+            keyDot.layoutPositioning = 'ABSOLUTE';
             itemFrame.layoutSizingHorizontal = 'FILL';
+
+            // Adjust dot
+            keyDot.x = c.x;
+            keyDot.y = key % 2 === 0 ? c.y + 6 : c.y - 6;
+            keyDot.resize(10,10);
 
         });
 

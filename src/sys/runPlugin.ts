@@ -14,4 +14,6 @@ export function runPlugin(selection: any) {
     // Go to documentation
     figma.viewport.scrollAndZoomIntoView([doneDocument]);
 
+    // Clean up custom data, return names to normal etc.
+
 }

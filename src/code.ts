@@ -10,8 +10,6 @@ const selection: any = figma.currentPage.selection;
 // Check if the user has selected anything and that if what they selected is a component
 if (isArray(selection)) {
 
-    console.log(selection[0]);
-
     // Load fonts
     if (isArray(fonts)) { for (const f of fonts) { await figma.loadFontAsync(f) } };
 
