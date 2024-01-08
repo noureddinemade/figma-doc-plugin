@@ -1,6 +1,6 @@
 // Import
 import { frame, iconVector, text } from "../../data/styles";
-import { make, makeItem, makeOptions, makeSection } from "../../functions/create";
+import { make, makeInstance, makeItem, makeSection } from "../../functions/create";
 import { cleanString, isArray, sortArray } from "../../functions/general";
 
 // Show all the component information like id, description and link
@@ -9,65 +9,72 @@ export function showProps(props: any, appendTo: any) {
     // Set up
     let section:    any | null = null;
     let content:    any | null = null;
-
-    // Type checks
-    props.text
-    props.boolean
-    props.variant
-    props.instance
+    let properties: any | null = null;
+    let instance:   any | null = null;
 
     // Check if there is component information
     if (props) {
 
-        section = makeSection('Properties');
-        content = make('content', frame.v.md, 'frame');
+        section     = makeSection('Properties');
+        content     = make('content', frame.h.md, 'frame');
+        properties  = make('properties', frame.v.md, 'frame');
+        instance    = make('component', frame.diagram, 'frame');
 
-        // Loop thru properties of each section
+        // Add each type of property
+        // TEXT
         if (isArray(props.text)) {
 
-            const item      = makeItem('Text', props.text);
+            const item = makeItem('Text', props.text);
 
-            content.appendChild(item);
+            properties.appendChild(item);
             item.layoutSizingHorizontal = 'FILL';
 
-        }
+        };
+        // BOOLEAN
+        if (isArray(props.boolean)) {
 
-        // props.forEach((p: any, key: number) => {
+            const item = makeItem('Boolean', props.boolean);
 
-        //     // Set up
-        //     let pLabel:     any     = cleanString(p.name, 'property');
-        //     let last:       boolean = false;
-        //     let depends:    any     = null;
+            properties.appendChild(item);
+            item.layoutSizingHorizontal = 'FILL';
 
-        //     // Create property items
-        //     const propLabel:    any = make('label', text.section.copy, 'text', pLabel);
-        //     const typeLabel:    any = make('label', text.label.type, 'text', `${p.type}`);
-        //     const propIcon:     any = make('icon', iconVector[p.type], 'vector');
-            
-        //     if (key+1 >= props.length)      { last = true };
-        //     if (p.type === 'INSTANCE_SWAP') { depends = figma.getNodeById(p.value); depends =  depends.name };
+        };
+        // VARIANT
+        if (isArray(props.variant)) {
 
-        //     // Create item
-        //     const propFrame = makeItem(propLabel, propIcon, typeLabel, p.options, depends, last, p.value);
-            
-        //     if (propFrame) {
+            const item = makeItem('Variant', props.variant);
 
-        //         content.appendChild(propFrame);
-        //         propFrame.layoutSizingHorizontal = 'FILL';
-            
-        //     }
+            properties.appendChild(item);
+            item.layoutSizingHorizontal = 'FILL';
 
-        // });
+        };
+        // INSTANCE_SWAP
+        if (isArray(props.instance)) {
+
+            const item = makeItem('Instance', props.instance);
+
+            properties.appendChild(item);
+            item.layoutSizingHorizontal = 'FILL';
+
+        };
 
     }
 
-    // Append to component frame if available
+    // Append & adjust if available
     if (section && appendTo) {
 
+        instance.appendChild(makeInstance('component'));
+        content.appendChild(properties);
+        content.appendChild(instance);
         section.appendChild(content);
         appendTo.appendChild(section);
-        content.layoutSizingHorizontal = 'FILL';
-        section.layoutSizingHorizontal = 'FILL';
+
+        
+        properties.layoutSizingHorizontal   = 'FILL';
+        instance.layoutSizingVertical       = 'FILL';
+        instance.layoutSizingHorizontal     = 'FILL';
+        content.layoutSizingHorizontal      = 'FILL';
+        section.layoutSizingHorizontal      = 'FILL';
 
     }
 

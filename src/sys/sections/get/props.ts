@@ -45,7 +45,7 @@ export function getProps(component: any) {
             }
 
             // Create object and push to relevant type
-            const property = { name: name, value: value, options: options };
+            const property = { name: name, value: value, options: options, instance: type === 'INSTANCE_SWAP' ? true : false };
 
             if (type === 'TEXT')            { compProps.text.push(property)     };
             if (type === 'BOOLEAN')         { compProps.boolean.push(property)  };

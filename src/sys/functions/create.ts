@@ -1,6 +1,6 @@
 import { frame, text, iconVector } from "../data/styles";
 import { findBaseComp } from "./component";
-import { isArray } from "./general";
+import { cleanString, isArray } from "./general";
 
 // Create Figma frame
 export function make(name: string, props: any, type: any, text: any = null) {
@@ -42,7 +42,7 @@ export function make(name: string, props: any, type: any, text: any = null) {
 export function makeSection(name: string) {
 
     // Create section frame and heading
-    const section: any = make(`section: ${text}`, frame.section, 'frame');
+    const section: any = make(`section: ${name}`, frame.section, 'frame');
     const title: any = make('section-title', text.title.section, 'text', name);
 
     // Append heading and set to fill
@@ -75,15 +75,25 @@ export function makeInstance(name: string, props: any = null, pluginData: any = 
 }
 
 // Make item
-export function makeItem(type: any, properties: any = null) {
+export function makeItem(name: any, properties: any = null, icon: any = null) {
+
+    // Which icon to use?
+    let whichIcon: any = iconVector[name];
+    
+    if (icon) { whichIcon = iconVector['Key'] };
 
     // Set up
     const item:             any = make('item', frame.property, 'frame');
-    const itemLabel:        any = make('label', text.section.copy, 'text', String(type));
+    const itemLabel:        any = make('label', text.title.prop, 'text', String(name));
     const itemIconFrame:    any = make('icon', frame.h.sm, 'frame');
-    const itemIcon:         any = make(type, iconVector[type], 'vector');
+    const itemIcon:         any = make(name, whichIcon, 'vector');
     const itemHeader:       any = make('header', frame.h.md, 'frame');
     const itemOptions:      any = properties ? makeProperties(properties) : null;
+
+    // Make adjustments
+    itemIcon.resize(10,10);
+    itemHeader.counterAxisAlignItems = 'CENTER';
+    if (icon) { itemIcon.fills = icon };
 
     // Append
     itemIconFrame.appendChild(itemIcon);
@@ -92,7 +102,7 @@ export function makeItem(type: any, properties: any = null) {
     item.appendChild(itemHeader);
 
     // Add options if available
-    if (isArray(itemOptions)) { itemOptions.forEach((i: any) => item.appendChild(i) ) };
+    if (isArray(itemOptions)) { itemOptions.forEach((i: any) => { item.appendChild(i); i.layoutSizingHorizontal = 'FILL'; }) };
 
     return item;
 
@@ -105,19 +115,50 @@ export function makeProperties(properties: any[]) {
     const items: any[] = [];
 
     // Loop thru options and create a label and frame for each one
-    properties.forEach((o: any) => {
+    properties.forEach((p: any) => {
 
         // Create required items
-        const property: any = make('options', frame.options, 'frame');
+        const property:         any = make('property', frame.options, 'frame');
+        const propertyLabel:    any = make('name', frame.type, 'frame');
+        const propertyText:     any = make('label', text.label.type, 'text', cleanString(p.name, 'property'));
 
         // Append
-        // optionFrame.appendChild(optionLabel);
-        // item.appendChild(optionFrame);
+        propertyLabel.appendChild(propertyText);
+        property.appendChild(propertyLabel);
 
         // Check if there are option for this item
-        if (isArray(o.options)) {
+        if (isArray(p.options)) {
+
+            // Loop thru options
+            p.options.forEach((o: any) => {
+
+                // Create required items
+                const optionLabel:  any = make('option', o === p.value ? frame.default : frame.value , 'frame');
+                const optionText:   any = make('label', text.label.value, 'text', String(o));
+
+                // Append
+                optionLabel.appendChild(optionText);
+                property.appendChild(optionLabel);
+
+            });
             
-        }
+        };
+
+        // Check if it is an INSTANCE_SWAP property
+        if (p.instance) {
+
+            // Set up
+            const depends = p.value ? figma.getNodeById(p.value)?.name : p.instance;
+
+            // Create required items
+            const dependencyLabel:  any = make('dependency', frame.dependency, 'frame');
+            const dependencyText:   any = make('label', text.label.dependency, 'text', `Dependency: ${depends}`);
+
+            // Append
+            dependencyLabel.appendChild(dependencyText);
+            property.appendChild(dependencyLabel);
+
+        };
 
         // Add to items
         items.push(property);

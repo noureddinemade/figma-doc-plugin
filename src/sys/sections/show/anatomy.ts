@@ -62,39 +62,34 @@ export function showAnatomy(anatomy: any, appendTo: any) {
 
             // Create needed objects for item
             const cleanName = cleanString(c.name, 'anatomy');
-            const itemLabel = make('name', text.section.copy, 'text', cleanName);
-            const typeLabel = make('label', text.label.type, 'text', c.type);
             const keyFrame  = make('key', null, 'circle');
 
             let keyColour: any  = generateColours(1, keyColours);
                 keyColour       = keyColour[0];
+                keyColour       = [{ type: 'SOLID', color: convertColour(keyColour) }]
 
             // Edit item's properties
-            keyFrame.fills  = [{ type: 'SOLID', color: convertColour(keyColour) }];
+            keyFrame.fills  = keyColour;
             
             // Set up dependency text
             let depends:    any | null  = null;
-            let last:       boolean     = false;
 
             if (c.type === 'INSTANCE') { depends = c.mainComponent.name };
 
-            // Clone keyFrame
-            const keyDot = keyFrame.clone();
-
             // Create item
-            const itemFrame = makeItem(itemLabel, keyFrame, typeLabel, null, depends, last);
+            const itemFrame = makeItem(cleanName, [{ name: c.type, instance: depends }], keyColour);
 
             // Append
+            keysOverlay.appendChild(keyFrame);
             keys.appendChild(itemFrame);
-            keysOverlay.appendChild(keyDot);
 
-            keyDot.layoutPositioning = 'ABSOLUTE';
+            keyFrame.layoutPositioning = 'ABSOLUTE';
             itemFrame.layoutSizingHorizontal = 'FILL';
 
             // Adjust dot
-            keyDot.x = c.x;
-            keyDot.y = key % 2 === 0 ? c.y + 6 : c.y - 6;
-            keyDot.resize(10,10);
+            keyFrame.x = c.x;
+            keyFrame.y = key % 2 === 0 ? c.y + 6 : c.y - 6;
+            keyFrame.resize(10,10);
 
         });
 
