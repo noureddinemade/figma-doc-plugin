@@ -1,4 +1,6 @@
 // Import
+import { styleAreas, styles } from "../data/arrays";
+import { makeInstance } from "./create";
 import { isArray } from "./general";
 
 // Get children from component
@@ -45,5 +47,50 @@ export function findBaseComp() {
     let base: any   = figma.currentPage.findAllWithCriteria({ types: ['COMPONENT'], pluginData: { keys: ['baseComponent'] } });
 
     return isArray(base) ? base[0] : null;
+
+}
+
+// Reset component back to default
+export function resetToDefault(instance: any) {
+
+    instance.resetOverrides();
+
+}
+
+// Get style from instance
+export function getBaseStyles() {
+
+    // Set up
+    let response:       any | null = null;
+    let baseInstance:   any | null = makeInstance('base');
+    
+    resetToDefault(baseInstance);
+    baseInstance.name = 'base';
+
+    // Check if base instance was created
+    if (baseInstance) {
+
+        // Set up
+        response = { base: baseInstance, styles: [] };
+
+        // Get all required styles from baseInstance
+        if (isArray(styleAreas) && styles) {
+
+            // Loop thru each style area
+            styleAreas.forEach((a: any) => styles[a].forEach((s: any) => {
+
+                //
+                let style = baseInstance[s];
+
+                if (style) { console.log(a, s, style) };
+
+            }));
+
+        }
+
+    }
+
+    //
+    return response;
 
 }
