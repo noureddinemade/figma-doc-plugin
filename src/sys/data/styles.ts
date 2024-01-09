@@ -59,6 +59,8 @@ const paddingTop32      = { key: 'paddingTop', value: 32 };
 const paddingRight32    = { key: 'paddingRight', value: 32 };
 const paddingBottom32   = { key: 'paddingBottom', value: 32 };
 const paddingLeft32     = { key: 'paddingLeft', value: 32 };
+const paddingTop96      = { key: 'paddingTop', value: 96 };
+const paddingBottom96   = { key: 'paddingBottom', value: 96 };
 
 const padding4          = [ paddingTop4, paddingRight4, paddingBottom4, paddingLeft4 ];
 const padding8          = [ paddingTop8, paddingRight8, paddingBottom8, paddingLeft8 ];
@@ -168,8 +170,9 @@ const smVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryM
 const mdVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap16, noContentClip ];
 const lgVFrame          = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterMin, gap24, noContentClip ];
 const iconFrame         = [ fillNone, strokeNone, autoLayout, vertical, primaryMin, counterCenter, { key: 'minWidth', value: 20 } ];
-const diagramFrame      = [ fillLightGrey, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, padding24, radius4, minWidthSm, noContentClip ];
+const diagramFrame      = [ fillLightGrey, strokeNone, autoLayout, vertical, primaryCenter, counterCenter, padding24, radius4, minWidthSm, noContentClip, paddingTop96, paddingBottom96 ];
 const keyFrame          = [ strokeNone, autoLayout, vertical, primaryCenter, counterCenter, equalSm, radiusSm ];
+const keysFrame         = [ fillNone, strokeNone, autoLayout, horizontal, primaryMin, counterMin, wrap, gap16, wrapGap16 ];
 
 // Text
 const compTitle         = [ fontInterSbl, font24, fontDefault, fillBlack ];
@@ -199,7 +202,8 @@ export const frame:         any = {
     icon:       iconFrame,
     diagram:    diagramFrame,
     key:        keyFrame,
-    options:    optionsFrame
+    options:    optionsFrame,
+    keys:       keysFrame
 
 }
 export const text:          any = {

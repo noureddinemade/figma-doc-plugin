@@ -17,7 +17,7 @@ export function showAnatomy(anatomy: any, appendTo: any) {
 
         // Create the anatomy frame and title
         section = makeSection('Anatomy');
-        content = make('content', frame.h.md, 'frame');
+        content = make('content', frame.v.md, 'frame');
 
         // Create diagram frame and append diagram instance to it
         const diagramFrame = make('diagram', frame.diagram, 'frame');
@@ -52,7 +52,7 @@ export function showAnatomy(anatomy: any, appendTo: any) {
             children        = children.filter((a: any) => a.name.includes('forAnatomy==='));
 
         // Create a frame to house keys
-        const keys = make('keys', frame.v.md, 'frame');
+        const keys = make('keys', frame.keys, 'frame');
 
         // Unique colour set
         const keyColours: Set<string> = new Set();
@@ -79,6 +79,9 @@ export function showAnatomy(anatomy: any, appendTo: any) {
             // Create item
             const itemFrame = makeItem(cleanName, [{ name: c.type, instance: depends }], keyColour);
 
+            itemFrame.maxWidth = 300;
+            itemFrame.minWidth = 300;
+
             // Append
             keysOverlay.appendChild(keyFrame);
             keys.appendChild(itemFrame);
@@ -94,11 +97,10 @@ export function showAnatomy(anatomy: any, appendTo: any) {
         });
 
         // Append
-        content.appendChild(keys);
         content.appendChild(diagramFrame);
+        content.appendChild(keys);
         keys.layoutSizingHorizontal = 'FILL';
         diagramFrame.layoutSizingHorizontal = 'FILL';
-        diagramFrame.layoutSizingVertical = 'FILL';
 
     }
 

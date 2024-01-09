@@ -17,7 +17,7 @@ export function getStyles(component: any) {
         // Get default styles
         const baseStyles = getBaseStyles();
 
-        console.log(baseStyles);
+        // console.log(baseStyles);
 
     }
 

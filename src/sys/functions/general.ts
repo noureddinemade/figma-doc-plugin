@@ -132,6 +132,13 @@ export function cleanString(string: string, type: any = null) {
 
         }
 
+        // 
+        if (type === 'token') {
+
+            response = string;
+
+        }
+
     }
 
     //
