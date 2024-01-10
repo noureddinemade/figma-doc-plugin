@@ -57,6 +57,39 @@ export function resetToDefault(instance: any) {
 
 }
 
+// Return true if there is no stroke
+function noStroke(strokes: any, style: any) {
+
+    // Set up
+    let array: any  = styles.strokes;
+        array       = array.filter((a: any) => a === style);
+
+    if (!isArray(strokes) && isArray(array)) { return true };
+
+}
+
+// Return true if there is no effect
+function noEffect(effects: any, style: any) {
+
+    // Set up
+    let array: any  = styles.effects;
+        array       = array.filter((a: any) => a === style);
+
+    if (!isArray(effects) && isArray(array)) { return true };
+
+}
+
+// Return true if there is no fill
+function noFill(fills: any, style: any) {
+
+    // Set up
+    let array: any  = styles.fills;
+        array       = array.filter((a: any) => a === style);
+
+    if (!isArray(fills) && isArray(array)) { return true };
+
+}
+
 // Get token from variable ID
 function findToken(id: any) {
 
@@ -87,8 +120,6 @@ function getToken(item: any) {
     }
     else { response = findToken(item.id) };
 
-    console.log(item);
-
     //
     return response;
 
@@ -112,29 +143,33 @@ function getEffectStyle(id: any) {
 function getStyleFromNode(node: any) {
 
     // Set up
-    let response: any | null = { name: node.name, styles: [] };
+    let response:   any | null  = { name: node.name, styles: [] };
+    let type:       any         = node.type;
 
     // Loop thru each property in style area
     styleAreas.forEach((a: any) => styles[a].forEach((s: any) => {
 
         // Get required
-        let value:  any | null = node[s];
-        let token:  any | null = node.boundVariables ? node.boundVariables[s] : null;
-        // let text:   any | null = node.getStyledTextSegments('textStyleId');
-        let effect: any | null = node.effectStyleId;
+        let value:  any | null  = node[s] ? node[s] : null;
+        let token:  any | null  = node.boundVariables[s] ? node.boundVariables[s] : null;
+        let text:   any | null  = type === 'TEXT' ? node.getStyledTextSegments('textStyleId') : null;
+        let effect: any | null  = node.effectStyleId;
+        let stroke: any         = noStroke(node.strokes, s);
 
-        // // Check if there is a variable or value
-        value   ? value     = value : null;
-        token   ? token     = getToken(token) : null;
-        // text    ? text      = getTextStyle(text) : null;
-        // effect  ? effect    = getEffectStyle(effect) : null;
+        // Check if there are tokens
+        stroke || isArray(value, 0, 'e') ? value = null : value;
+        token ? token = getToken(token) : null;
+        text ? text = getTextStyle(text) : null;
+        effect ? effect = getEffectStyle(effect) : effect;
+
+        // Conditions
+        const c1 = value && value !== undefined;
+        const c2 = token && token !== undefined;
+        const c3 = text && text !== undefined;
+        const c4 = effect && effect !== undefined;
 
         // Push to styles array
-        // if (value || token || text || effect) {
-
-        //     response.styles.push({ name: s, category: a, value: value, token: token, text: text, effect: effect });
-
-        // } 
+        if (c1 || c2 || c3 || c4) { response.styles.push({ name: s, category: a, value: value, token: token, text: text, effect: effect }) };
 
     }));
 
@@ -158,7 +193,6 @@ export function getBaseStyles() {
 
         // Set up
         response = getStyleFromNode(baseInstance);
-        // response = { base: baseInstance, styles: [] };
 
     }
 
