@@ -58,35 +58,13 @@ export function resetToDefault(instance: any) {
 }
 
 // Return true if there is no stroke
-function noStroke(strokes: any, style: any) {
+function emptyStyle(array: any, style: any, type: any) {
 
     // Set up
-    let array: any  = styles.strokes;
-        array       = array.filter((a: any) => a === style);
+    let newArray: any  = styles[type];
+        newArray       = newArray.filter((a: any) => a === style);
 
-    if (!isArray(strokes) && isArray(array)) { return true };
-
-}
-
-// Return true if there is no effect
-function noEffect(effects: any, style: any) {
-
-    // Set up
-    let array: any  = styles.effects;
-        array       = array.filter((a: any) => a === style);
-
-    if (!isArray(effects) && isArray(array)) { return true };
-
-}
-
-// Return true if there is no fill
-function noFill(fills: any, style: any) {
-
-    // Set up
-    let array: any  = styles.fills;
-        array       = array.filter((a: any) => a === style);
-
-    if (!isArray(fills) && isArray(array)) { return true };
+    if (!isArray(array) && isArray(newArray)) { return true };
 
 }
 
@@ -106,6 +84,7 @@ function getToken(item: any) {
     // Set up
     let response: any | null = null;
 
+    // Check if there are multiple tokens
     if (isArray(item)) {
 
         if (isArray(item, 1, 'e')) { response = findToken(item[0].id) }
@@ -125,17 +104,35 @@ function getToken(item: any) {
 
 }
 
-// Get text style/s from id
-function getTextStyle(id: any) {
+// Get effect style from id
+function getFigmaStyle(id: any) {
 
-    return null;
+    let style: any  = figma.getStyleById(id);
+        style       = cleanString(style.name, 'token');
+
+    return style;
 
 }
 
-// Get effect style from id
-function getEffectStyle(id: any) {
+// Get all text styles
+function getTextStyles(array: any) {
 
-    return null;
+    // Set up
+    let response: any | null = null;
+
+    // Check array length
+    if (isArray(array, 1, 'e')) { response = getFigmaStyle(array[0].textStyleId) }
+    else if (isArray(array, 1, 'm')) {
+
+        response = [];
+
+        array.forEach((i: any) => { response.push(getFigmaStyle(i.textStyleId)) });
+
+    }
+    else { response = null };
+
+    //
+    return response;
 
 }
 
@@ -152,15 +149,18 @@ function getStyleFromNode(node: any) {
         // Get required
         let value:  any | null  = node[s] ? node[s] : null;
         let token:  any | null  = node.boundVariables[s] ? node.boundVariables[s] : null;
-        let text:   any | null  = type === 'TEXT' ? node.getStyledTextSegments('textStyleId') : null;
-        let effect: any | null  = node.effectStyleId;
-        let stroke: any         = noStroke(node.strokes, s);
+        let text:   any | null  = type === 'TEXT' && a === 'text' ? node.getStyledTextSegments('textStyleId') : null;
+        let effect: any | null  = node.effectStyleId !== '' && a === 'effects' ? node.effectStyleId : null;
+        let stroke: any         = emptyStyle(node.strokes, s, 'strokes');
 
-        // Check if there are tokens
+        // Check if there are styles
         stroke || isArray(value, 0, 'e') ? value = null : value;
         token ? token = getToken(token) : null;
-        text ? text = getTextStyle(text) : null;
-        effect ? effect = getEffectStyle(effect) : effect;
+        text ? text = getTextStyles(text) : null;
+        effect ? effect = getFigmaStyle(effect) : null;
+
+        // Check if the value is an array of 1
+        value = isArray(value, 1, 'e') ? value[0] : value;
 
         // Conditions
         const c1 = value && value !== undefined;

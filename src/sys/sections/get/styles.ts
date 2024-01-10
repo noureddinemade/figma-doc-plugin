@@ -17,7 +17,11 @@ export function getStyles(component: any) {
         // Get default styles
         const baseStyles = getBaseStyles();
 
-        console.log(baseStyles);
+        // Get children of base
+        let baseChildren: any   = component.findAll();
+            baseChildren        = baseChildren.length;
+
+        console.log(baseChildren);
 
     }
 

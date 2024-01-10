@@ -108,6 +108,16 @@ export function sortArray(array: any, key: any, reverse: any | null = null) {
 
 }
 
+// Replace all instances of a character in a string
+export function replaceAllInString(string: any, x: any, y: any) {
+
+    // What to replace
+    const toReplace = new RegExp(String(x), 'g');
+    
+    return string.replace(toReplace, String(y));
+
+}
+
 // Clean a string
 export function cleanString(string: string, type: any = null) {
 
@@ -135,7 +145,9 @@ export function cleanString(string: string, type: any = null) {
         // 
         if (type === 'token') {
 
-            response = string;
+            response = replaceAllInString(response, '/', '.');
+            response = replaceAllInString(response, ' ', '-');
+            response = response.toLowerCase();
 
         }
 
