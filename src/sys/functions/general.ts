@@ -1,3 +1,18 @@
+// Get the heirachy of each item
+export function getHeirachy(node: any, level: number) {
+
+    if (node.parent && node.parent.type !== 'PAGE') {
+    
+        level = level + 1;
+
+        return getHeirachy(node.parent, level);
+
+    }
+
+    else { return level }
+
+}
+
 // Check if something is an array
 export function isArray(item: any, length: number = 0, operator: string = 'm') {
 

@@ -79,8 +79,7 @@ export function showAnatomy(anatomy: any, appendTo: any) {
             // Create item
             const itemFrame = makeItem(cleanName, [{ name: c.type, instance: depends }], keyColour);
 
-            itemFrame.maxWidth = 300;
-            itemFrame.minWidth = 300;
+            itemFrame.minWidth = 458;
 
             // Append
             keysOverlay.appendChild(keyFrame);

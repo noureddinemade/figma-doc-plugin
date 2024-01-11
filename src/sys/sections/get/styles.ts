@@ -1,27 +1,50 @@
 // Import
-import { getBaseStyles } from "../../functions/component";
+import { getStylesFromInstance, resetToDefault } from "../../functions/component";
+import { makeInstance } from "../../functions/create";
 import { isArray } from "../../functions/general";
 
 // Get styles from component, which includes any variants, children and variant children
-export function getStyles(component: any) {
+export function getStyles(compVariants: any, compDependencies: any) {
 
     // Set up
-    let response: any[] | null = null;
+    let response: any;
 
-    // Check if there is anything to get styles from
-    if (component) {
+    // Check if there is any variants to get styles from
+    if (isArray(compVariants)) {
 
-        // Set up
         response = [];
 
-        // Get default styles
-        const baseStyles = getBaseStyles();
+        compVariants.forEach((p: any) => {
 
-        // Get children of base
-        let baseChildren: any   = component.findAll();
-            baseChildren        = baseChildren.length;
+            // Check if there options
+            if (isArray(p.options)) {
 
-        console.log(baseChildren);
+                // Loop thru options
+                p.options.forEach((o: any) => {
+
+                    const def:              any = p.value === o ? '(DEFAULT) ' : '';
+                    const variant:          any = makeInstance(`${def}${p.name}=${o}`, [{[p.name]: o}]);
+                    const variantStyles:    any = getStylesFromInstance(variant, compDependencies);
+
+                    response.push(variantStyles);
+
+                });
+
+            };
+
+        });
+
+    }
+    // Otherwise make a base instance and get styles from that
+    else {
+
+        const baseInstance: any = makeInstance('defaultInstance');
+        const baseStyles:   any = getStylesFromInstance(baseInstance, compDependencies);
+
+        resetToDefault(baseInstance);
+        baseInstance.name = 'defaultInstance';
+
+        response = baseStyles;
 
     }
 

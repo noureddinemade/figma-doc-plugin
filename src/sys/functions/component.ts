@@ -1,7 +1,7 @@
 // Import
 import { styleAreas, styles } from "../data/arrays";
 import { makeInstance } from "./create";
-import { cleanString, isArray } from "./general";
+import { cleanString, getHeirachy, isArray } from "./general";
 
 // Get children from component
 export function anyChildren(component: any, criteria: any | null = null) {
@@ -24,6 +24,25 @@ export function belongsToInstance(node: any): boolean {
     // Check if the node is available and it has a parent
     if (node && node.parent) { return node.parent.type === 'INSTANCE' ? true : belongsToInstance(node.parent) }
     else { return false; }
+
+}
+
+// Find out if a node has the same parent as a dependency
+export function sameParentAsDependency(node: any, dependencies: any) {
+
+    // Set up
+    let response: any | null = null;
+
+    // Check if there are dependencies
+    if (isArray(dependencies)) {
+
+        // Loop thru dependencies
+        dependencies.forEach((d: any) => { if (d.name === node.parent.name) { response = true } });
+
+    }
+
+    //
+    return response;
 
 }
 
@@ -107,10 +126,14 @@ function getToken(item: any) {
 // Get effect style from id
 function getFigmaStyle(id: any) {
 
-    let style: any  = figma.getStyleById(id);
-        style       = cleanString(style.name, 'token');
+    if (id !== '') {
 
-    return style;
+        let style: any  = figma.getStyleById(id);
+            style       = cleanString(style.name, 'token');
+
+        return style;
+
+    } else { return null };
 
 }
 
@@ -140,7 +163,9 @@ function getTextStyles(array: any) {
 function getStyleFromNode(node: any) {
 
     // Set up
-    let response:   any | null  = { name: node.name, styles: [] };
+    let heirachy:   any | null  = getHeirachy(node, 0);
+    let parent:     any | null  = heirachy === 0 ? null : node.parent.name;
+    let response:   any | null  = { name: node.name, styles: [], level: heirachy, parent: parent };
     let type:       any         = node.type;
 
     // Loop thru each property in style area
@@ -149,7 +174,7 @@ function getStyleFromNode(node: any) {
         // Get required
         let value:  any | null  = node[s] ? node[s] : null;
         let token:  any | null  = node.boundVariables[s] ? node.boundVariables[s] : null;
-        let text:   any | null  = type === 'TEXT' && a === 'text' ? node.getStyledTextSegments('textStyleId') : null;
+        let text:   any | null  = type === 'TEXT' && a === 'text' ? node.getStyledTextSegments(['textStyleId']) : null;
         let effect: any | null  = node.effectStyleId !== '' && a === 'effects' ? node.effectStyleId : null;
         let stroke: any         = emptyStyle(node.strokes, s, 'strokes');
 
@@ -178,21 +203,61 @@ function getStyleFromNode(node: any) {
 
 }
 
-// Get style from instance
-export function getBaseStyles() {
+// Get style from children
+function getStyleFromChildren(children: any, dependencies: any) {
 
     // Set up
-    let response:       any | null = null;
-    let baseInstance:   any | null = makeInstance('base');
-    
-    resetToDefault(baseInstance);
-    baseInstance.name = 'base';
+    let response: any | null = null;
+
+    // Check if there are children and get styles from each one
+    if (isArray(children)) {
+
+        // Set array
+        response = [];
+
+        // Loop thru children and add to styles to each array
+        children.forEach((c: any) => {
+
+            const c1 = isInstance(c);
+            const c2 = belongsToInstance(c);
+            const c3 = sameParentAsDependency(c, dependencies);
+            
+            if (!c1) {
+
+                if (c2 && !c3) {
+
+                    const childStyle = getStyleFromNode(c);
+                    response.push(childStyle);
+
+                }
+                
+            }
+
+        });
+
+    }
+
+    //
+    return response;
+
+}
+
+// Get style from instance
+export function getStylesFromInstance(instance: any, dependencies: any) {
+
+    // Set up
+    let response:   any | null = null;
+    let children:   any | null = anyChildren(instance);
 
     // Check if base instance was created
-    if (baseInstance) {
+    if (instance) {
 
-        // Set up
-        response = getStyleFromNode(baseInstance);
+        // Get style from base instance
+        const top = getStyleFromNode(instance);
+
+        response = getStyleFromChildren(children, dependencies);
+
+        response.unshift(top);
 
     }
 

@@ -38,7 +38,7 @@ export function getAll(selection: any) {
             const compAnatomy: any = getAnatomy(compProps);
 
             // Get component style
-            const compStyles: any = getStyles(c);
+            const compStyles: any = getStyles(compProps.variant, compDependencies);
 
             // Add each component to response
             response.push({
