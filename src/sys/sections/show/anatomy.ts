@@ -80,6 +80,7 @@ export function showAnatomy(anatomy: any, appendTo: any) {
             const itemFrame = makeItem(cleanName, [{ name: c.type, instance: depends }], keyColour);
 
             itemFrame.minWidth = 458;
+            itemFrame.maxWidth = 458;
 
             // Append
             keysOverlay.appendChild(keyFrame);
@@ -99,7 +100,6 @@ export function showAnatomy(anatomy: any, appendTo: any) {
         content.appendChild(diagramFrame);
         content.appendChild(keys);
         keys.layoutSizingHorizontal = 'FILL';
-        diagramFrame.layoutSizingHorizontal = 'FILL';
 
     }
 
@@ -109,7 +109,6 @@ export function showAnatomy(anatomy: any, appendTo: any) {
         section.appendChild(content);
         appendTo.appendChild(section);
         content.layoutSizingHorizontal = 'FILL';
-        section.layoutSizingHorizontal = 'FILL';
 
     }
 

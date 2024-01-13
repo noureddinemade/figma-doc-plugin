@@ -1,7 +1,7 @@
 // Import
-import { frame, iconVector, text } from "../../data/styles";
+import { frame } from "../../data/styles";
 import { make, makeInstance, makeItem, makeSection } from "../../functions/create";
-import { cleanString, isArray, sortArray } from "../../functions/general";
+import { isArray } from "../../functions/general";
 
 // Show all the component information like id, description and link
 export function showProps(props: any, appendTo: any) {
@@ -16,7 +16,7 @@ export function showProps(props: any, appendTo: any) {
     if (props) {
 
         section     = makeSection('Properties');
-        content     = make('content', frame.h.md, 'frame');
+        content     = make('content', frame.v.md, 'frame');
         properties  = make('properties', frame.v.md, 'frame');
         instance    = make('component', frame.diagram, 'frame');
 
@@ -64,17 +64,12 @@ export function showProps(props: any, appendTo: any) {
     if (section && appendTo) {
 
         instance.appendChild(makeInstance('component'));
-        content.appendChild(properties);
         content.appendChild(instance);
+        content.appendChild(properties);
         section.appendChild(content);
         appendTo.appendChild(section);
 
-        
         properties.layoutSizingHorizontal   = 'FILL';
-        instance.layoutSizingVertical       = 'FILL';
-        instance.layoutSizingHorizontal     = 'FILL';
-        content.layoutSizingHorizontal      = 'FILL';
-        section.layoutSizingHorizontal      = 'FILL';
 
     }
 

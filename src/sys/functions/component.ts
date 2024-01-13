@@ -160,12 +160,12 @@ function getTextStyles(array: any) {
 }
 
 // Get style from node
-function getStyleFromNode(node: any) {
+function getStyleFromNode(node: any, def: boolean = false) {
 
     // Set up
     let heirachy:   any | null  = getHeirachy(node, 0);
     let parent:     any | null  = heirachy === 0 ? null : node.parent.name;
-    let response:   any | null  = { name: node.name, styles: [], level: heirachy, parent: parent };
+    let response:   any | null  = { name: node.name, styles: [], level: heirachy, parent: parent, default: def };
     let type:       any         = node.type;
 
     // Loop thru each property in style area
@@ -204,7 +204,7 @@ function getStyleFromNode(node: any) {
 }
 
 // Get style from children
-function getStyleFromChildren(children: any, dependencies: any) {
+function getStyleFromChildren(children: any, dependencies: any, def: boolean = false) {
 
     // Set up
     let response: any | null = null;
@@ -226,7 +226,7 @@ function getStyleFromChildren(children: any, dependencies: any) {
 
                 if (c2 && !c3) {
 
-                    const childStyle = getStyleFromNode(c);
+                    const childStyle = getStyleFromNode(c, def);
                     response.push(childStyle);
 
                 }
@@ -243,7 +243,7 @@ function getStyleFromChildren(children: any, dependencies: any) {
 }
 
 // Get style from instance
-export function getStylesFromInstance(instance: any, dependencies: any) {
+export function getStylesFromInstance(instance: any, dependencies: any, def: boolean = false) {
 
     // Set up
     let response:   any | null = null;
@@ -253,9 +253,9 @@ export function getStylesFromInstance(instance: any, dependencies: any) {
     if (instance) {
 
         // Get style from base instance
-        const top = getStyleFromNode(instance);
+        const top = getStyleFromNode(instance, def);
 
-        response = getStyleFromChildren(children, dependencies);
+        response = getStyleFromChildren(children, dependencies, def);
 
         response.unshift(top);
 

@@ -21,7 +21,7 @@ export function showAll(toBeDocumented: any[]) {
         // Loop thru each item to document
         toBeDocumented.forEach((i: any) => {
 
-            console.log(i);
+            // console.log(i);
 
             // Prep component
             const info:     any = i.information;

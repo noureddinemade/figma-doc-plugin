@@ -25,11 +25,11 @@ export function getAll(selection: any) {
             // Get component information
             const compInfo: any = getInfo(c);
 
-            // Get component properties
-            const compProps: any = getProps(c);
-
             // Get component children
             const compChildren: any = getChildren(c);
+
+            // Get component properties
+            const compProps: any = getProps(c, compChildren);
 
             // Get component dependencies
             const compDependencies: any = getDependencies(compChildren);
@@ -55,6 +55,8 @@ export function getAll(selection: any) {
         }
 
     });
+
+    console.log(response);
 
     //
     return response;
