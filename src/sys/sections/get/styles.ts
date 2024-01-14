@@ -7,16 +7,20 @@ import { isArray } from "../../functions/general";
 export function getStyles(compVariants: any, compDependencies: any) {
 
     // Set up
-    let response: any = [];
+    let response: any | null = null;
 
     // Check if there is any variants to get styles from
     if (isArray(compVariants)) {
+
+        // Set up
+        response = { styles: false, variants: [] };
 
         // Loop thru variant properties
         compVariants.forEach((p: any) => {
 
             // Set up
-            let toCompare: any = { defaults: [], variants: [] };
+            let result:     any = { property: p.name, defaults: [], variants: [] };
+            let toCompare:  any = { defaults: [], variants: [] };
 
             // Check if there options
             if (isArray(p.options)) {
@@ -30,57 +34,69 @@ export function getStyles(compVariants: any, compDependencies: any) {
 
                     // Check where to add styles to
                     def
-                    ? toCompare.defaults = [...toCompare.defaults, ...variantStyles] 
+                    ? toCompare.defaults = [...toCompare.defaults, ...variantStyles]
                     : toCompare.variants = [...toCompare.variants, ...variantStyles]
 
                 });
 
             };
 
-            // Compare styles for each variant property
+            console.log(toCompare);
+
+            // Check if data is for styles is available
             if (isArray(toCompare.defaults) && isArray(toCompare.variants)) {
 
-                // Sort and filter
-                let defaults:           any = toCompare.defaults;
-                let defaultsParent:     any = defaults.filter((a: any) => !a.parent);
-                    defaultsParent          = defaultsParent[0].styles;
-                let defaultsChilds:     any = defaults.filter((a: any) => a.parent);
-                let variants:           any = toCompare.variants;
-                let variantsParent:     any = variants.filter((a: any) => !a.parent);
-                let variantsChilds:     any = variants.filter((a: any) => a.parent);
+                // Set up defaults
+                result.defaults = toCompare.defaults;
 
-                // Compare default parent with variants parent
-                if (isArray(variantsParent)) {
+            }
 
-                    // Loop thru variants parent
-                    variantsParent.forEach((p: any) => {
+            response.variants.push(result);
 
-                        // Check if styles exist
-                        if (isArray(p.styles)) {
+            // Compare styles for each variant property
+            // if (isArray(toCompare.defaults) && isArray(toCompare.variants)) {
 
-                            let styles: any = { property: p.name, static: [], changes: [] };
+            //     // Sort and filter
+            //     let defaults:           any = toCompare.defaults;
+            //     let defaultsParent:     any = defaults.filter((a: any) => !a.parent);
+            //         defaultsParent          = defaultsParent[0].styles;
+            //     let defaultsChilds:     any = defaults.filter((a: any) => a.parent);
+            //     let variants:           any = toCompare.variants;
+            //     let variantsParent:     any = variants.filter((a: any) => !a.parent);
+            //     let variantsChilds:     any = variants.filter((a: any) => a.parent);
 
-                            p.styles.forEach((s: any) => {
+            //     // Compare default parent with variants parent
+            //     if (isArray(variantsParent)) {
 
-                                // Match with parent
-                                let match: any  = defaultsParent.filter((a: any) => a.name === s.name);
-                                    match       = match[0];
-                                    match       = JSON.stringify(match) === JSON.stringify(s);
+            //         // Loop thru variants parent
+            //         variantsParent.forEach((p: any) => {
 
-                                if (!match) { styles.changes.push(s.name) }
-                                else        { styles.static.push(s.name) };
+            //             let variant: any = { property: p.name, top: [], children: [] };
 
-                            });
+            //             // Check if styles exist
+            //             if (isArray(p.styles)) {
 
-                            console.log(styles);
+            //                 p.styles.forEach((s: any) => {
 
-                        };
+            //                     // Match with parent
+            //                     let match: any  = defaultsParent.filter((a: any) => a.name === s.name);
+            //                         match       = match[0];
+            //                         match       = JSON.stringify(match) === JSON.stringify(s);
 
-                    });
+            //                     if (!match) { variant.top.push(s) }
 
-                };
+            //                 });
 
-            };
+            //                 // Add to response
+            //                 response.variants.push(variant);
+
+            //             };
+
+            //         });
+
+            //     };
+
+            // };
 
         });
 
@@ -94,7 +110,7 @@ export function getStyles(compVariants: any, compDependencies: any) {
         resetToDefault(baseInstance);
         baseInstance.name = 'defaultInstance';
 
-        response = baseStyles;
+        response = { styles: baseStyles, variants: false };
 
     }
 
