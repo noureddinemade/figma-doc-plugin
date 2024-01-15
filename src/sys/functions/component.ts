@@ -218,12 +218,13 @@ function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
         });
 
         // Check if there were any uniques
-        if (isArray(uniques)) { response.styles = uniques };
+        if (isArray(uniques)) { response.styles = uniques }
+        else { response.styles = null };
 
     }
 
     //
-    return response && isArray(response.styles) ? response : null;
+    return response;
 
 }
 

@@ -9,10 +9,10 @@ export function runPlugin(selection: any) {
     const toBeDocumented: any[] = getAll(selection);
 
     // Document everything that was gathered
-    // const doneDocument: any = showAll(toBeDocumented);
+    const doneDocument: any = showAll(toBeDocumented);
 
     // Go to documentation
-    // figma.viewport.scrollAndZoomIntoView([doneDocument]);
+    figma.viewport.scrollAndZoomIntoView([doneDocument]);
 
     // Clean up custom data, return names to normal etc.
 

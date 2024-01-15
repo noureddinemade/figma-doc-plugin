@@ -38,13 +38,13 @@ export function getStyles(compVariants: any, compDependencies: any) {
 
         styleAreas.forEach((sa: any) => { response.shared = [...response.shared, ...styles[sa]] });
 
-        response.shared = { top: response.shared, children: response.shared };
+        response.shared = { parent: response.shared, child: response.shared };
 
         // Loop thru variants
         compVariants.forEach((i: any) => {
 
             // Set up
-            let property: any = { name: i.name, variants: [], unique: [] };
+            let property: any = { name: i.name, variants: [], unique: { parent: [], child: [] } };
 
             // Check if there are variants for this property
             if (isArray(i.options)) {
@@ -83,9 +83,9 @@ export function getStyles(compVariants: any, compDependencies: any) {
                         // Loop thru top styles
                         p.styles.forEach((s: any) => {
 
-                            if (!property.unique.includes(s.name)) { property.unique.push(s.name) };
+                            if (!property.unique.parent.includes(s.name)) { property.unique.parent.push(s.name) };
 
-                            response.shared.top = response.shared.top.filter((a: any) => a !== s.name);
+                            response.shared.parent = response.shared.parent.filter((a: any) => a !== s.name);
 
                         });
 
@@ -95,7 +95,19 @@ export function getStyles(compVariants: any, compDependencies: any) {
                             // Loop thru children
                             p.children.forEach((c: any) => {
 
-                                console.log(c);
+                                // Check if styles exist
+                                if (isArray(c.styles)) {
+
+                                    // Loop thru child styes
+                                    c.styles.forEach((cs: any) => {
+
+                                        if (!property.unique.child.includes(cs.name)) { property.unique.child.push(cs.name) };
+
+                                        response.shared.child = response.shared.child.filter((a: any) => a !== cs.name);
+
+                                    });
+
+                                };
 
                             });
 
@@ -118,15 +130,19 @@ export function getStyles(compVariants: any, compDependencies: any) {
                     // Loop thru uniques
                     property.unique.forEach((u: any) => {
 
-                        let match: any  = defVariant.styles.filter((a: any) => a.name === u);
-                            match       = match[0];
+                        if (isArray(defVariant.styles)) {
+                            
+                            let match: any  = defVariant.styles.filter((a: any) => a.name === u);
+                                match       = match[0];
 
-                        if (match) { newStyles.push(match) };
+                            if (match) { newStyles.push(match) };
+
+                        }
 
                     });
 
-                    // Replace
-                    defVariant.styles = newStyles;
+                    // Check if there are styles to overwrite
+                    defVariant.styles = isArray(newStyles) ? newStyles : null;
 
                 };
 

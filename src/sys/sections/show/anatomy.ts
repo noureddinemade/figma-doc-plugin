@@ -35,6 +35,7 @@ export function showAnatomy(anatomy: any, appendTo: any) {
         diagramOverlay.resize(diagramFrame.width, diagramFrame.height);
         diagramOverlay.constraints = { horizontal: 'STRETCH', vertical: 'STRETCH' };
         diagramOverlay.fills = [{ type: 'SOLID', color: convertColour('FFFFFF'), opacity: .7 }];
+        diagramFrame.minWidth = 932;
 
         // Create an overlay frame to house all the keys and resize it to match anatomy instance then append to diagramFrame
         const keysOverlay = make('keysOverlay', frame.h.sm, 'frame');

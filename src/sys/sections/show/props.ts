@@ -69,6 +69,7 @@ export function showProps(props: any, appendTo: any) {
         section.appendChild(content);
         appendTo.appendChild(section);
 
+        content.layoutSizingHorizontal   = 'FILL';
         properties.layoutSizingHorizontal   = 'FILL';
 
     }
