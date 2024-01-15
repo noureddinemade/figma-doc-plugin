@@ -160,13 +160,14 @@ function getTextStyles(array: any) {
 }
 
 // Get style from node
-function getStyleFromNode(node: any, def: boolean = false) {
+function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
 
     // Set up
     let heirachy:   any | null  = getHeirachy(node, 0);
     let parent:     any | null  = heirachy === 0 ? null : node.parent.name;
     let response:   any | null  = { name: node.name, styles: [], level: heirachy, parent: parent, default: def };
     let type:       any         = node.type;
+    let uniques:    any         = [];
 
     // Loop thru each property in style area
     styleAreas.forEach((a: any) => styles[a].forEach((s: any) => {
@@ -198,13 +199,36 @@ function getStyleFromNode(node: any, def: boolean = false) {
 
     }));
 
+    // Check if there is a response
+    if (response && isArray(response.styles) && isArray(base)) {
+
+        // Check
+        const baseMatch: any = isArray(base, 1, 'e') ? base[0] : base.filter((a: any) => a.name === node.name)[0];
+
+        // Loop thru each style
+        response.styles.forEach((i: any) => {
+
+            // Find match
+            let match: any  = baseMatch.styles.filter((a: any) => JSON.stringify(a) === JSON.stringify(i));
+                match       = match[0];
+
+            // Check if style is unique
+            if (!match) { uniques.push(i) };
+
+        });
+
+        // Check if there were any uniques
+        if (isArray(uniques)) { response.styles = uniques };
+
+    }
+
     //
     return response && isArray(response.styles) ? response : null;
 
 }
 
 // Get style from children
-function getStyleFromChildren(children: any, dependencies: any, def: boolean = false) {
+function getStyleFromChildren(children: any, dependencies: any, def: boolean = false, base: any = null) {
 
     // Set up
     let response: any | null = null;
@@ -221,12 +245,13 @@ function getStyleFromChildren(children: any, dependencies: any, def: boolean = f
             const c1 = isInstance(c);
             const c2 = belongsToInstance(c);
             const c3 = sameParentAsDependency(c, dependencies);
+            const c4 = base ? base.filter((a: any) => a.name === c.name) : null;
             
             if (!c1) {
 
                 if (c2 && !c3) {
 
-                    const childStyle = getStyleFromNode(c, def);
+                    const childStyle = getStyleFromNode(c, def, c4);
                     response.push(childStyle);
 
                 }
@@ -243,19 +268,21 @@ function getStyleFromChildren(children: any, dependencies: any, def: boolean = f
 }
 
 // Get style from instance
-export function getStylesFromInstance(instance: any, dependencies: any, def: boolean = false) {
+export function getStylesFromInstance(instance: any, dependencies: any, def: boolean = false, base: any = null) {
 
     // Set up
-    let response:   any | null = null;
-    let children:   any | null = anyChildren(instance);
+    let response:       any = null;
+    let children:       any = anyChildren(instance);
+    let baseParent:     any = base ? base.filter((a: any) => !a.parent) : null;
+    let baseChildren:   any = base ? base.filter((a: any) => a.parent) : null;
 
     // Check if base instance was created
     if (instance) {
 
         // Get style from base instance
-        const top = getStyleFromNode(instance, def);
+        const top = getStyleFromNode(instance, def, baseParent);
 
-        response = getStyleFromChildren(children, dependencies, def);
+        response = getStyleFromChildren(children, dependencies, def, baseChildren);
 
         response.unshift(top);
 

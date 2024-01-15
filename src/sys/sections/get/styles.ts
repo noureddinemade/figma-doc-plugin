@@ -1,4 +1,5 @@
 // Import
+import { styleAreas, styles } from "../../data/arrays";
 import { getStylesFromInstance, resetToDefault } from "../../functions/component";
 import { makeInstance } from "../../functions/create";
 import { isArray } from "../../functions/general";
@@ -6,113 +7,134 @@ import { isArray } from "../../functions/general";
 // Get styles from component, which includes any variants, children and variant children
 export function getStyles(compVariants: any, compDependencies: any) {
 
-    // Set up
-    let response: any | null = null;
+    // Set up base instance
+    const baseInstance:         any = makeInstance('defaultInstance');
+    
+    // Reset defaults for base instance
+    resetToDefault(baseInstance);
+    baseInstance.name = 'defaultInstance';
+
+    // Set up base styles
+    const baseStyles:           any = getStylesFromInstance(baseInstance, compDependencies, true);
+    const baseChildrenStyles:   any = baseStyles.filter((a: any) => a.parent);
+    
+    let baseParentStyles: any   = baseStyles.filter((a: any) => !a.parent);
+        baseParentStyles        = baseParentStyles[0];
+    
+    
+    // Set up response
+    let response:           any = { default: baseStyles, variantProps: false, shared: false };
+
+    // Reset defaults for base instance
+    resetToDefault(baseInstance);
+    baseInstance.name = 'defaultInstance';
 
     // Check if there is any variants to get styles from
     if (isArray(compVariants)) {
 
         // Set up
-        response = { styles: false, variants: [] };
+        response.variantProps   = [];
+        response.shared         = [];
 
-        // Loop thru variant properties
-        compVariants.forEach((p: any) => {
+        styleAreas.forEach((sa: any) => { response.shared = [...response.shared, ...styles[sa]] });
+
+        response.shared = { top: response.shared, children: response.shared };
+
+        // Loop thru variants
+        compVariants.forEach((i: any) => {
 
             // Set up
-            let result:     any = { property: p.name, defaults: [], variants: [] };
-            let toCompare:  any = { defaults: [], variants: [] };
+            let property: any = { name: i.name, variants: [], unique: [] };
 
-            // Check if there options
-            if (isArray(p.options)) {
+            // Check if there are variants for this property
+            if (isArray(i.options)) {
 
                 // Loop thru options
-                p.options.forEach((o: any) => {
+                i.options.forEach((o: any) => {
 
-                    const def:              any = p.value === o ? true : false;
-                    const variant:          any = makeInstance(`${p.name}=${o}`, [{[p.name]: o}]);
-                    const variantStyles:    any = getStylesFromInstance(variant, compDependencies, def);
+                    // Set up
+                    let isItTheDefault:         any = i.value === o ? true : false;
+                    let variantInstance:        any = makeInstance(o, [{[i.name]: o}]);
+                    let variantStyles:          any = getStylesFromInstance(variantInstance, compDependencies, isItTheDefault, baseStyles);
+                    let variantChildrenStyles:  any = variantStyles.filter((a: any) => a.parent);
+                    let variant:                any = variantStyles.filter((a: any) => !a.parent);
+                        variant                     = variant[0];
+                        variant.children            = variantChildrenStyles;
 
-                    // Check where to add styles to
-                    def
-                    ? toCompare.defaults = [...toCompare.defaults, ...variantStyles]
-                    : toCompare.variants = [...toCompare.variants, ...variantStyles]
+                    // Push to property
+                    property.variants.push(variant);
 
                 });
 
             };
 
-            console.log(toCompare);
+            // Add to response
+            response.variantProps.push(property);
 
-            // Check if data is for styles is available
-            if (isArray(toCompare.defaults) && isArray(toCompare.variants)) {
+            // Set uniques and shared for property
+            if (isArray(property.variants)) {
 
-                // Set up defaults
-                result.defaults = toCompare.defaults;
+                // Loop thru variants
+                property.variants.forEach((p: any) => {
+
+                    // Check if styles exist and that this is not the default item
+                    if (isArray(p.styles) && !p.default) {
+
+                        // Loop thru top styles
+                        p.styles.forEach((s: any) => {
+
+                            if (!property.unique.includes(s.name)) { property.unique.push(s.name) };
+
+                            response.shared.top = response.shared.top.filter((a: any) => a !== s.name);
+
+                        });
+
+                        // Check if there are children
+                        if (isArray(p.children)) {
+
+                            // Loop thru children
+                            p.children.forEach((c: any) => {
+
+                                console.log(c);
+
+                            });
+
+                        };
+
+                    }
+
+                });
+
+                // Clean default styles
+                if (isArray(property.unique)) {
+
+                    // Set up
+                    const newStyles: any = [];
+
+                    // Find default variant
+                    let defVariant: any = property.variants.filter((a: any) => a.default);
+                        defVariant      = defVariant[0];
+
+                    // Loop thru uniques
+                    property.unique.forEach((u: any) => {
+
+                        let match: any  = defVariant.styles.filter((a: any) => a.name === u);
+                            match       = match[0];
+
+                        if (match) { newStyles.push(match) };
+
+                    });
+
+                    // Replace
+                    defVariant.styles = newStyles;
+
+                };
 
             }
 
-            response.variants.push(result);
-
-            // Compare styles for each variant property
-            // if (isArray(toCompare.defaults) && isArray(toCompare.variants)) {
-
-            //     // Sort and filter
-            //     let defaults:           any = toCompare.defaults;
-            //     let defaultsParent:     any = defaults.filter((a: any) => !a.parent);
-            //         defaultsParent          = defaultsParent[0].styles;
-            //     let defaultsChilds:     any = defaults.filter((a: any) => a.parent);
-            //     let variants:           any = toCompare.variants;
-            //     let variantsParent:     any = variants.filter((a: any) => !a.parent);
-            //     let variantsChilds:     any = variants.filter((a: any) => a.parent);
-
-            //     // Compare default parent with variants parent
-            //     if (isArray(variantsParent)) {
-
-            //         // Loop thru variants parent
-            //         variantsParent.forEach((p: any) => {
-
-            //             let variant: any = { property: p.name, top: [], children: [] };
-
-            //             // Check if styles exist
-            //             if (isArray(p.styles)) {
-
-            //                 p.styles.forEach((s: any) => {
-
-            //                     // Match with parent
-            //                     let match: any  = defaultsParent.filter((a: any) => a.name === s.name);
-            //                         match       = match[0];
-            //                         match       = JSON.stringify(match) === JSON.stringify(s);
-
-            //                     if (!match) { variant.top.push(s) }
-
-            //                 });
-
-            //                 // Add to response
-            //                 response.variants.push(variant);
-
-            //             };
-
-            //         });
-
-            //     };
-
-            // };
-
         });
 
-    }
-    // Otherwise make a base instance and get styles from that
-    else {
-
-        const baseInstance: any = makeInstance('defaultInstance');
-        const baseStyles:   any = getStylesFromInstance(baseInstance, compDependencies);
-
-        resetToDefault(baseInstance);
-        baseInstance.name = 'defaultInstance';
-
-        response = { styles: baseStyles, variants: false };
-
-    }
+    };
 
     //
     return response;
