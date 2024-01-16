@@ -49,6 +49,7 @@ export function showStyles(styles: any, appendTo: any) {
                         let styleLabel: any = make('label', text.label.value, 'text', String(s.name));
                         let valueLabel: any = s.value ? make('value', text.label.value, 'text', String(s.value)) : null;
                         let tokenLabel: any = s.token ? make('token', text.label.strong, 'text', String(s.token)) : null;
+                        let seperator:  any = valueLabel && tokenLabel ? make('seperator', text.label.seperator, 'text', '/') : null;
 
                         // Customise
                         styleItem.paddingLeft = 28;
@@ -56,6 +57,7 @@ export function showStyles(styles: any, appendTo: any) {
                         // Append
                         styleItem.appendChild(styleLabel);
                         if (valueLabel) { styleItem.appendChild(valueLabel) };
+                        if (seperator)  { styleItem.appendChild(seperator) };
                         if (tokenLabel) { styleItem.appendChild(tokenLabel) };
                         item.appendChild(styleItem);
 

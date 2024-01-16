@@ -256,6 +256,40 @@ function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
 
         }
 
+        // Check width and height
+        let horizontal:     any = response.styles.filter((a: any) => a.name === 'layoutSizingHorizontal');
+            horizontal          = isArray(horizontal) ? horizontal[0].value : null;
+        let vertical:       any = response.styles.filter((a: any) => a.name === 'layoutSizingVertical');
+            vertical            = isArray(vertical) ? vertical[0].value : null;
+        let width:          any = response.styles.filter((a: any) => a.name === 'width');
+            width               = isArray(width) ? width[0] : null;
+        let height:         any = response.styles.filter((a: any) => a.name === 'height');
+            height              = isArray(height) ? height[0] : null;
+        
+        let value: any;
+        let token: any;
+
+        if (horizontal === 'HUG' || horizontal === 'FILL' && width) { 
+            
+            value = 'AUTO'; token = null;
+
+            response.styles = response.styles.filter((a: any) => a.name !== 'width' );
+
+            response.styles.push({ name: 'width', category: 'layout', value: value, token: token, text: null, effect: null });
+        
+        };
+
+        if (vertical === 'HUG' || vertical === 'FILL' && height) { 
+            
+            value = 'AUTO'; token = null;
+
+            response.styles = response.styles.filter((a: any) => a.name !== 'height' );
+
+            response.styles.push({ name: 'height', category: 'layout', value: value, token: token, text: null, effect: null });
+
+        }
+
+        // Add unique matches 
         if (isArray(base)) {
 
             // Check
