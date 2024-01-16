@@ -15,7 +15,7 @@ export function showProps(props: any, appendTo: any) {
     // Check if there is component information
     if (props) {
 
-        section     = makeSection('Properties');
+        section     = makeSection('properties');
         content     = make('content', frame.v.md, 'frame');
         properties  = make('properties', frame.v.md, 'frame');
         instance    = make('component', frame.diagram, 'frame');

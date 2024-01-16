@@ -1,7 +1,9 @@
 export const styles: any = {
 
-    general:    ['opacity', 'visible', 'topRightRadius', 'topLeftRadius', 'bottomRightRadius', 'bottomLeftRadius'],
-    layout:     ['width', 'minWidth', 'maxWidth', 'height', 'minHeight', 'maxHeight', 'layoutMode', 'primaryAxisAlignItems', 'counterAxisAlignItems', 'layoutSizingHorizontal', 'layoutSizingVertical', 'constraints'],
+    general:    ['opacity', 'visible'],
+    radius:     ['topRightRadius', 'topLeftRadius', 'bottomRightRadius', 'bottomLeftRadius'],
+    layout:     ['layoutMode', 'primaryAxisAlignItems', 'counterAxisAlignItems', 'layoutSizingHorizontal', 'layoutSizingVertical', 'constraints'],
+    size:       ['width', 'minWidth', 'maxWidth', 'height', 'minHeight', 'maxHeight'],
     spacing:    ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'itemSpacing'],
     fills:      ['fills'],
     strokes:    ['strokes', 'strokeTopWeight', 'strokeRightWeight', 'strokeBottomWeight', 'strokeLeftWeight', 'strokeAlign', 'dashPattern'],

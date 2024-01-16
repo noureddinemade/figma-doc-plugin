@@ -16,7 +16,7 @@ export function showAnatomy(anatomy: any, appendTo: any) {
     if (anatomy) {
 
         // Create the anatomy frame and title
-        section = makeSection('Anatomy');
+        section = makeSection('anatomy');
         content = make('content', frame.v.md, 'frame');
 
         // Create diagram frame and append diagram instance to it

@@ -5,6 +5,7 @@ import { isArray } from "../functions/general";
 import { showAnatomy } from "./show/anatomy";
 import { showInfo } from "./show/info";
 import { showProps } from "./show/props";
+import { showStyles } from "./show/styles";
 
 // Get everything required for documentation from a component
 export function showAll(toBeDocumented: any[]) {
@@ -16,7 +17,7 @@ export function showAll(toBeDocumented: any[]) {
     if (isArray(toBeDocumented)) {
 
         // Set up the main frame (lol) for documentation
-        document = make('Documentation', frame.main, 'frame');
+        document = make('documentation', frame.main, 'frame');
 
         // Loop thru each item to document
         toBeDocumented.forEach((i: any) => {
@@ -33,8 +34,8 @@ export function showAll(toBeDocumented: any[]) {
             let name:   any = info.name;
 
             // Create component frame & title
-            const cFrame:       any = make(`component`, frame.comp, 'frame');
-            const cTitle:       any = make('label', text.title.comp, 'text', name);
+            const cFrame:       any = make(`component: ${name}`, frame.comp, 'frame');
+            const cTitle:       any = make('component-title', text.title.comp, 'text', name);
 
             // Add title to component and component to main frame (lol)
             cFrame.appendChild(cTitle);
@@ -49,6 +50,7 @@ export function showAll(toBeDocumented: any[]) {
             showAnatomy(anatomy, cFrame);
 
             // Show component styles
+            showStyles(styles, cFrame);
 
             // Show component dependencies
 

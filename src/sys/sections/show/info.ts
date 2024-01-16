@@ -13,7 +13,7 @@ export function showInfo(info: any, appendTo: any) {
     if (info && info.description) {
 
         // Create the information frame and title
-        section = makeSection('Information');
+        section = makeSection('information');
         content = make('content', frame.v.md, 'frame');
 
         // Check if description is available

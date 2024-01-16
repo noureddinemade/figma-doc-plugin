@@ -64,6 +64,9 @@ export function getStyles(compVariants: any, compDependencies: any) {
                     // Push to property
                     property.variants.push(variant);
 
+                    // Remove instance when done
+                    variantInstance.remove();
+
                 });
 
             };
@@ -151,6 +154,9 @@ export function getStyles(compVariants: any, compDependencies: any) {
         });
 
     };
+
+    // Remove base instance
+    baseInstance.remove();
 
     //
     return response;

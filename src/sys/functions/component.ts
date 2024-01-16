@@ -3,6 +3,31 @@ import { styleAreas, styles } from "../data/arrays";
 import { makeInstance } from "./create";
 import { cleanString, getHeirachy, isArray } from "./general";
 
+// Check radius
+export function checkSides(sides: any[]) {
+
+    // Set up
+    let response: any;
+
+    // Check if radius array is available
+    if (isArray(sides)) {
+
+        const t: any = sides[0];
+        const l: any = sides[1];
+        const b: any = sides[2];
+        const r: any = sides[3];
+
+        if (t === l && l === b && b === r)  { response = t }
+        else if (t === b && l === r)        { response = [t,l] }
+        else                                { response = [t,l,b,r] }
+
+    }
+
+    //
+    return response;
+
+}
+
 // Get children from component
 export function anyChildren(component: any, criteria: any | null = null) {
 
@@ -200,26 +225,59 @@ function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
     }));
 
     // Check if there is a response
-    if (response && isArray(response.styles) && isArray(base)) {
+    if (response && isArray(response.styles)) {
 
-        // Check
-        const baseMatch: any = isArray(base, 1, 'e') ? base[0] : base.filter((a: any) => a.name === node.name)[0];
+        // Check radius
+        const radius: any = response.styles.filter((a: any) => a.category === 'radius');
 
-        // Loop thru each style
-        response.styles.forEach((i: any) => {
+        if (isArray(radius, 3, 'm')) {
 
-            // Find match
-            let match: any  = baseMatch.styles.filter((a: any) => JSON.stringify(a) === JSON.stringify(i));
-                match       = match[0];
+            // Check radius values and tokens
+            let cleanRadiusValue: any = checkSides([radius[0].value, radius[1].value, radius[2].value, radius[3].value]);
+            let cleanRadiusToken: any = checkSides([radius[0].token, radius[1].token, radius[2].token, radius[3].token]);
 
-            // Check if style is unique
-            if (!match) { uniques.push(i) };
+            if (cleanRadiusValue && cleanRadiusToken) {
 
-        });
+                // Set up
+                let value: any;
+                let token: any;
 
-        // Check if there were any uniques
-        if (isArray(uniques)) { response.styles = uniques }
-        else { response.styles = null };
+                const c1: any = isArray(cleanRadiusValue, 2, 'e');
+                const c2: any = isArray(cleanRadiusToken, 2, 'e');
+
+                response.styles = response.styles.filter((a: any) => a.category !== 'radius');
+
+                if (c1 && c2) { value = `${cleanRadiusValue[0]},${cleanRadiusValue[1]}`; token = `${cleanRadiusToken[0]},${cleanRadiusToken[1]}` }
+                else { value = cleanRadiusValue; token = cleanRadiusToken[1] };
+
+                response.styles.push({ name: 'borderRadius', category: 'radius', value: cleanRadiusValue, token: cleanRadiusToken, text: null, effect: null });
+
+            }
+
+        }
+
+        if (isArray(base)) {
+
+            // Check
+            const baseMatch: any = isArray(base, 1, 'e') ? base[0] : base.filter((a: any) => a.name === node.name)[0];
+
+            // Loop thru each style
+            response.styles.forEach((i: any) => {
+
+                // Find match
+                let match: any  = baseMatch.styles.filter((a: any) => JSON.stringify(a) === JSON.stringify(i));
+                    match       = match[0];
+
+                // Check if style is unique
+                if (!match) { uniques.push(i) };
+
+            });
+
+            // Check if there were any uniques
+            if (isArray(uniques)) { response.styles = uniques }
+            else { response.styles = null };
+
+        }
 
     }
 
