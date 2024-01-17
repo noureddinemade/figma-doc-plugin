@@ -4,7 +4,7 @@ import { makeInstance } from "./create";
 import { cleanString, getHeirachy, isArray } from "./general";
 
 // Check radius
-export function checkSides(sides: any[]) {
+function checkEqualSides(sides: any[]) {
 
     // Set up
     let response: any;
@@ -17,14 +17,47 @@ export function checkSides(sides: any[]) {
         const b: any = sides[2];
         const r: any = sides[3];
 
-        if (t === l && l === b && b === r)  { response = t }
-        else if (t === b && l === r)        { response = [t,l] }
-        else                                { response = [t,l,b,r] }
+        t === l && l === b && b === r ? response = t : response = [t,l,b,r];
 
     }
 
     //
     return response;
+
+}
+
+// Check sides of a style
+function checkEqualSidesOfStyle(sides: any[], response: any, style: any, newName: any) {
+
+    if (isArray(sides, 4, 'e')) {
+
+        // Check radius values and tokens
+        let value: any = checkEqualSides([sides[0].value, sides[1].value, sides[2].value, sides[3].value]);
+        let token: any = checkEqualSides([sides[0].token, sides[1].token, sides[2].token, sides[3].token]);
+
+        response.styles = response.styles.filter((a: any) => a.name !== sides[0].name);
+        response.styles = response.styles.filter((a: any) => a.name !== sides[1].name);
+        response.styles = response.styles.filter((a: any) => a.name !== sides[2].name);
+        response.styles = response.styles.filter((a: any) => a.name !== sides[3].name);
+
+        if (isArray(value, 4, 'e') && isArray(token, 4, 'e')) {
+
+            value = `${value[0]},${value[1]},${value[2]},${value[3]}`;
+            token = `${token[0]},${token[1]},${token[2]},${token[3]}`;
+
+        }
+
+        if (isArray(value, 2, 'e') && isArray(token, 2, 'e')) {
+
+            value = `${value[0]},${value[1]}`;
+            token = `${token[0]},${token[1]}`;
+
+        }
+
+        // Push to responses
+        response.styles.push({ name: newName, category: style, value: value, token: token, text: null, effect: null });
+
+    }
 
 }
 
@@ -228,42 +261,47 @@ function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
     if (response && isArray(response.styles)) {
 
         // Check radius
-        const radius: any = response.styles.filter((a: any) => a.category === 'radius');
+        let checkRadius:        any = response.styles.filter((a: any) => a.category === 'general');
+        let radiusTopRight:     any = checkRadius ? checkRadius.filter((a: any) => a.name === 'topRightRadius') : null;
+        let radiusTopLeft:      any = checkRadius ? checkRadius.filter((a: any) => a.name === 'topLeftRadius') : null;
+        let radiusBottomRight:  any = checkRadius ? checkRadius.filter((a: any) => a.name === 'bottomRightRadius') : null;
+        let radiusBottomLeft:   any = checkRadius ? checkRadius.filter((a: any) => a.name === 'bottomLeftRadius') : null;
+            radiusTopRight          = isArray(radiusTopRight) ? radiusTopRight[0] : null
+            radiusTopLeft           = isArray(radiusTopLeft) ? radiusTopLeft[0] : null
+            radiusBottomRight       = isArray(radiusBottomRight) ? radiusBottomRight[0] : null
+            radiusBottomLeft        = isArray(radiusBottomLeft) ? radiusBottomLeft[0] : null
+            checkRadius             = radiusTopRight && radiusTopLeft && radiusBottomRight && radiusBottomLeft
+                                        ? [radiusTopRight, radiusTopLeft, radiusBottomRight, radiusBottomLeft]
+                                        : null;
 
-        if (isArray(radius, 3, 'm')) {
+        if (isArray(checkRadius)) { checkEqualSidesOfStyle(checkRadius, response, 'general', 'borderRadius') };
 
-            // Check radius values and tokens
-            let cleanRadiusValue: any = checkSides([radius[0].value, radius[1].value, radius[2].value, radius[3].value]);
-            let cleanRadiusToken: any = checkSides([radius[0].token, radius[1].token, radius[2].token, radius[3].token]);
+        // Check padding
+        let checkPadding:   any = response.styles.filter((a: any) => a.category === 'layout');
+        let paddingTop:     any = checkPadding ? checkPadding.filter((a: any) => a.name === 'paddingTop') : null;
+        let paddingRight:   any = checkPadding ? checkPadding.filter((a: any) => a.name === 'paddingRight') : null;
+        let paddingBottom:  any = checkPadding ? checkPadding.filter((a: any) => a.name === 'paddingBottom') : null;
+        let paddingLeft:    any = checkPadding ? checkPadding.filter((a: any) => a.name === 'paddingLeft') : null;
+            paddingTop          = isArray(paddingTop) ? paddingTop[0] : null
+            paddingRight        = isArray(paddingRight) ? paddingRight[0] : null
+            paddingBottom       = isArray(paddingBottom) ? paddingBottom[0] : null
+            paddingLeft         = isArray(paddingLeft) ? paddingLeft[0] : null
+            checkPadding        = [paddingTop, paddingRight, paddingBottom, paddingLeft];
+            checkPadding        = paddingTop && paddingRight && paddingBottom && paddingLeft
+                                    ? [paddingTop, paddingRight, paddingBottom, paddingLeft]
+                                    : null;
 
-            if (cleanRadiusValue && cleanRadiusToken) {
+        if (isArray(checkPadding)) { checkEqualSidesOfStyle(checkPadding, response, 'layout', 'padding') };
 
-                // Set up
-                let value: any;
-                let token: any;
-
-                const c1: any = isArray(cleanRadiusValue, 2, 'e');
-                const c2: any = isArray(cleanRadiusToken, 2, 'e');
-
-                response.styles = response.styles.filter((a: any) => a.category !== 'radius');
-
-                if (c1 && c2) { value = `${cleanRadiusValue[0]},${cleanRadiusValue[1]}`; token = `${cleanRadiusToken[0]},${cleanRadiusToken[1]}` }
-                else { value = cleanRadiusValue; token = cleanRadiusToken[1] };
-
-                response.styles.push({ name: 'borderRadius', category: 'radius', value: cleanRadiusValue, token: cleanRadiusToken, text: null, effect: null });
-
-            }
-
-        }
 
         // Check width and height
         let horizontal:     any = response.styles.filter((a: any) => a.name === 'layoutSizingHorizontal');
-            horizontal          = isArray(horizontal) ? horizontal[0].value : null;
         let vertical:       any = response.styles.filter((a: any) => a.name === 'layoutSizingVertical');
-            vertical            = isArray(vertical) ? vertical[0].value : null;
         let width:          any = response.styles.filter((a: any) => a.name === 'width');
-            width               = isArray(width) ? width[0] : null;
         let height:         any = response.styles.filter((a: any) => a.name === 'height');
+            horizontal          = isArray(horizontal) ? horizontal[0].value : null;
+            vertical            = isArray(vertical) ? vertical[0].value : null;
+            width               = isArray(width) ? width[0] : null;
             height              = isArray(height) ? height[0] : null;
         
         let value: any;

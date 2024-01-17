@@ -13,6 +13,7 @@ export function getHeirachy(node: any, level: number) {
 
 }
 
+
 // Check if something is an array
 export function isArray(array: any, length: number = 0, operator: string = 'm') {
 

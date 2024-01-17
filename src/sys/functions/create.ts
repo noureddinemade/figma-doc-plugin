@@ -34,6 +34,7 @@ export function make(name: string, props: any, type: any, text: any = null) {
     if (type === 'text' && text) { response.characters = text };
 
     // Return frame
+    if (type === 'frame') { response.expanded = false };
     return response;
 
 }
@@ -83,7 +84,7 @@ export function makeItem(name: any, properties: any = null, icon: any = null) {
     if (icon) { whichIcon = iconVector['Key'] };
 
     // Set up
-    const item:             any = make('item', frame.property, 'frame');
+    const item:             any = make(`item: ${name}`, frame.property, 'frame');
     const itemLabel:        any = make('label', text.title.prop, 'text', String(name));
     const itemIconFrame:    any = make('icon', frame.h.sm, 'frame');
     const itemIcon:         any = make(name, whichIcon, 'vector');

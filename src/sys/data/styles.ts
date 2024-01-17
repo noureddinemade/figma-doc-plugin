@@ -195,6 +195,7 @@ const keyLabel          = [ fontPlexReg, font10, fontUpper, fillBlack ];
 const dependencyLabel   = [ fontPlexReg, font12, fontUpper, fillRedDark ];
 const strongLabel       = [ fontPlexMed, font12, fontUpper, fillBlack ];
 const seperatorLabel    = [ fontPlexReg, font12, fontUpper, fillSubtle ];
+const styleLabel        = [ fontPlexReg, font12, fontDefault, fillBlack ];
 
 // Create styles
 export const frame:         any = {
@@ -220,7 +221,7 @@ export const text:          any = {
 
     title:      { comp: compTitle, section: sectionTitle, prop: propTitle },
     section:    { copy: sectionCopy, link: sectionLink },
-    label:      { value: valueLabel, key: keyLabel, dependency: dependencyLabel, def: defValueLabel, type: typeLabel, strong: strongLabel, seperator: seperatorLabel }
+    label:      { value: valueLabel, key: keyLabel, dependency: dependencyLabel, def: defValueLabel, type: typeLabel, strong: strongLabel, seperator: seperatorLabel, style: styleLabel }
 
 }
 export const iconVector:    any = {

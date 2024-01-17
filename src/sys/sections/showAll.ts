@@ -62,6 +62,8 @@ export function showAll(toBeDocumented: any[]) {
 
         //
         document.layoutSizingHorizontal = 'HUG';
+        document.expanded = false;
+        // document.locked = true;
 
     }
 
