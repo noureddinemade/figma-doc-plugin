@@ -76,10 +76,11 @@ export function makeInstance(name: string, props: any = null, pluginData: any = 
 }
 
 // Make item
-export function makeItem(name: any, properties: any = null, icon: any = null) {
+export function makeItem(name: any, properties: any = null, icon: any = null, d: any = 'h') {
 
-    // Which icon to use?
-    let whichIcon: any = iconVector[name];
+    // Dynamic business
+    let whichIcon:      any = iconVector[name];
+    let hideOptions:    any = name === 'Boolean' ? true : false;
     
     if (icon) { whichIcon = iconVector['Key'] };
 
@@ -89,7 +90,7 @@ export function makeItem(name: any, properties: any = null, icon: any = null) {
     const itemIconFrame:    any = make('icon', frame.h.sm, 'frame');
     const itemIcon:         any = make(name, whichIcon, 'vector');
     const itemHeader:       any = make('header', frame.h.md, 'frame');
-    const itemOptions:      any = properties ? makeProperties(properties) : null;
+    const itemOptions:      any = properties ? makeProperties(properties, d, hideOptions) : null;
 
     // Make adjustments
     itemIcon.resize(10,10);
@@ -103,32 +104,35 @@ export function makeItem(name: any, properties: any = null, icon: any = null) {
     item.appendChild(itemHeader);
 
     // Add options if available
-    if (isArray(itemOptions)) { itemOptions.forEach((i: any) => { item.appendChild(i); i.layoutSizingHorizontal = 'FILL'; }) };
+    if (itemOptions) { item.appendChild(itemOptions); itemOptions.layoutSizingHorizontal = 'FILL'; };
 
     return item;
 
 }
 
 // Make Options
-export function makeProperties(properties: any[]) {
+export function makeProperties(properties: any[], d: any = 'h', hide: boolean = false) {
 
     // Set up
-    const items: any[] = [];
+    const response: any = make('property', frame[d].sm, 'frame');
+
+    response.paddingLeft            = 28;
+    response.layoutWrap             = 'WRAP';
+    response.counterAxisSpacing     = 8;
 
     // Loop thru options and create a label and frame for each one
     properties.forEach((p: any) => {
 
         // Create required items
-        const property:         any = make('property', frame.options, 'frame');
         const propertyLabel:    any = make('name', frame.type, 'frame');
         const propertyText:     any = make('label', text.label.type, 'text', cleanString(p.name, 'property'));
 
         // Append
         propertyLabel.appendChild(propertyText);
-        property.appendChild(propertyLabel);
+        response.appendChild(propertyLabel);
 
         // Check if there are option for this item
-        if (isArray(p.options)) {
+        if (isArray(p.options) && !hide) {
 
             // Loop thru options
             p.options.forEach((o: any) => {
@@ -139,7 +143,7 @@ export function makeProperties(properties: any[]) {
 
                 // Append
                 optionLabel.appendChild(optionText);
-                property.appendChild(optionLabel);
+                response.appendChild(optionLabel);
 
             });
             
@@ -157,16 +161,13 @@ export function makeProperties(properties: any[]) {
 
             // Append
             dependencyLabel.appendChild(dependencyText);
-            property.appendChild(dependencyLabel);
+            response.appendChild(dependencyLabel);
 
         };
-
-        // Add to items
-        items.push(property);
 
     });
 
     // 
-    return items;
+    return response;
 
 }

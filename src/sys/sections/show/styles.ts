@@ -29,13 +29,10 @@ export function showStyles(styles: any, appendTo: any) {
         if (def && defParent && isArray(defChildren)) {
 
             // Set up
-            const block:    any = make('block', frame.h.md, 'frame');
+            const block:    any = make('block', frame.v.md, 'frame');
             const item:     any = makeItem('Static');
             const diagram:  any = make('diagram', frame.diagram, 'frame');
             const instance: any = makeInstance('diagram');
-
-            // Categories to ignore first
-            // let ignore: any = ['layout', 'fills', 'effects']
 
             // Check if there are shared parent styles
             if (isArray(defParent.styles)) {
@@ -160,9 +157,13 @@ export function showStyles(styles: any, appendTo: any) {
 
             // Append
             diagram.appendChild(instance);
-            block.appendChild(item);
             block.appendChild(diagram);
+            block.appendChild(item);
             content.appendChild(block);
+
+            item.layoutSizingHorizontal = 'FILL';
+            diagram.layoutSizingHorizontal = 'FILL';
+            block.layoutSizingHorizontal = 'FILL';
 
         }
 

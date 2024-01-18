@@ -1,5 +1,6 @@
 // Import
 import { styleAreas, styles } from "../data/arrays";
+import { rgbToHex } from "./colours";
 import { makeInstance } from "./create";
 import { cleanString, getHeirachy, isArray } from "./general";
 
@@ -27,7 +28,7 @@ function checkEqualSides(sides: any[]) {
 }
 
 // Check sides of a style
-function checkEqualSidesOfStyle(sides: any[], response: any, style: any, newName: any) {
+function checkEqualSidesOfStyle(sides: any[], response: any, style: any, name: any) {
 
     if (isArray(sides, 4, 'e')) {
 
@@ -55,9 +56,34 @@ function checkEqualSidesOfStyle(sides: any[], response: any, style: any, newName
         }
 
         // Push to responses
-        response.styles.push({ name: newName, category: style, value: value, token: token, text: null, effect: null });
+        response.styles.push({ name: name, category: style, value: value, token: token, text: null, effect: null });
 
     }
+
+}
+
+// Check style
+function checkStyleSides(response: any, style: any, name: any) {
+
+    let i: any = { t: '', r: '', b: '', l: '' };
+
+    if (name === 'borderRadius') { i.t = 'topRightRadius', i.r = 'topLeftRadius', i.b = 'bottomRightRadius', i.l = 'bottomLeftRadius' };
+    if (name === 'padding') { i.t = 'paddingTop', i.r = 'paddingRight', i.b = 'paddingBottom', i.l = 'paddingLeft' };
+    if (name === 'borderWeight') { i.t = 'strokeTopWeight', i.r = 'strokeRightWeight', i.b = 'strokeBottomWeight', i.l = 'strokeLeftWeight' };
+
+
+    let checkStyle: any = response.styles.filter((a: any) => a.category === style);
+    let top:        any = checkStyle ? checkStyle.filter((a: any) => a.name === i.t) : null;
+    let left:       any = checkStyle ? checkStyle.filter((a: any) => a.name === i.r) : null;
+    let right:      any = checkStyle ? checkStyle.filter((a: any) => a.name === i.b) : null;
+    let bottom:     any = checkStyle ? checkStyle.filter((a: any) => a.name === i.l) : null;
+        top             = isArray(top) ? top[0] : null
+        left            = isArray(left) ? left[0] : null
+        bottom          = isArray(bottom) ? bottom[0] : null
+        right           = isArray(right) ? right[0] : null
+        checkStyle      = top && left && bottom && right ? [top, right, bottom, left] : null;
+
+    if (isArray(checkStyle)) { checkEqualSidesOfStyle(checkStyle, response, style, name) };
 
 }
 
@@ -134,7 +160,7 @@ export function resetToDefault(instance: any) {
 
 }
 
-// Return true if there is no stroke
+// Return true if there is no specified style
 function emptyStyle(array: any, style: any, type: any) {
 
     // Set up
@@ -217,6 +243,36 @@ function getTextStyles(array: any) {
 
 }
 
+// Check colour
+function checkColour(response: any, array: any, name: any, category: any) {
+
+    // Set up
+    let prop: any;
+    let colour      = isArray(array) ? array[0] : null;
+        colour      = colour ? { type: colour.value.type, opacity: colour.value.opacity, colour: `#${rgbToHex([colour.value.color.r, colour.value.color.g, colour.value.color.b])}`, token: colour.token } : null;
+
+    if (name === 'fills')   { prop = 'background' };
+    if (name === 'strokes') { prop = 'border' };
+    if (name === 'effects') { prop = 'dropShadow' };
+
+    // Check if the colour exists
+    if (colour) {
+
+        response.styles = response.styles.filter((a: any) => a.name !== name );
+
+        response.styles.push({ name: `${prop}Colour`, category: category, value: colour.colour, token: colour.token, text: null, effect: null });
+        if (name == 'fills') { response.styles.push({ name: `${prop}Type`, category: category, value: colour.type, token: colour.token, text: null, effect: null }) }
+        response.styles.push({ name: `${prop}Opacity`, category: category, value: colour.opacity, token: colour.token, text: null, effect: null })
+
+    }
+
+}
+
+// Check effect
+function checkEffect(response: any, array: any, name: any, category: any) {
+    
+}
+
 // Get style from node
 function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
 
@@ -260,38 +316,18 @@ function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
     // Check if there is a response
     if (response && isArray(response.styles)) {
 
-        // Check radius
-        let checkRadius:        any = response.styles.filter((a: any) => a.category === 'general');
-        let radiusTopRight:     any = checkRadius ? checkRadius.filter((a: any) => a.name === 'topRightRadius') : null;
-        let radiusTopLeft:      any = checkRadius ? checkRadius.filter((a: any) => a.name === 'topLeftRadius') : null;
-        let radiusBottomRight:  any = checkRadius ? checkRadius.filter((a: any) => a.name === 'bottomRightRadius') : null;
-        let radiusBottomLeft:   any = checkRadius ? checkRadius.filter((a: any) => a.name === 'bottomLeftRadius') : null;
-            radiusTopRight          = isArray(radiusTopRight) ? radiusTopRight[0] : null
-            radiusTopLeft           = isArray(radiusTopLeft) ? radiusTopLeft[0] : null
-            radiusBottomRight       = isArray(radiusBottomRight) ? radiusBottomRight[0] : null
-            radiusBottomLeft        = isArray(radiusBottomLeft) ? radiusBottomLeft[0] : null
-            checkRadius             = radiusTopRight && radiusTopLeft && radiusBottomRight && radiusBottomLeft
-                                        ? [radiusTopRight, radiusTopLeft, radiusBottomRight, radiusBottomLeft]
-                                        : null;
+        // Check styles
+        let fills:  any = response.styles.filter((a: any) => a.name === 'fills');
+        let stroke: any = response.styles.filter((a: any) => a.name === 'strokes');
+        let effect: any = response.styles.filter((a: any) => a.name === 'effects');
 
-        if (isArray(checkRadius)) { checkEqualSidesOfStyle(checkRadius, response, 'general', 'borderRadius') };
+        checkStyleSides(response, 'general', 'borderRadius');
+        checkStyleSides(response, 'layout', 'padding');
+        checkStyleSides(response, 'strokes', 'borderWeight');
 
-        // Check padding
-        let checkPadding:   any = response.styles.filter((a: any) => a.category === 'layout');
-        let paddingTop:     any = checkPadding ? checkPadding.filter((a: any) => a.name === 'paddingTop') : null;
-        let paddingRight:   any = checkPadding ? checkPadding.filter((a: any) => a.name === 'paddingRight') : null;
-        let paddingBottom:  any = checkPadding ? checkPadding.filter((a: any) => a.name === 'paddingBottom') : null;
-        let paddingLeft:    any = checkPadding ? checkPadding.filter((a: any) => a.name === 'paddingLeft') : null;
-            paddingTop          = isArray(paddingTop) ? paddingTop[0] : null
-            paddingRight        = isArray(paddingRight) ? paddingRight[0] : null
-            paddingBottom       = isArray(paddingBottom) ? paddingBottom[0] : null
-            paddingLeft         = isArray(paddingLeft) ? paddingLeft[0] : null
-            checkPadding        = [paddingTop, paddingRight, paddingBottom, paddingLeft];
-            checkPadding        = paddingTop && paddingRight && paddingBottom && paddingLeft
-                                    ? [paddingTop, paddingRight, paddingBottom, paddingLeft]
-                                    : null;
-
-        if (isArray(checkPadding)) { checkEqualSidesOfStyle(checkPadding, response, 'layout', 'padding') };
+        if (isArray(fills))     { checkColour(response, fills, 'fills', 'fills') };
+        if (isArray(stroke))    { checkColour(response, stroke, 'strokes', 'strokes'); };
+        if ((isArray(effect)))  {  }
 
 
         // Check width and height

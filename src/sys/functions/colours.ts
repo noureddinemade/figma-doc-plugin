@@ -25,8 +25,8 @@ function isDarkColour(color: RGBColor): boolean {
 }
 
 // Convert to HEX
-function rgbToHex(color: RGBColor): string {
-    return color.map(component => component.toString(16).padStart(2, '0')).join('');
+export function rgbToHex(color: RGBColor): string {
+    return color.map(component => Math.round(component * 255).toString(16).padStart(2, '0')).join('');
 }
 
 // Create a distinct colour for each item

@@ -9,16 +9,12 @@ export function showProps(props: any, appendTo: any) {
     // Set up
     let section:    any | null = null;
     let content:    any | null = null;
-    let properties: any | null = null;
-    let instance:   any | null = null;
 
     // Check if there is component information
     if (props) {
 
         section     = makeSection('properties');
         content     = make('content', frame.v.md, 'frame');
-        properties  = make('properties', frame.v.md, 'frame');
-        instance    = make('component', frame.diagram, 'frame');
 
         // Add each type of property
         // TEXT
@@ -26,7 +22,7 @@ export function showProps(props: any, appendTo: any) {
 
             const item = makeItem('Text', props.text);
 
-            properties.appendChild(item);
+            content.appendChild(item);
             item.layoutSizingHorizontal = 'FILL';
 
         };
@@ -35,7 +31,7 @@ export function showProps(props: any, appendTo: any) {
 
             const item = makeItem('Boolean', props.boolean);
 
-            properties.appendChild(item);
+            content.appendChild(item);
             item.layoutSizingHorizontal = 'FILL';
 
         };
@@ -44,7 +40,7 @@ export function showProps(props: any, appendTo: any) {
 
             const item = makeItem('Variant', props.variant);
 
-            properties.appendChild(item);
+            content.appendChild(item);
             item.layoutSizingHorizontal = 'FILL';
 
         };
@@ -53,7 +49,7 @@ export function showProps(props: any, appendTo: any) {
 
             const item = makeItem('Instance', props.instance);
 
-            properties.appendChild(item);
+            content.appendChild(item);
             item.layoutSizingHorizontal = 'FILL';
 
         };
@@ -63,14 +59,10 @@ export function showProps(props: any, appendTo: any) {
     // Append & adjust if available
     if (section && appendTo) {
 
-        instance.appendChild(makeInstance('component'));
-        content.appendChild(instance);
-        content.appendChild(properties);
         section.appendChild(content);
         appendTo.appendChild(section);
 
         content.layoutSizingHorizontal   = 'FILL';
-        properties.layoutSizingHorizontal   = 'FILL';
 
     }
 
