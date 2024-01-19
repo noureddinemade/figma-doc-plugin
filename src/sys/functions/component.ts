@@ -8,15 +8,15 @@ import { cleanString, getHeirachy, isArray } from "./general";
 function checkEqualSides(sides: any[]) {
 
     // Set up
-    let response: any;
+    let response: any = sides;
 
     // Check if radius array is available
     if (isArray(sides)) {
 
-        const t: any = sides[0];
-        const l: any = sides[1];
-        const b: any = sides[2];
-        const r: any = sides[3];
+        const t: any = sides[0] ? sides[0] : null;
+        const l: any = sides[1] ? sides[1] : null;
+        const b: any = sides[2] ? sides[2] : null;
+        const r: any = sides[3] ? sides[3] : null;
 
         t === l && l === b && b === r ? response = t : response = [t,l,b,r];
 
@@ -43,15 +43,15 @@ function checkEqualSidesOfStyle(sides: any[], response: any, style: any, name: a
 
         if (isArray(value, 4, 'e') && isArray(token, 4, 'e')) {
 
-            value = `${value[0]},${value[1]},${value[2]},${value[3]}`;
-            token = `${token[0]},${token[1]},${token[2]},${token[3]}`;
+            value = `${value[0]} ${value[1]} ${value[2]} ${value[3]}`;
+            token = `${token[0]} ${token[1]} ${token[2]} ${token[3]}`;
 
         }
 
         if (isArray(value, 2, 'e') && isArray(token, 2, 'e')) {
 
-            value = `${value[0]},${value[1]}`;
-            token = `${token[0]},${token[1]}`;
+            value = `${value[0]} ${value[1]}`;
+            token = `${token[0]} ${token[1]}`;
 
         }
 
@@ -67,7 +67,7 @@ function checkStyleSides(response: any, style: any, name: any) {
 
     let i: any = { t: '', r: '', b: '', l: '' };
 
-    if (name === 'borderRadius') { i.t = 'topRightRadius', i.r = 'topLeftRadius', i.b = 'bottomRightRadius', i.l = 'bottomLeftRadius' };
+    if (name === 'radius') { i.t = 'topRightRadius', i.r = 'topLeftRadius', i.b = 'bottomRightRadius', i.l = 'bottomLeftRadius' };
     if (name === 'padding') { i.t = 'paddingTop', i.r = 'paddingRight', i.b = 'paddingBottom', i.l = 'paddingLeft' };
     if (name === 'borderWeight') { i.t = 'strokeTopWeight', i.r = 'strokeRightWeight', i.b = 'strokeBottomWeight', i.l = 'strokeLeftWeight' };
 
@@ -84,6 +84,13 @@ function checkStyleSides(response: any, style: any, name: any) {
         checkStyle      = top && left && bottom && right ? [top, right, bottom, left] : null;
 
     if (isArray(checkStyle)) { checkEqualSidesOfStyle(checkStyle, response, style, name) };
+
+}
+
+// Is parent a COMPONENT_SET
+export function belongsToComponentSet(item: any) {
+
+    return item.type === 'COMPONENT_SET' ? true : false;
 
 }
 
@@ -171,6 +178,20 @@ function emptyStyle(array: any, style: any, type: any) {
 
 }
 
+// Check if there are multiple tokens
+function multipleTokens(array: any[]) {
+
+    // Set up
+    let response: any[] = [];
+
+    // Loop thru array
+    array.forEach((i: any) => { if (i.token) { response.push(i.token)} });
+
+    // Check count
+    return response.length > 1 ? 'multiple tokens' : response;
+
+}
+
 // Get token from variable ID
 function findToken(id: any) {
 
@@ -243,24 +264,21 @@ function getTextStyles(array: any) {
 
 }
 
-// Check colour
-function checkColour(response: any, array: any, name: any, category: any) {
+// Replace default figma colour format
+function replaceColour(colour: any, response: any, name: any, category: any) {
 
     // Set up
     let prop: any;
-    let colour      = isArray(array) ? array[0] : null;
-        colour      = colour ? { type: colour.value.type, opacity: colour.value.opacity, colour: `#${rgbToHex([colour.value.color.r, colour.value.color.g, colour.value.color.b])}`, token: colour.token } : null;
 
     if (name === 'fills')   { prop = 'background' };
     if (name === 'strokes') { prop = 'border' };
     if (name === 'effects') { prop = 'dropShadow' };
 
-    // Check if the colour exists
     if (colour) {
 
         response.styles = response.styles.filter((a: any) => a.name !== name );
 
-        response.styles.push({ name: `${prop}Colour`, category: category, value: colour.colour, token: colour.token, text: null, effect: null });
+        response.styles.push({ name: `${prop}Colour`, category: category, value: colour.hex, token: colour.token, text: null, effect: null });
         if (name == 'fills') { response.styles.push({ name: `${prop}Type`, category: category, value: colour.type, token: colour.token, text: null, effect: null }) }
         response.styles.push({ name: `${prop}Opacity`, category: category, value: colour.opacity, token: colour.token, text: null, effect: null })
 
@@ -268,9 +286,97 @@ function checkColour(response: any, array: any, name: any, category: any) {
 
 }
 
-// Check effect
-function checkEffect(response: any, array: any, name: any, category: any) {
-    
+// Fix default figma colour format
+function fixColourStyle(array: any, response: any) {
+
+    if (array[0].value.visible) {
+
+        // Set up
+        let fill:       any = array[0];
+        let name:       any = 'background';
+        let value:      any = fill.value;
+        let token:      any = fill.token;
+        let hex:        any = rgbToHex([value.color.r, value.color.g, value.color.b]);
+        let type:       any = value.type.toLowerCase();
+        let opacity:    any = value.opacity;
+        let blend:      any = value.blendMode.toLowerCase();
+            value           = `#${hex} ${opacity} ${type} ${blend}`;
+
+        // Add to response styles
+        response.styles.push({ name: name, category: 'fills', value: value, token: token });
+
+    }
+
+    // Get rid of old style
+    response.styles = response.styles.filter((a: any) => a.name !== 'fills' );
+
+}
+
+// Fix default figma stroke format
+function fixStrokeStyle(array: any, response: any) {
+
+    // Set up
+    let weights:    any = array.filter((a: any) => a.name.includes('Weight'));
+    let dash:       any = array.filter((a: any) => a.name === 'dashPattern');
+    let fill:       any = array.filter((a: any) => a.name === 'strokes');
+    let token:      any = multipleTokens([...weights, ...dash, ...fill]);
+    let border:     any;
+
+        weights         = isArray(weights, 4, 'e') ? [weights[0].value, weights[1].value, weights[2].value, weights[3].value] : null;
+        weights         = isArray(weights) ? checkEqualSides(weights) : null;
+        weights         = isArray(weights) ? `${weights[0]} ${weights[1]} ${weights[2]} ${weights[3]}` : weights;
+        dash            = isArray(dash) ? `dashed (${dash[0]}, ${dash[1]})` : 'solid';
+        fill            = isArray(fill) ? fill[0] : null;
+        fill            = `#${rgbToHex([fill.value.color.r, fill.value.color.g, fill.value.color.b])}`;
+        token           = isArray(token) ? token[0] : token;
+        border          = `${weights} ${dash} ${fill}`;
+
+    // Get rid of old style
+    response.styles = response.styles.filter((a: any) => a.category !== 'strokes' );
+
+    // Add to styles
+    response.styles.push({ name: 'border', category: 'strokes', value: border, token: token });
+
+}
+
+// Return cleaned result for effect
+function cleanEffect(item: any, response: any, token: any) {
+
+    // Set up
+    let e:          any = item;
+    let name:       any = e.type;
+    let colour:     any = e.color ? `#${rgbToHex([e.color.r, e.color.g, e.color.b])}` : '';
+    let opacity:    any = e.color && e.color.a ? e.color.a : '1';
+    let offset:     any = e.offset ? `${e.offset.x} ${e.offset.y}` : '0 0';
+    let radius:     any = e.radius ? e.radius : '0';
+    let spread:     any = e.spread ? e.spread : '0';
+    let value:      any = `${offset} ${radius} ${spread} ${colour} ${opacity} ${name === 'INNER_SHADOW' ? 'inset' : ''}`;
+
+    // Clean effect name
+    if (name === 'DROP_SHADOW')     { name = 'boxShadow' };
+    if (name === 'INNER_SHADOW')    { name = 'boxShadow' };
+    if (name === 'BACKGROUND_BLUR') { name = 'backgdropFilter' };
+    if (name === 'LAYER_BLUR')      { name = 'filter' };
+
+    response.styles.push({ name: name, category: 'effects', value: value, token: token });
+
+}
+
+// Fix default figma effect format
+function fixEffectStyle(array: any, response: any) {
+
+    // Set up
+    let effect:     any = array[0];
+    let token:      any = effect.effect;
+    let effects:    any = effect.value;
+
+    // Get rid of old style
+    response.styles = response.styles.filter((a: any) => a.category !== 'effects' );
+
+    // Check if there are multiple effects
+    if (isArray(effects, 1, 'm')) { effects.forEach((e: any) => { if (e.visible) { cleanEffect(e, response, token) } }) }
+    else { let e: any = effects[0]; if (e.visible) { cleanEffect(e, response, token) } };
+
 }
 
 // Get style from node
@@ -317,18 +423,18 @@ function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
     if (response && isArray(response.styles)) {
 
         // Check styles
-        let fills:  any = response.styles.filter((a: any) => a.name === 'fills');
-        let stroke: any = response.styles.filter((a: any) => a.name === 'strokes');
-        let effect: any = response.styles.filter((a: any) => a.name === 'effects');
+        let fills:      any = response.styles.filter((a: any) => a.name === 'fills');
+        let stroke:     any = response.styles.filter((a: any) => a.category === 'strokes');
+        let effect:     any = response.styles.filter((a: any) => a.name === 'effects');
 
-        checkStyleSides(response, 'general', 'borderRadius');
+        // Fix fills and strokes
+        if (isArray(fills))  { fixColourStyle(fills, response) };
+        if (isArray(stroke)) { fixStrokeStyle(stroke, response) };
+        if (isArray(effect)) { fixEffectStyle(effect, response) };
+
+        // Check styles with 4 sides
+        checkStyleSides(response, 'general', 'radius');
         checkStyleSides(response, 'layout', 'padding');
-        checkStyleSides(response, 'strokes', 'borderWeight');
-
-        if (isArray(fills))     { checkColour(response, fills, 'fills', 'fills') };
-        if (isArray(stroke))    { checkColour(response, stroke, 'strokes', 'strokes'); };
-        if ((isArray(effect)))  {  }
-
 
         // Check width and height
         let horizontal:     any = response.styles.filter((a: any) => a.name === 'layoutSizingHorizontal');

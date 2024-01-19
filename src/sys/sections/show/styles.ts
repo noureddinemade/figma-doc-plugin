@@ -17,6 +17,7 @@ export function showStyles(styles: any, appendTo: any) {
         const shared:           any = { p: styles.shared.parent, c: styles.shared.child}
         const def:              any = styles.default;
         const defChildren:      any = def.filter((a: any) => a.parent);
+        const variantProps:     any = styles.variantProps;
 
         let defParent:  any = def.filter((a: any) => !a.parent);
             defParent       = isArray(defParent, 1, 'e') ? defParent[0] : null; 
@@ -30,20 +31,31 @@ export function showStyles(styles: any, appendTo: any) {
 
             // Set up
             const block:    any = make('block', frame.v.md, 'frame');
-            const item:     any = makeItem('Static');
             const diagram:  any = make('diagram', frame.diagram, 'frame');
             const instance: any = makeInstance('diagram');
 
+            // Append diagram first
+            block.appendChild(diagram);
+
+            // Don't include these styles
+            const doNotInclude: any = ['constraints', 'layoutSizingHorizontal', 'layoutSizingVertical', 'visible'];
+
             // Check if there are shared parent styles
             if (isArray(defParent.styles)) {
+                
+                // Do not include certain styles
+                defParent.styles = defParent.styles.filter((a: any) => !doNotInclude.includes(a.name));
+
+                // Set up item
+                const item: any = makeItem('Base');
 
                 // Loop thru shared parent styles
                 defParent.styles.forEach((s: any) => {
-
+                    
                     // Check if style is shared or not
-                    const match: any = shared.p.filter((a: any) => a === s.name);
+                    let matches:  any = shared.p.filter((a: any) => a === s.name);
 
-                    if (isArray(match) && s.category !== 'layout') {
+                    if (isArray(matches)) {
 
                         // Create required
                         let styleItem:  any = make(`property: ${s.name}`, frame.h.sm, 'frame');
@@ -80,6 +92,10 @@ export function showStyles(styles: any, appendTo: any) {
 
                 });
 
+                // Append
+                block.appendChild(item);
+                item.layoutSizingHorizontal = 'FILL';
+
             };
 
             // Check if there are shared children styles
@@ -91,8 +107,8 @@ export function showStyles(styles: any, appendTo: any) {
                     // Check if there are styles for this child
                     if (isArray(c.styles)) {
 
-                        // Create child label
-                        let childItem:  any = makeItem(`${c.name}`);
+                        // Create child item
+                        let childItem:  any = makeItem(`child: ${c.name}`);
 
                         // Edit
                         if (k + 1 >= defChildren.length) {
@@ -102,13 +118,16 @@ export function showStyles(styles: any, appendTo: any) {
 
                         }
 
+                        // Check styles
+                        c.styles = c.styles.filter((a: any) => !doNotInclude.includes(a.name));
+
                         // Loop thru styles for this child
                         c.styles.forEach((cs: any) => {
 
                             // Check if style is shared or not
-                            const match: any = shared.c.filter((a: any) => a === cs.name);
+                            const matches: any = shared.c.filter((a: any) => a === cs.name);
 
-                            if (isArray(match) && cs.category !== 'layout') {
+                            if (isArray(matches)) {
 
                                 // Create required
                                 let styleItem:  any = make(`property: ${cs.name}`, frame.h.sm, 'frame');
@@ -146,7 +165,7 @@ export function showStyles(styles: any, appendTo: any) {
                         });
 
                         // Append
-                        item.appendChild(childItem);
+                        block.appendChild(childItem);
                         childItem.layoutSizingHorizontal = 'FILL';
 
                     };
@@ -157,15 +176,50 @@ export function showStyles(styles: any, appendTo: any) {
 
             // Append
             diagram.appendChild(instance);
-            block.appendChild(diagram);
-            block.appendChild(item);
             content.appendChild(block);
 
-            item.layoutSizingHorizontal = 'FILL';
             diagram.layoutSizingHorizontal = 'FILL';
             block.layoutSizingHorizontal = 'FILL';
 
         }
+
+        // Loop thru variant styles
+        // Check if there are any variant props
+        if (isArray(variantProps)) {
+
+            // Loop thru variant props
+            variantProps.forEach((prop: any) => {
+
+                // Check if there are any variants
+                if (isArray(prop.variants)) {
+
+                    // Only display these properties
+                    if (prop.unique) { const propsToDisplay: any = { p: prop.unique.parent ? prop.unique.parent : null, c: prop.unique.child ? prop.unique.child : null } };
+
+                    // Loop thru prop variants
+                    prop.variants.forEach((v: any) => {
+
+                        // Set up items for this variant
+                        const block:    any = make('block', frame.v.md, 'frame');
+                        const diagram:  any = make('diagram', frame.diagram, 'frame');
+                        const instance: any = makeInstance('diagram', { [prop.name]: v });
+
+                        // Append items
+                        diagram.appendChild(instance);
+                        block.appendChild(diagram);
+                        content.appendChild(block);
+
+                        diagram.layoutSizingHorizontal = 'FILL';
+                        block.layoutSizingHorizontal = 'FILL';
+
+                    });
+
+                };
+
+            });
+
+        }
+
 
     }
 

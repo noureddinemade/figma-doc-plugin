@@ -162,12 +162,21 @@ export function cleanString(string: string, type: any = null) {
 
         }
 
-        // 
+        // Remove slashes and spaces and add dots then convert to lowercase
         if (type === 'token') {
 
             response = replaceAllInString(response, '/', '.');
             response = replaceAllInString(response, ' ', '-');
             response = response.toLowerCase();
+
+        }
+
+        //
+        if (type === 'effect') {
+
+            response = response.toLowerCase()
+            response = response.split('_');
+            response = `${response[0]}${response[1].charAt(0).toUpperCase() + response[1].slice(1)}`;
 
         }
 

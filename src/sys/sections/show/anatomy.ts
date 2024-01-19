@@ -1,6 +1,7 @@
 // Import
 import { frame, text } from "../../data/styles";
 import { generateColours } from "../../functions/colours";
+import { belongsToComponentSet } from "../../functions/component";
 import { make, makeItem, makeSection } from "../../functions/create";
 import { cleanString, convertColour } from "../../functions/general";
 import { getChildren } from "../get/children";
@@ -75,7 +76,7 @@ export function showAnatomy(anatomy: any, appendTo: any) {
             // Set up dependency text
             let depends:    any | null  = null;
 
-            if (c.type === 'INSTANCE') { depends = c.mainComponent.name };
+            if (c.type === 'INSTANCE') { depends = belongsToComponentSet(c.mainComponent.parent) ? c.mainComponent.parent.name : c.mainComponent.name };
 
             // Create item
             const itemFrame = makeItem(cleanName, [{ name: c.type, instance: depends }], keyColour);
