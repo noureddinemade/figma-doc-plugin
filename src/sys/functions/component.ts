@@ -264,28 +264,6 @@ function getTextStyles(array: any) {
 
 }
 
-// Replace default figma colour format
-function replaceColour(colour: any, response: any, name: any, category: any) {
-
-    // Set up
-    let prop: any;
-
-    if (name === 'fills')   { prop = 'background' };
-    if (name === 'strokes') { prop = 'border' };
-    if (name === 'effects') { prop = 'dropShadow' };
-
-    if (colour) {
-
-        response.styles = response.styles.filter((a: any) => a.name !== name );
-
-        response.styles.push({ name: `${prop}Colour`, category: category, value: colour.hex, token: colour.token, text: null, effect: null });
-        if (name == 'fills') { response.styles.push({ name: `${prop}Type`, category: category, value: colour.type, token: colour.token, text: null, effect: null }) }
-        response.styles.push({ name: `${prop}Opacity`, category: category, value: colour.opacity, token: colour.token, text: null, effect: null })
-
-    }
-
-}
-
 // Fix default figma colour format
 function fixColourStyle(array: any, response: any) {
 
@@ -352,12 +330,16 @@ function cleanEffect(item: any, response: any, token: any) {
     let spread:     any = e.spread ? e.spread : '0';
     let value:      any = `${offset} ${radius} ${spread} ${colour} ${opacity} ${name === 'INNER_SHADOW' ? 'inset' : ''}`;
 
+    // Update value if it's a filter
+    if (name === 'BACKGROUND_BLUR' || name === 'LAYER_BLUR') { value = `blur(${radius})` };
+
     // Clean effect name
     if (name === 'DROP_SHADOW')     { name = 'boxShadow' };
     if (name === 'INNER_SHADOW')    { name = 'boxShadow' };
-    if (name === 'BACKGROUND_BLUR') { name = 'backgdropFilter' };
+    if (name === 'BACKGROUND_BLUR') { name = 'backdropFilter' };
     if (name === 'LAYER_BLUR')      { name = 'filter' };
 
+    // Push to response
     response.styles.push({ name: name, category: 'effects', value: value, token: token });
 
 }
