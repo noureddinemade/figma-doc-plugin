@@ -202,7 +202,7 @@ export function showStyles(styles: any, appendTo: any) {
                         // Set up items for this variant
                         const block:    any = make('block', frame.v.md, 'frame');
                         const diagram:  any = make('diagram', frame.diagram, 'frame');
-                        const instance: any = makeInstance('diagram', { [prop.name]: v });
+                        const instance: any = makeInstance('diagram', [{ [prop.name]: v.name }]);
 
                         // Append items
                         diagram.appendChild(instance);
