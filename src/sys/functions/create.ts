@@ -171,3 +171,39 @@ export function makeProperties(properties: any[], d: any = 'h', hide: boolean = 
     return response;
 
 }
+
+// Make style property
+export function makeStyleProp(s: any, parent: any, padding: number = 28) {
+
+    // Create required
+    let styleItem:  any = make(`property: ${s.name}`, frame.h.sm, 'frame');
+    let styleLabel: any = make('label', text.label.style, 'text', String(s.name));
+    let valueFrame: any = s.value ? make('value', frame.value, 'frame') : null;
+    let tokenFrame: any = s.token ? make('token', frame.type, 'frame') : null;
+
+    // Customise
+    styleItem.paddingLeft = padding;
+
+    // Append
+    styleItem.appendChild(styleLabel);
+
+    if (tokenFrame) { 
+
+        tokenFrame.appendChild(make('label', text.label.value, 'text', String(s.token)));
+        styleItem.appendChild(tokenFrame);
+
+    };
+
+    if (valueFrame) { 
+        
+        valueFrame.appendChild(make('label', text.label.value, 'text', String(s.value)));
+        styleItem.appendChild(valueFrame);
+    
+    };
+
+    parent.appendChild(styleItem);
+
+    styleLabel.layoutSizingHorizontal = 'FILL';
+    styleItem.layoutSizingHorizontal = 'FILL';
+
+}

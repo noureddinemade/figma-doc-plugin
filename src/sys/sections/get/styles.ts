@@ -61,6 +61,13 @@ export function getStyles(compVariants: any, compDependencies: any) {
                         variant                     = variant[0];
                         variant.children            = variantChildrenStyles;
 
+                    if (isItTheDefault) {
+
+                        variant.styles      = baseParentStyles.styles;
+                        variant.children    = baseChildrenStyles;
+
+                    }
+
                     // Push to property
                     property.variants.push(variant);
 
@@ -152,6 +159,15 @@ export function getStyles(compVariants: any, compDependencies: any) {
             }
 
         });
+
+        // Add unique values to default variants
+        // Check if there are variants
+        // if (isArray(response.variantProps)) {
+
+        //     // Set up
+        //     const defParent: any = 
+
+        // };
 
     };
 

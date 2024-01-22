@@ -4,89 +4,6 @@ import { rgbToHex } from "./colours";
 import { makeInstance } from "./create";
 import { cleanString, getHeirachy, isArray } from "./general";
 
-// Check radius
-function checkEqualSides(sides: any[]) {
-
-    // Set up
-    let response: any = sides;
-
-    // Check if radius array is available
-    if (isArray(sides)) {
-
-        const t: any = sides[0] ? sides[0] : null;
-        const l: any = sides[1] ? sides[1] : null;
-        const b: any = sides[2] ? sides[2] : null;
-        const r: any = sides[3] ? sides[3] : null;
-
-        t === l && l === b && b === r ? response = t : response = [t,l,b,r];
-
-    }
-
-    //
-    return response;
-
-}
-
-// Check sides of a style
-function checkEqualSidesOfStyle(sides: any[], response: any, style: any, name: any) {
-
-    if (isArray(sides, 4, 'e')) {
-
-        // Check radius values and tokens
-        let value: any = checkEqualSides([sides[0].value, sides[1].value, sides[2].value, sides[3].value]);
-        let token: any = checkEqualSides([sides[0].token, sides[1].token, sides[2].token, sides[3].token]);
-
-        response.styles = response.styles.filter((a: any) => a.name !== sides[0].name);
-        response.styles = response.styles.filter((a: any) => a.name !== sides[1].name);
-        response.styles = response.styles.filter((a: any) => a.name !== sides[2].name);
-        response.styles = response.styles.filter((a: any) => a.name !== sides[3].name);
-
-        if (isArray(value, 4, 'e') && isArray(token, 4, 'e')) {
-
-            value = `${value[0]} ${value[1]} ${value[2]} ${value[3]}`;
-            token = `${token[0]} ${token[1]} ${token[2]} ${token[3]}`;
-
-        }
-
-        if (isArray(value, 2, 'e') && isArray(token, 2, 'e')) {
-
-            value = `${value[0]} ${value[1]}`;
-            token = `${token[0]} ${token[1]}`;
-
-        }
-
-        // Push to responses
-        response.styles.push({ name: name, category: style, value: value, token: token, text: null, effect: null });
-
-    }
-
-}
-
-// Check style
-function checkStyleSides(response: any, style: any, name: any) {
-
-    let i: any = { t: '', r: '', b: '', l: '' };
-
-    if (name === 'radius') { i.t = 'topRightRadius', i.r = 'topLeftRadius', i.b = 'bottomRightRadius', i.l = 'bottomLeftRadius' };
-    if (name === 'padding') { i.t = 'paddingTop', i.r = 'paddingRight', i.b = 'paddingBottom', i.l = 'paddingLeft' };
-    if (name === 'borderWeight') { i.t = 'strokeTopWeight', i.r = 'strokeRightWeight', i.b = 'strokeBottomWeight', i.l = 'strokeLeftWeight' };
-
-
-    let checkStyle: any = response.styles.filter((a: any) => a.category === style);
-    let top:        any = checkStyle ? checkStyle.filter((a: any) => a.name === i.t) : null;
-    let left:       any = checkStyle ? checkStyle.filter((a: any) => a.name === i.r) : null;
-    let right:      any = checkStyle ? checkStyle.filter((a: any) => a.name === i.b) : null;
-    let bottom:     any = checkStyle ? checkStyle.filter((a: any) => a.name === i.l) : null;
-        top             = isArray(top) ? top[0] : null
-        left            = isArray(left) ? left[0] : null
-        bottom          = isArray(bottom) ? bottom[0] : null
-        right           = isArray(right) ? right[0] : null
-        checkStyle      = top && left && bottom && right ? [top, right, bottom, left] : null;
-
-    if (isArray(checkStyle)) { checkEqualSidesOfStyle(checkStyle, response, style, name) };
-
-}
-
 // Is parent a COMPONENT_SET
 export function belongsToComponentSet(item: any) {
 
@@ -179,16 +96,16 @@ function emptyStyle(array: any, style: any, type: any) {
 }
 
 // Check if there are multiple tokens
-function multipleTokens(array: any[]) {
+function multipleTokens(array: any[], type: any = 'token') {
 
     // Set up
-    let response: any[] = [];
+    let response:   any[] = [];
 
     // Loop thru array
-    array.forEach((i: any) => { if (i.token) { response.push(i.token)} });
+    array.forEach((i: any) => { if (i[type] && !response.includes(i[type])) { response.push(i[type])} });
 
     // Check count
-    return response.length > 1 ? 'multiple tokens' : response;
+    return response.length > 1 ? 'multiple tokens' : response[0];
 
 }
 
@@ -302,11 +219,9 @@ function fixStrokeStyle(array: any, response: any) {
 
         weights         = isArray(weights, 4, 'e') ? [weights[0].value, weights[1].value, weights[2].value, weights[3].value] : null;
         weights         = isArray(weights) ? checkEqualSides(weights) : null;
-        weights         = isArray(weights) ? `${weights[0]} ${weights[1]} ${weights[2]} ${weights[3]}` : weights;
         dash            = isArray(dash) ? `dashed (${dash[0]}, ${dash[1]})` : 'solid';
         fill            = isArray(fill) ? fill[0] : null;
         fill            = `#${rgbToHex([fill.value.color.r, fill.value.color.g, fill.value.color.b])}`;
-        token           = isArray(token) ? token[0] : token;
         border          = `${weights} ${dash} ${fill}`;
 
     // Get rid of old style
@@ -361,6 +276,82 @@ function fixEffectStyle(array: any, response: any) {
 
 }
 
+// Check equal sides
+function checkEqualSides(sides: any[]) {
+
+    // Set up
+    let response: any;
+
+    // Check if radius array is available
+    if (isArray(sides)) {
+
+        const t: any = sides[0].value ? sides[0].value : null;
+        const l: any = sides[1].value ? sides[1].value : null;
+        const b: any = sides[2].value ? sides[2].value : null;
+        const r: any = sides[3].value ? sides[3].value : null;
+
+        t === l && l === b && b === r ? response = t : response = sides.map((a: any) => a.value).join(' ');
+
+    }
+
+    //
+    return response;
+
+}
+
+// Fix default figma padding format
+function fixBoundingSides(array: any, response: any, type: string, category: string) {
+
+    // Set up
+    let sides:  any = checkEqualSides(array);
+    let token:  any = multipleTokens(array);
+
+    // Get rid of old styles
+    response.styles = response.styles.filter((a: any) => !a.name.includes(type));
+
+    // Add to response
+    response.styles.push({ name: type.toLowerCase(), category: category, value: sides, token: token, text: null, effect: null });
+
+}
+
+// Fix default figma text format
+function fixTextStyles(array: any, response: any) {
+
+    // Set up
+    let result: any;
+    let token: any = multipleTokens(array, 'text');
+
+    // Get
+    let name:   any = array.filter((a: any) => a.name === 'fontName');
+    let style:  any = isArray(name) ? `${name[0].value.style} ` : '';
+    let size:   any = array.filter((a: any) => a.name === 'fontSize');
+    let weight: any = array.filter((a: any) => a.name === 'fontWeight');
+    let tCase:  any = array.filter((a: any) => a.name === 'textCase');
+    let decor:  any = array.filter((a: any) => a.name === 'textDecoration');
+    let space:  any = array.filter((a: any) => a.name === 'letterSpacing');
+    let align:  any = array.filter((a: any) => a.name === 'textAlignHorizontal');
+
+        name        = isArray(name) ? `'${name[0].value.family}' ` : '';
+        size        = isArray(size) ? `${size[0].value} ` : '';
+        weight      = isArray(weight) ? `(${weight[0].value}) ` : '';
+        tCase       = isArray(tCase) ? tCase[0].value : null;
+        tCase       = tCase && tCase !== 'ORIGINAL' ? `${tCase} ` : '';
+        decor       = isArray(decor) ? decor[0].value : null;
+        decor       = decor && decor !== 'NONE' ? `${decor} ` : '';
+        space       = isArray(space) ? space[0] : null;
+        space       = space && space.value.value !== 0 ? `${space.value.value} ` : '';
+        align       = isArray(align) ? `${align[0].value} ` : '';
+        result      = `${size}${name}${style}${weight}${space}${tCase}${decor}${align}`;
+
+    // Remove default styles
+    response.styles = response.styles.filter((a: any) => a.category !== 'text');
+
+    // Add new style
+    response.styles.push({ name: 'font', category: 'text', value: result, token: token, text: null, effect: null });
+
+
+}
+
 // Get style from node
 function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
 
@@ -408,15 +399,17 @@ function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
         let fills:      any = response.styles.filter((a: any) => a.name === 'fills');
         let stroke:     any = response.styles.filter((a: any) => a.category === 'strokes');
         let effect:     any = response.styles.filter((a: any) => a.name === 'effects');
+        let padding:    any = response.styles.filter((a: any) => a.name.includes('padding'));
+        let radius:     any = response.styles.filter((a: any) => a.name.includes('Radius'));
+        let text:       any = response.styles.filter((a: any) => a.category === 'text');
 
-        // Fix fills and strokes
-        if (isArray(fills))  { fixColourStyle(fills, response) };
-        if (isArray(stroke)) { fixStrokeStyle(stroke, response) };
-        if (isArray(effect)) { fixEffectStyle(effect, response) };
-
-        // Check styles with 4 sides
-        checkStyleSides(response, 'general', 'radius');
-        checkStyleSides(response, 'layout', 'padding');
+        // Fix styles
+        if (isArray(fills))     { fixColourStyle(fills, response)                               };
+        if (isArray(stroke))    { fixStrokeStyle(stroke, response)                              };
+        if (isArray(effect))    { fixEffectStyle(effect, response)                              };
+        if (isArray(padding))   { fixBoundingSides(padding, response, 'padding', 'layout')      };
+        if (isArray(radius))    { fixBoundingSides(radius, response, 'Radius', 'general')       };
+        if (isArray(text))      { if (type === 'TEXT') { fixTextStyles(text, response) }        };
 
         // Check width and height
         let horizontal:     any = response.styles.filter((a: any) => a.name === 'layoutSizingHorizontal');

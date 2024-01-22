@@ -1,6 +1,6 @@
 // Import
 import { frame, text } from "../../data/styles";
-import { make, makeInstance, makeItem, makeSection } from "../../functions/create";
+import { make, makeInstance, makeItem, makeSection, makeStyleProp } from "../../functions/create";
 import { isArray } from "../../functions/general";
 
 // Show all the component styles for each variant and child
@@ -55,40 +55,7 @@ export function showStyles(styles: any, appendTo: any) {
                     // Check if style is shared or not
                     let matches:  any = shared.p.filter((a: any) => a === s.name);
 
-                    if (isArray(matches)) {
-
-                        // Create required
-                        let styleItem:  any = make(`property: ${s.name}`, frame.h.sm, 'frame');
-                        let styleLabel: any = make('label', text.label.style, 'text', String(s.name));
-                        let valueFrame: any = s.value ? make('value', frame.value, 'frame') : null;
-                        let tokenFrame: any = s.token ? make('token', frame.type, 'frame') : null;
-
-                        // Customise
-                        styleItem.paddingLeft = 28;
-
-                        // Append
-                        styleItem.appendChild(styleLabel);
-
-                        if (tokenFrame) { 
-
-                            tokenFrame.appendChild(make('label', text.label.value, 'text', String(s.token)));
-                            styleItem.appendChild(tokenFrame);
-
-                        };
-
-                        if (valueFrame) { 
-                            
-                            valueFrame.appendChild(make('label', text.label.value, 'text', String(s.value)));
-                            styleItem.appendChild(valueFrame);
-                        
-                        };
-
-                        item.appendChild(styleItem);
-
-                        styleLabel.layoutSizingHorizontal = 'FILL';
-                        styleItem.layoutSizingHorizontal = 'FILL';
-
-                    }
+                    if (isArray(matches)) { makeStyleProp(s, item) };
 
                 });
 
@@ -127,40 +94,7 @@ export function showStyles(styles: any, appendTo: any) {
                             // Check if style is shared or not
                             const matches: any = shared.c.filter((a: any) => a === cs.name);
 
-                            if (isArray(matches)) {
-
-                                // Create required
-                                let styleItem:  any = make(`property: ${cs.name}`, frame.h.sm, 'frame');
-                                let styleLabel: any = make('label', text.label.style, 'text', String(cs.name));
-                                let valueFrame: any = cs.value ? make('value', frame.value, 'frame') : null;
-                                let tokenFrame: any = cs.token ? make('token', frame.type, 'frame') : null;
-
-                                // Customise
-                                styleItem.paddingLeft = 42;
-
-                                // Append
-                                styleItem.appendChild(styleLabel);
-
-                                if (tokenFrame) { 
-
-                                    tokenFrame.appendChild(make('label', text.label.value, 'text', String(cs.token)));
-                                    styleItem.appendChild(tokenFrame);
-
-                                };
-
-                                if (valueFrame) { 
-                                    
-                                    valueFrame.appendChild(make('label', text.label.value, 'text', String(cs.value)));
-                                    styleItem.appendChild(valueFrame);
-                                
-                                };
-
-                                childItem.appendChild(styleItem);
-
-                                styleLabel.layoutSizingHorizontal = 'FILL';
-                                styleItem.layoutSizingHorizontal = 'FILL';
-
-                            };
+                            if (isArray(matches)) { makeStyleProp(cs, childItem, 42) };
 
                         });
 
@@ -193,8 +127,11 @@ export function showStyles(styles: any, appendTo: any) {
                 // Check if there are any variants
                 if (isArray(prop.variants)) {
 
+                    // Set up
+                    let propsToDisplay: any;
+
                     // Only display these properties
-                    if (prop.unique) { const propsToDisplay: any = { p: prop.unique.parent ? prop.unique.parent : null, c: prop.unique.child ? prop.unique.child : null } };
+                    if (prop.unique) { propsToDisplay = { p: prop.unique.parent ? prop.unique.parent : null, c: prop.unique.child ? prop.unique.child : null } };
 
                     // Loop thru prop variants
                     prop.variants.forEach((v: any) => {
@@ -204,11 +141,97 @@ export function showStyles(styles: any, appendTo: any) {
                         const diagram:  any = make('diagram', frame.diagram, 'frame');
                         const instance: any = makeInstance('diagram', [{ [prop.name]: v.name }]);
 
+                        let item: any;
+
+                        // Append diagram
+                        block.appendChild(diagram);
+
+                        // Don't include these styles
+                        const doNotInclude: any = ['constraints', 'layoutSizingHorizontal', 'layoutSizingVertical', 'visible'];
+
+                        // Check if there are unique parent styles or children
+                        if (isArray(v.styles) || isArray(v.children)) {
+
+                            // Create an item for this variant
+                            item = makeItem('Variant');
+                            
+                            // Update label
+                            let label: any  = item && item.children ? item.children.filter((a: any) => a.name === 'header') : null;
+                                label       = label && isArray(label) ? label[0].children.filter((a: any) => a.name === 'label' ) : null;
+
+                            if (isArray(label)) { label[0].characters = `${prop.name}: ${v.name}` };
+
+                        }
+
+                        // Check if there are unique parent styles
+                        if (isArray(v.styles)) {
+
+                            // Do not include some styles
+                            v.styles = v.styles.filter((a: any) => !doNotInclude.includes(a.name));
+
+                            // Loop thru styles
+                            v.styles.forEach((s: any) => {
+
+                                // Check if style is unique or not
+                                let matches:  any = propsToDisplay.p.filter((a: any) => a === s.name);
+
+                                if (isArray(matches)) { makeStyleProp(s, item) }
+
+                            });
+                            
+                        }
+
+                        // Append
+                        block.appendChild(item);
+
+                        // Check if there are unique children styles
+                        if (isArray(v.children)) {
+
+                            // Loop thru children
+                            v.children.forEach((c: any, k: any) => {
+
+                                // Check if there are styles for this child
+                                if (isArray(c.styles)) {
+
+                                    // Create child item
+                                    let childItem:  any = makeItem(`child: ${c.name}`);
+
+                                    // Edit
+                                    if (k + 1 >= v.children.length) {
+
+                                        childItem.paddingBottom = 0;
+                                        childItem.strokes = [];
+
+                                    }
+
+                                    // Check styles
+                                    c.styles = c.styles.filter((a: any) => !doNotInclude.includes(a.name));
+
+                                    // Loop thru styles for this child
+                                    c.styles.forEach((cs: any) => {
+
+                                        // Check if style is shared or not
+                                        const matches: any = propsToDisplay.c.filter((a: any) => a === cs.name);
+
+                                        if (isArray(matches)) { makeStyleProp(cs, childItem, 42) };
+
+                                    });
+
+                                    // Append
+                                    block.appendChild(childItem);
+                                    childItem.layoutSizingHorizontal = 'FILL';
+
+                                };
+
+                            });
+
+                        };
+
                         // Append items
                         diagram.appendChild(instance);
-                        block.appendChild(diagram);
                         content.appendChild(block);
 
+                        item.layoutSizingHorizontal = 'FILL';
                         diagram.layoutSizingHorizontal = 'FILL';
                         block.layoutSizingHorizontal = 'FILL';
 
