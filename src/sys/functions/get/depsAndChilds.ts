@@ -1,20 +1,21 @@
 // Import
-import { belongsToComponentSet } from "../../functions/component";
-import { inArray, isArray } from "../../functions/general";
+import { anyChildren, belongsToComponentSet } from "../component";
+import { inArray, isArray } from "../general";
 
 // Get any dependencies from the component
-export function getDependencies(children: any) {
+export function getDependenciesAndChildren(component: any) {
 
     // Set up
+    const children:     any = anyChildren(component);
     const dependencies: any = children.filter((a: any) => a.type === 'INSTANCE');
     
-    let compDependencies: any[] = [];
+    let compDsAndCs: any = { d: null, c: null };
 
     // Check if there are dependencies
     if (isArray(dependencies)) {
 
         // Set up temp array
-        const temp: any[] = [];
+        let temp: any[] = [];
 
         // Loop thru dependencies
         dependencies.forEach((d: any) => {
@@ -34,12 +35,32 @@ export function getDependencies(children: any) {
 
         });
 
-        // Move to compDependencies
-        compDependencies = temp;
+        // Move to compDsAndCs
+        compDsAndCs.d = temp;
+
+        // Clean children
+        if (isArray(temp) && isArray(children)) {
+
+            // Set up
+            compDsAndCs.c = [];
+
+            // Loop thru children
+            children.forEach((c: any) => {
+
+                // Set up
+                const match: any = temp.filter((a: any) => a.name === c.name);
+
+                if (!isArray(match)) { compDsAndCs.c.push(c) };
+
+            });
+
+        }
 
     }
 
+    console.log(compDsAndCs)
+
     //
-    return isArray(compDependencies) ? compDependencies : null;
+    return isArray(compDsAndCs.c) ? compDsAndCs : null;
 
 }

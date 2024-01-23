@@ -1,6 +1,6 @@
 // Import
 
-import { isArray } from "../../functions/general";
+import { isArray } from "../general";
 
 // Get name, id, description and link from component
 export function getInfo(component: any) {

@@ -27,11 +27,18 @@ export function isInstance(node: any) {
 }
 
 // Find out if a node belongs to an instance
-export function belongsToInstance(node: any): boolean {
+export function belongsToInstance(node: any, dependencies: any[]): boolean {
 
-    // Check if the node is available and it has a parent
-    if (node && node.parent) { return node.parent.type === 'INSTANCE' ? true : belongsToInstance(node.parent) }
-    else { return false; }
+    // Check if node exists and has a parent
+    if (node && node.parent) {
+
+        // Look for a match
+        const match: any = dependencies.filter((a: any) => a.name === node.name);
+
+        // Return response
+        return isArray(match) ? true : belongsToInstance(node.parent, dependencies);
+
+    } else { return false };
 
 }
 
@@ -184,7 +191,11 @@ function getTextStyles(array: any) {
 // Fix default figma colour format
 function fixColourStyle(array: any, response: any) {
 
-    if (array[0].value.visible) {
+    // Get rid of old style
+    response.styles = response.styles.filter((a: any) => a.name !== 'fills' );
+
+    // Check if fill is visible
+    if (array[0].value.visible && array[0].value.type === 'SOLID') {
 
         // Set up
         let fill:       any = array[0];
@@ -201,9 +212,6 @@ function fixColourStyle(array: any, response: any) {
         response.styles.push({ name: name, category: 'fills', value: value, token: token });
 
     }
-
-    // Get rid of old style
-    response.styles = response.styles.filter((a: any) => a.name !== 'fills' );
 
 }
 
@@ -490,19 +498,15 @@ function getStyleFromChildren(children: any, dependencies: any, def: boolean = f
         // Loop thru children and add to styles to each array
         children.forEach((c: any) => {
 
-            const c1 = isInstance(c);
-            const c2 = belongsToInstance(c);
-            const c3 = sameParentAsDependency(c, dependencies);
-            const c4 = base ? base.filter((a: any) => a.name === c.name) : null;
+            // Set up
+            const isInstance:       any = dependencies.filter((a: any) => a.name === c.name);
+            const belongsToInst:    any = belongsToInstance(c, dependencies);
+            const childBase:        any = base ? base.filter((a: any) => a.name === c.name) : null;
             
-            if (!c1) {
+            if (!isArray(isInstance) && !belongsToInst) {
 
-                if (c2 && !c3) {
-
-                    const childStyle = getStyleFromNode(c, def, c4);
-                    response.push(childStyle);
-
-                }
+                const childStyle = getStyleFromNode(c, def, childBase);
+                response.push(childStyle);
                 
             }
 

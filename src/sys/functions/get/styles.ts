@@ -1,8 +1,8 @@
 // Import
 import { styleAreas, styles } from "../../data/arrays";
-import { getStylesFromInstance, resetToDefault } from "../../functions/component";
-import { makeInstance } from "../../functions/create";
-import { isArray } from "../../functions/general";
+import { getStylesFromInstance, resetToDefault } from "../component";
+import { makeInstance } from "../create";
+import { isArray } from "../general";
 
 // Get styles from component, which includes any variants, children and variant children
 export function getStyles(compVariants: any, compDependencies: any) {
@@ -29,16 +29,16 @@ export function getStyles(compVariants: any, compDependencies: any) {
     resetToDefault(baseInstance);
     baseInstance.name = 'defaultInstance';
 
+    // Set up
+    response.variantProps   = [];
+    response.shared         = [];
+
+    styleAreas.forEach((sa: any) => { response.shared = [...response.shared, ...styles[sa]] });
+
+    response.shared = { parent: response.shared, child: response.shared };
+
     // Check if there is any variants to get styles from
     if (isArray(compVariants)) {
-
-        // Set up
-        response.variantProps   = [];
-        response.shared         = [];
-
-        styleAreas.forEach((sa: any) => { response.shared = [...response.shared, ...styles[sa]] });
-
-        response.shared = { parent: response.shared, child: response.shared };
 
         // Loop thru variants
         compVariants.forEach((i: any) => {
@@ -159,15 +159,6 @@ export function getStyles(compVariants: any, compDependencies: any) {
             }
 
         });
-
-        // Add unique values to default variants
-        // Check if there are variants
-        // if (isArray(response.variantProps)) {
-
-        //     // Set up
-        //     const defParent: any = 
-
-        // };
 
     };
 

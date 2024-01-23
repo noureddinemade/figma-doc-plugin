@@ -1,7 +1,7 @@
 // Import
 import { frame } from "../../data/styles";
-import { make, makeInstance, makeItem, makeSection } from "../../functions/create";
-import { isArray } from "../../functions/general";
+import { make, makeInstance, makeItem, makeSection } from "../create";
+import { isArray } from "../general";
 
 // Show all the component information like id, description and link
 export function showProps(props: any, appendTo: any) {

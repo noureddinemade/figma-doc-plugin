@@ -1,9 +1,7 @@
 // Import
-import { setBaseComp } from "../functions/component";
-import { isArray, sortArray } from "../functions/general";
+import { setBaseComp } from "./component";
 import { getAnatomy } from "./get/anatomy";
-import { getChildren } from "./get/children";
-import { getDependencies } from "./get/dependencies";
+import { getDependenciesAndChildren } from "./get/depsAndChilds";
 import { getInfo } from "./get/info";
 import { getProps } from "./get/props";
 import { getStyles } from "./get/styles";
@@ -25,17 +23,16 @@ export function getAll(selection: any) {
             // Get component information
             const compInfo: any = getInfo(c);
 
-            // Get component children
-            const compChildren: any = getChildren(c);
+            // Get component dependencies
+            const compDandC:        any = getDependenciesAndChildren(c);
+            const compDependencies: any = compDandC.d;
+            const compChildren:     any = compDandC.c;
 
             // Get component properties
             const compProps: any = getProps(c, compChildren);
 
-            // Get component dependencies
-            const compDependencies: any = getDependencies(compChildren);
-
             // Get component anatomy
-            const compAnatomy: any = getAnatomy(compProps);
+            const compAnatomy: any = getAnatomy(compProps, compChildren);
 
             // Get component style
             const compStyles: any = getStyles(compProps.variant, compDependencies);

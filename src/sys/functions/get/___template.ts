@@ -1,5 +1,5 @@
 // Import
-import { isArray } from "../../functions/general";
+import { isArray } from "../general";
 
 // Get the anatomy of the component
 export function FUNCTION(component: any) {

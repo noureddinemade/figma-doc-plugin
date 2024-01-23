@@ -1,7 +1,7 @@
 // Import
 import { frame, text } from "../data/styles";
-import { make } from "../functions/create";
-import { isArray } from "../functions/general";
+import { make } from "./create";
+import { isArray } from "./general";
 import { showAnatomy } from "./show/anatomy";
 import { showInfo } from "./show/info";
 import { showProps } from "./show/props";

@@ -1,10 +1,10 @@
 // Import
-import { anyChildren, isInstance } from "../../functions/component";
-import { makeInstance } from "../../functions/create";
-import { isArray } from "../../functions/general";
+import { anyChildren, isInstance } from "../component";
+import { makeInstance } from "../create";
+import { isArray } from "../general";
 
 // Get the anatomy of the component
-export function getAnatomy(props: any) {
+export function getAnatomy(props: any, children: any) {
 
     // Set up
     let compAnatomy: any | null = null;
@@ -17,7 +17,7 @@ export function getAnatomy(props: any) {
     if (isArray(booleanProps)) {
 
         // Loop thru props and turn them on for the instance
-        booleanProps.forEach((b: any) => propsForInstance.push({[b.name]: b.value === true ? false : true }));
+        booleanProps.forEach((b: any) => propsForInstance.push({[b.name]: b.value === true ? true : true }));
 
     }
 
@@ -35,11 +35,9 @@ export function getAnatomy(props: any) {
         instChildren.forEach((c: any) => {
 
             // Label eligible children
-            const c1 = isInstance(c);
-            const c2 = c.parent.name === instance.name;
-            const c3 = c.parent.type === 'INSTANCE';
+            const eligible: any = children.filter((a: any) => a.name === c.name);
 
-            if (c1 && c2 || !c1 && c2 && c3 || !c1 && !c2 && !c3 || c1 && c3 && !c2) { 
+            if (isArray(eligible)) { 
 
                 // Update name to be able to find later
                 c.name = `forAnatomy===${c.name}`;

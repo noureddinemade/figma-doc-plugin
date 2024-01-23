@@ -1,6 +1,6 @@
 // Import
 import { frame, text } from "../../data/styles";
-import { make, makeSection } from "../../functions/create";
+import { make, makeSection } from "../create";
 
 // Show all the component information like id, description and link
 export function showInfo(info: any, appendTo: any) {

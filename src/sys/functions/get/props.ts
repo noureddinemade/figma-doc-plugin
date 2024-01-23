@@ -1,5 +1,5 @@
 // Import
-import { isArray } from "../../functions/general";
+import { isArray } from "../general";
 
 // Get all properties and their type, value and options
 export function getProps(component: any, compChildren: any) {

@@ -1,10 +1,9 @@
 // Import
 import { frame, text } from "../../data/styles";
-import { generateColours } from "../../functions/colours";
-import { belongsToComponentSet } from "../../functions/component";
-import { make, makeItem, makeSection } from "../../functions/create";
-import { cleanString, convertColour } from "../../functions/general";
-import { getChildren } from "../get/children";
+import { generateColours } from "../colours";
+import { anyChildren, belongsToComponentSet } from "../component";
+import { make, makeItem, makeSection } from "../create";
+import { cleanString, convertColour } from "../general";
 
 // Show all the component information like id, description and link
 export function showAnatomy(anatomy: any, appendTo: any) {
@@ -50,7 +49,7 @@ export function showAnatomy(anatomy: any, appendTo: any) {
         keysOverlay.layoutPositioning = 'ABSOLUTE';
         keysOverlay.constraints = { horizontal: 'CENTER', vertical: 'CENTER' };
 
-        let children: any   = getChildren(anatomy);
+        let children: any   = anyChildren(anatomy);
             children        = children.filter((a: any) => a.name.includes('forAnatomy==='));
 
         // Create a frame to house keys

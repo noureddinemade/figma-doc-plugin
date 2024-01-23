@@ -1,7 +1,7 @@
 // Import
 import { frame, text } from "../../data/styles";
-import { make, makeInstance, makeItem, makeSection, makeStyleProp } from "../../functions/create";
-import { isArray } from "../../functions/general";
+import { make, makeInstance, makeItem, makeSection, makeStyleProp } from "../create";
+import { isArray } from "../general";
 
 // Show all the component styles for each variant and child
 export function showStyles(styles: any, appendTo: any) {
