@@ -25,8 +25,8 @@ export function getAll(selection: any) {
 
             // Get component dependencies
             const compDandC:        any = getDependenciesAndChildren(c);
-            const compDependencies: any = compDandC.d;
-            const compChildren:     any = compDandC.c;
+            const compDependencies: any = compDandC ? compDandC.d : null;
+            const compChildren:     any = compDandC ? compDandC.c : null;
 
             // Get component properties
             const compProps: any = getProps(c, compChildren);
@@ -47,7 +47,7 @@ export function getAll(selection: any) {
                 anatomy: compAnatomy,
                 styles: compStyles
             
-            })
+            });
 
         }
 

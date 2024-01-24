@@ -5,7 +5,7 @@ export const styles: any = {
     fills:      ['fills', 'background', 'color'],
     strokes:    ['strokes', 'strokeTopWeight', 'strokeRightWeight', 'strokeBottomWeight', 'strokeLeftWeight', 'dashPattern', 'border'],
     effects:    ['effects', 'boxShadow', 'innerShadow', 'filter', 'backdropFilter'],
-    text:       ['fontName', 'fontSize', 'fontWeight', 'textAlignHorizontal', 'textAlignVertical', 'textAutoResize', 'textCase', 'textDecoration', 'textTruncation', 'lineHeight', 'letterSpacing']
+    text:       ['fontName', 'fontSize', 'fontWeight', 'textCase', 'textDecoration', 'lineHeight', 'letterSpacing', 'font']
 
 }
 

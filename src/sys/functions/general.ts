@@ -1,19 +1,3 @@
-// Get the heirachy of each item
-export function getHeirachy(node: any, level: number) {
-
-    if (node.parent && node.parent.type !== 'PAGE') {
-    
-        level = level + 1;
-
-        return getHeirachy(node.parent, level);
-
-    }
-
-    else { return level }
-
-}
-
-
 // Check if something is an array
 export function isArray(array: any, length: number = 0, operator: string = 'm') {
 
@@ -27,6 +11,21 @@ export function isArray(array: any, length: number = 0, operator: string = 'm') 
         if (operator === 'el')  { return Array.isArray(array) && array.length <= length ? true : false    };
         
     }
+
+}
+
+// Get the heirachy of each item
+export function getHeirachy(node: any, level: number) {
+
+    if (node.parent && node.parent.type !== 'PAGE') {
+    
+        level = level + 1;
+
+        return getHeirachy(node.parent, level);
+
+    }
+
+    else { return level }
 
 }
 
@@ -96,6 +95,45 @@ export function convertColour(value: any) {
     }
 
     return result;
+
+}
+
+// Check if it's a string
+export function isItAString(value: any): boolean {
+
+    return typeof value === 'string';
+
+}
+
+// Check if it's a number
+export function isItANumber(value: any): boolean {
+
+    return !isNaN(value);
+
+}
+
+// Check if its a number or string
+export function numberOrString(value: any) {
+
+    // Set up
+    const string: any = isItAString(value);
+    const number: any = isItANumber(value);
+    
+    let response: any; 
+
+    // Check
+    response = string ? true : false;
+    response = number ? true : false;
+
+    //
+    return response;
+
+}
+
+// Check if it's a symbol
+export function isSymbol(value: any): boolean {
+
+    return value && value.description ? true : false;
 
 }
 
@@ -184,5 +222,17 @@ export function cleanString(string: string, type: any = null) {
 
     //
     return response;
+
+}
+
+// Clean a number
+export function cleanNumber(number: number, decimal: number = 0) {
+
+    // Set up
+    let result: any = Math.pow(10, decimal);
+        result      = Math.round(number  * result) / result;
+
+    // 
+    return result
 
 }

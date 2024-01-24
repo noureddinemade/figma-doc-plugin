@@ -1,8 +1,7 @@
 // Import
 import { styleAreas, styles } from "../data/arrays";
 import { rgbToHex } from "./colours";
-import { makeInstance } from "./create";
-import { cleanString, getHeirachy, isArray } from "./general";
+import { cleanNumber, cleanString, getHeirachy, isArray, isSymbol } from "./general";
 
 // Is parent a COMPONENT_SET
 export function belongsToComponentSet(item: any) {
@@ -30,7 +29,7 @@ export function isInstance(node: any) {
 export function belongsToInstance(node: any, dependencies: any[]): boolean {
 
     // Check if node exists and has a parent
-    if (node && node.parent) {
+    if (node && node.parent && isArray(dependencies)) {
 
         // Look for a match
         const match: any = dependencies.filter((a: any) => a.name === node.name);
@@ -225,7 +224,6 @@ function fixStrokeStyle(array: any, response: any) {
     let token:      any = multipleTokens([...weights, ...dash, ...fill]);
     let border:     any;
 
-        weights         = isArray(weights, 4, 'e') ? [weights[0].value, weights[1].value, weights[2].value, weights[3].value] : null;
         weights         = isArray(weights) ? checkEqualSides(weights) : null;
         dash            = isArray(dash) ? `dashed (${dash[0]}, ${dash[1]})` : 'solid';
         fill            = isArray(fill) ? fill[0] : null;
@@ -247,7 +245,7 @@ function cleanEffect(item: any, response: any, token: any) {
     let e:          any = item;
     let name:       any = e.type;
     let colour:     any = e.color ? `#${rgbToHex([e.color.r, e.color.g, e.color.b])}` : '';
-    let opacity:    any = e.color && e.color.a ? e.color.a : '1';
+    let opacity:    any = e.color && e.color.a ? cleanNumber(e.color.a, 2) : '1';
     let offset:     any = e.offset ? `${e.offset.x} ${e.offset.y}` : '0 0';
     let radius:     any = e.radius ? e.radius : '0';
     let spread:     any = e.spread ? e.spread : '0';
@@ -280,7 +278,8 @@ function fixEffectStyle(array: any, response: any) {
 
     // Check if there are multiple effects
     if (isArray(effects, 1, 'm')) { effects.forEach((e: any) => { if (e.visible) { cleanEffect(e, response, token) } }) }
-    else { let e: any = effects[0]; if (e.visible) { cleanEffect(e, response, token) } };
+    else if (isArray(effects, 1, 'e')) { let e: any = effects[0]; if (e.visible) { cleanEffect(e, response, token) } }
+    else { let e: any = effects; if (e.visible) { cleanEffect(e, response, token) } };
 
 }
 
@@ -293,10 +292,16 @@ function checkEqualSides(sides: any[]) {
     // Check if radius array is available
     if (isArray(sides)) {
 
-        const t: any = sides[0].value ? sides[0].value : null;
-        const l: any = sides[1].value ? sides[1].value : null;
-        const b: any = sides[2].value ? sides[2].value : null;
-        const r: any = sides[3].value ? sides[3].value : null;
+        let t:  any = sides[0] && sides[0].value ? sides[0].value : null;
+        let l:  any = sides[1] && sides[1].value ? sides[1].value : null;
+        let b:  any = sides[2] && sides[2].value ? sides[2].value : null;
+        let r:  any = sides[3] && sides[3].value ? sides[3].value : null;
+
+            t       = t ? cleanNumber(t) : null;
+            l       = l ? cleanNumber(l) : null;
+            b       = b ? cleanNumber(b) : null;
+            r       = r ? cleanNumber(r) : null;
+
 
         t === l && l === b && b === r ? response = t : response = sides.map((a: any) => a.value).join(' ');
 
@@ -320,6 +325,24 @@ function fixBoundingSides(array: any, response: any, type: string, category: str
     // Add to response
     response.styles.push({ name: type.toLowerCase(), category: category, value: sides, token: token, text: null, effect: null });
 
+
+
+}
+
+// Check if the text value is mixed
+function checkTextValue(response: any) {
+
+    // Set ep
+    let result: any = response;
+
+    // Check
+    result = isArray(result) ? result[0] : null;
+    result = result ? result.value : null;
+    result = isSymbol(result) ? null : result;
+
+    //
+    return result;
+
 }
 
 // Fix default figma text format
@@ -331,7 +354,7 @@ function fixTextStyles(array: any, response: any) {
 
     // Get
     let name:   any = array.filter((a: any) => a.name === 'fontName');
-    let style:  any = isArray(name) ? `${name[0].value.style} ` : '';
+    let style:  any = '';
     let size:   any = array.filter((a: any) => a.name === 'fontSize');
     let weight: any = array.filter((a: any) => a.name === 'fontWeight');
     let tCase:  any = array.filter((a: any) => a.name === 'textCase');
@@ -339,16 +362,18 @@ function fixTextStyles(array: any, response: any) {
     let space:  any = array.filter((a: any) => a.name === 'letterSpacing');
     let align:  any = array.filter((a: any) => a.name === 'textAlignHorizontal');
 
-        name        = isArray(name) ? `'${name[0].value.family}' ` : '';
-        size        = isArray(size) ? `${size[0].value} ` : '';
-        weight      = isArray(weight) ? `(${weight[0].value}) ` : '';
-        tCase       = isArray(tCase) ? tCase[0].value : null;
-        tCase       = tCase && tCase !== 'ORIGINAL' ? `${tCase} ` : '';
-        decor       = isArray(decor) ? decor[0].value : null;
+        style       = checkTextValue(name) ? `${name.style} ` : 'Mixed ';
+        name        = checkTextValue(name) ? `${name.family} ` : 'Mixed ';
+        size        = checkTextValue(size) ? `${cleanNumber(size, 2)} ` : 'Mixed ';
+        weight      = checkTextValue(weight) ? `(${weight}) ` : '(Mixed) ';
+        tCase       = checkTextValue(tCase) ? tCase : 'Mixed';
+        tCase       = tCase && tCase !== 'ORIGINAL' ? `${tCase} ` : ''; 
+        decor       = checkTextValue(decor) ? decor : 'Mixed';
         decor       = decor && decor !== 'NONE' ? `${decor} ` : '';
-        space       = isArray(space) ? space[0] : null;
-        space       = space && space.value.value !== 0 ? `${space.value.value} ` : '';
+        space       = checkTextValue(space) ? space.value : 'Mixed';
+        space       = space && space !== 0 ? `${space} ` : '';
         align       = isArray(align) ? `${align[0].value} ` : '';
+
         result      = `${size}${name}${style}${weight}${space}${tCase}${decor}${align}`;
 
     // Remove default styles
@@ -357,6 +382,59 @@ function fixTextStyles(array: any, response: any) {
     // Add new style
     response.styles.push({ name: 'font', category: 'text', value: result, token: token, text: null, effect: null });
 
+
+}
+
+// Fix default figma layout format
+function fixLayoutStyle(layout: any, response: any) {
+
+    // Adjust height and width
+    let horizontal:     any = layout.filter((a: any) => a.name === 'layoutSizingHorizontal');
+    let vertical:       any = layout.filter((a: any) => a.name === 'layoutSizingVertical');
+    let width:          any = layout.filter((a: any) => a.name === 'width');
+    let height:         any = layout.filter((a: any) => a.name === 'height');
+        horizontal          = isArray(horizontal) ? horizontal[0].value : null;
+        vertical            = isArray(vertical) ? vertical[0].value : null;
+        width               = isArray(width) ? width[0] : null;
+        height              = isArray(height) ? height[0] : null;
+    
+    let hValue: any;
+    let vValue: any;
+    let token:  any;
+
+    // Remove old width and height
+    layout = layout.filter((a: any) => a.name !== 'width' );
+    layout = layout.filter((a: any) => a.name !== 'height' );
+
+    if (horizontal === 'HUG' || horizontal === 'FILL' && width) { hValue = 'AUTO'; token = null } 
+    else { hValue = cleanNumber(width.value) }
+
+    if (vertical === 'HUG' || vertical === 'FILL' && height) { vValue = 'AUTO'; token = null }
+    else { vValue = cleanNumber(height.value) }
+
+    // Add new width and height
+    layout.push({ name: 'width', category: 'layout', value: hValue, token: token, text: null, effect: null });
+    layout.push({ name: 'height', category: 'layout', value: vValue, token: token, text: null, effect: null });
+
+    // Adjust mode
+    let mode:   any = layout.filter((a: any) => a.name === 'layoutMode');
+        mode        = mode[0];
+
+    // Fix layout
+    if (mode && mode.value === 'NONE') {
+
+        // Remove default styles
+        layout = layout.filter((a: any) => a.name !== 'primaryAxisAlignItems'   );
+        layout = layout.filter((a: any) => a.name !== 'counterAxisAlignItems'   );
+        layout = layout.filter((a: any) => a.name !== 'layoutSizingHorizontal'  );
+        layout = layout.filter((a: any) => a.name !== 'layoutSizingVertical'    );
+        layout = layout.filter((a: any) => a.name !== 'layoutMode'              );
+
+    }
+
+    // Clear original styles
+    response.styles = response.styles.filter((a: any) => a.category !== 'layout');
+    if (isArray(layout)) { layout.forEach((i: any) => response.styles.push(i) )};
 
 }
 
@@ -410,47 +488,16 @@ function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
         let padding:    any = response.styles.filter((a: any) => a.name.includes('padding'));
         let radius:     any = response.styles.filter((a: any) => a.name.includes('Radius'));
         let text:       any = response.styles.filter((a: any) => a.category === 'text');
+        let layout:     any = response.styles.filter((a: any) => a.category === 'layout');
 
         // Fix styles
         if (isArray(fills))     { fixColourStyle(fills, response)                               };
         if (isArray(stroke))    { fixStrokeStyle(stroke, response)                              };
         if (isArray(effect))    { fixEffectStyle(effect, response)                              };
+        if (isArray(layout))    { fixLayoutStyle(layout, response)                              };
         if (isArray(padding))   { fixBoundingSides(padding, response, 'padding', 'layout')      };
         if (isArray(radius))    { fixBoundingSides(radius, response, 'Radius', 'general')       };
         if (isArray(text))      { if (type === 'TEXT') { fixTextStyles(text, response) }        };
-
-        // Check width and height
-        let horizontal:     any = response.styles.filter((a: any) => a.name === 'layoutSizingHorizontal');
-        let vertical:       any = response.styles.filter((a: any) => a.name === 'layoutSizingVertical');
-        let width:          any = response.styles.filter((a: any) => a.name === 'width');
-        let height:         any = response.styles.filter((a: any) => a.name === 'height');
-            horizontal          = isArray(horizontal) ? horizontal[0].value : null;
-            vertical            = isArray(vertical) ? vertical[0].value : null;
-            width               = isArray(width) ? width[0] : null;
-            height              = isArray(height) ? height[0] : null;
-        
-        let value: any;
-        let token: any;
-
-        if (horizontal === 'HUG' || horizontal === 'FILL' && width) { 
-            
-            value = 'AUTO'; token = null;
-
-            response.styles = response.styles.filter((a: any) => a.name !== 'width' );
-
-            response.styles.push({ name: 'width', category: 'layout', value: value, token: token, text: null, effect: null });
-        
-        };
-
-        if (vertical === 'HUG' || vertical === 'FILL' && height) { 
-            
-            value = 'AUTO'; token = null;
-
-            response.styles = response.styles.filter((a: any) => a.name !== 'height' );
-
-            response.styles.push({ name: 'height', category: 'layout', value: value, token: token, text: null, effect: null });
-
-        }
 
         // Add unique matches 
         if (isArray(base)) {
@@ -499,7 +546,7 @@ function getStyleFromChildren(children: any, dependencies: any, def: boolean = f
         children.forEach((c: any) => {
 
             // Set up
-            const isInstance:       any = dependencies.filter((a: any) => a.name === c.name);
+            const isInstance:       any = isArray(dependencies) ? dependencies.filter((a: any) => a.name === c.name) : null;
             const belongsToInst:    any = belongsToInstance(c, dependencies);
             const childBase:        any = base ? base.filter((a: any) => a.name === c.name) : null;
             
