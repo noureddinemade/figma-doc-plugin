@@ -213,7 +213,7 @@ function fixColourStyle(array: any, response: any, nodeType: string) {
         let token:      any = fill.token;
         let hex:        any = rgbToHex([value.color.r, value.color.g, value.color.b]);
         let type:       any = value.type.toLowerCase();
-        let opacity:    any = value.opacity;
+        let opacity:    any = cleanNumber(value.opacity, 2);
         let blend:      any = value.blendMode.toLowerCase();
             value           = `#${hex} ${opacity} ${type} ${blend}`;
 
