@@ -1,4 +1,5 @@
 // Import
+import { cleanAll } from "./functions/cleanAll";
 import { getAll } from "./functions/getAll";
 import { showAll } from "./functions/showAll";
 
@@ -15,5 +16,6 @@ export function runPlugin(selection: any) {
     figma.viewport.scrollAndZoomIntoView([doneDocument]);
 
     // Clean up custom data, return names to normal etc.
+    cleanAll(selection, toBeDocumented);
 
 }

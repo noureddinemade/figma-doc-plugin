@@ -79,7 +79,17 @@ export function findBaseComp() {
     // Set up
     let base: any   = figma.currentPage.findAllWithCriteria({ types: ['COMPONENT'], pluginData: { keys: ['baseComponent'] } });
 
-    return isArray(base) ? base[0] : null;
+    // Check if there is a result
+    if (isArray(base)) {
+
+        // Check if the result is true
+        if (base[0].getPluginData('baseComponent') === 'true') {
+
+            return base[0];
+
+        } else { return false; }
+
+    } else { return false; }
 
 }
 
@@ -188,7 +198,7 @@ function getTextStyles(array: any) {
 }
 
 // Fix default figma colour format
-function fixColourStyle(array: any, response: any) {
+function fixColourStyle(array: any, response: any, nodeType: string) {
 
     // Get rid of old style
     response.styles = response.styles.filter((a: any) => a.name !== 'fills' );
@@ -198,7 +208,7 @@ function fixColourStyle(array: any, response: any) {
 
         // Set up
         let fill:       any = array[0];
-        let name:       any = 'background';
+        let name:       any = nodeType === 'TEXT' ? 'colour' : 'background';
         let value:      any = fill.value;
         let token:      any = fill.token;
         let hex:        any = rgbToHex([value.color.r, value.color.g, value.color.b]);
@@ -362,15 +372,23 @@ function fixTextStyles(array: any, response: any) {
     let space:  any = array.filter((a: any) => a.name === 'letterSpacing');
     let align:  any = array.filter((a: any) => a.name === 'textAlignHorizontal');
 
-        style       = checkTextValue(name) ? `${name.style} ` : 'Mixed ';
-        name        = checkTextValue(name) ? `${name.family} ` : 'Mixed ';
-        size        = checkTextValue(size) ? `${cleanNumber(size, 2)} ` : 'Mixed ';
-        weight      = checkTextValue(weight) ? `(${weight}) ` : '(Mixed) ';
-        tCase       = checkTextValue(tCase) ? tCase : 'Mixed';
+        style       = checkTextValue(name);
+        name        = checkTextValue(name);
+        size        = checkTextValue(size);
+        weight      = checkTextValue(weight);
+        tCase       = checkTextValue(tCase);
+        decor       = checkTextValue(decor);
+        space       = checkTextValue(space);    
+
+        style       = style ? `${style.style} ` : 'Mixed ';
+        name        = name ? `${name.family} ` : 'Mixed ';
+        size        = size ? `${cleanNumber(size, 2)} ` : 'Mixed ';
+        weight      = weight ? `(${weight}) ` : '(Mixed) ';
+        tCase       = tCase ? tCase : 'Mixed';
         tCase       = tCase && tCase !== 'ORIGINAL' ? `${tCase} ` : ''; 
-        decor       = checkTextValue(decor) ? decor : 'Mixed';
+        decor       = decor ? decor : 'Mixed';
         decor       = decor && decor !== 'NONE' ? `${decor} ` : '';
-        space       = checkTextValue(space) ? space.value : 'Mixed';
+        space       = space ? space.value : 'Mixed';
         space       = space && space !== 0 ? `${space} ` : '';
         align       = isArray(align) ? `${align[0].value} ` : '';
 
@@ -491,7 +509,7 @@ function getStyleFromNode(node: any, def: boolean = false, base: any = null) {
         let layout:     any = response.styles.filter((a: any) => a.category === 'layout');
 
         // Fix styles
-        if (isArray(fills))     { fixColourStyle(fills, response)                               };
+        if (isArray(fills))     { fixColourStyle(fills, response, type)                         };
         if (isArray(stroke))    { fixStrokeStyle(stroke, response)                              };
         if (isArray(effect))    { fixEffectStyle(effect, response)                              };
         if (isArray(layout))    { fixLayoutStyle(layout, response)                              };

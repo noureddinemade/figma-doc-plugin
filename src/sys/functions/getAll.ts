@@ -53,8 +53,6 @@ export function getAll(selection: any) {
 
     });
 
-    console.log(response);
-
     //
     return response;
 
